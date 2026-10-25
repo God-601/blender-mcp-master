@@ -35,6 +35,10 @@ mat = bpy.data.materials.get(NAME) or bpy.data.materials.new(NAME)
 mat.use_nodes = True
 nt = mat.node_tree
 nodes, links = nt.nodes, nt.links
+# Remove nodes created by this script on previous runs; preserve user-authored nodes.
+for node in list(nodes):
+    if node.get("_blender_mcp_generated", False):
+        nodes.remove(node)
 bsdf = next((n for n in nodes if n.type == 'BSDF_PRINCIPLED'), None)
 if bsdf is None:
     bsdf = nodes.new('ShaderNodeBsdfPrincipled')
@@ -64,28 +68,36 @@ def add_tex(path, label, noncolor, x, y):
     img = bpy.data.images.load(path, check_existing=True)
     img.colorspace_settings.name = 'Non-Color' if noncolor else 'sRGB'
     n = nodes.new('ShaderNodeTexImage')
+    n["_blender_mcp_generated"] = True
     n.image = img
     n.label = label
     n.location = (x, y)
     return n
 
+def replace_input_link(output_socket, input_socket):
+    """Replace an existing connection to this input rather than stacking links."""
+    for link in list(input_socket.links):
+        links.remove(link)
+    links.new(output_socket, input_socket)
+
 
 if TEXTURES:
     if "color" in TEXTURES:
         n = add_tex(TEXTURES["color"], "Base Color", False, -600, 300)
-        links.new(n.outputs['Color'], bsdf.inputs['Base Color'])
+        replace_input_link(n.outputs['Color'], bsdf.inputs['Base Color'])
     if "rough" in TEXTURES:
         n = add_tex(TEXTURES["rough"], "Roughness", True, -600, 0)
-        links.new(n.outputs['Color'], bsdf.inputs['Roughness'])
+        replace_input_link(n.outputs['Color'], bsdf.inputs['Roughness'])
     if "metal" in TEXTURES:
         n = add_tex(TEXTURES["metal"], "Metallic", True, -600, -300)
-        links.new(n.outputs['Color'], bsdf.inputs['Metallic'])
+        replace_input_link(n.outputs['Color'], bsdf.inputs['Metallic'])
     if "normal" in TEXTURES:
         n = add_tex(TEXTURES["normal"], "Normal", True, -900, -600)
         nm = nodes.new('ShaderNodeNormalMap')
+        nm["_blender_mcp_generated"] = True
         nm.location = (-300, -600)
-        links.new(n.outputs['Color'], nm.inputs['Color'])
-        links.new(nm.outputs['Normal'], bsdf.inputs['Normal'])
+        replace_input_link(n.outputs['Color'], nm.inputs['Color'])
+        replace_input_link(nm.outputs['Normal'], bsdf.inputs['Normal'])
 
 for name in ASSIGN_TO:
     ob = bpy.data.objects.get(name)
