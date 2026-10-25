@@ -35,6 +35,12 @@ class RepositoryStaticChecks(unittest.TestCase):
         self.assertIn("ALLOW_SHARED_MESH_DATA = False", source)
         self.assertIn("SKIP: mesh data is shared", source)
 
+    def test_pbr_script_tags_generated_nodes_and_replaces_texture_links(self):
+        source = (ROOT / "scripts" / "pbr_material.py").read_text(encoding="utf-8")
+        self.assertIn('node.get("_blender_mcp_generated", False)', source)
+        self.assertIn('n["_blender_mcp_generated"] = True', source)
+        self.assertIn("replace_input_link", source)
+
 
 if __name__ == "__main__":
     unittest.main()
