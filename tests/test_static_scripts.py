@@ -30,6 +30,11 @@ class RepositoryStaticChecks(unittest.TestCase):
         self.assertIn("existing scene objects are never deleted automatically", source)
         self.assertIn("for modifier in list(lod.modifiers)", source)
 
+    def test_cleanup_skips_shared_mesh_data_by_default(self):
+        source = (ROOT / "scripts" / "cleanup_mesh.py").read_text(encoding="utf-8")
+        self.assertIn("ALLOW_SHARED_MESH_DATA = False", source)
+        self.assertIn("SKIP: mesh data is shared", source)
+
 
 if __name__ == "__main__":
     unittest.main()
