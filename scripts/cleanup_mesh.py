@@ -13,6 +13,7 @@ RECALC_NORMALS = True        # make normals consistent (outward)
 TRIANGULATE = False          # triangulate faces (game export); prefer doing it last
 TRIS_TO_QUADS = False        # join triangles into quads (cleaner topology for subsurf)
 DISSOLVE_ANGLE_DEG = 0.0     # >0 = limited dissolve of near-flat edges (e.g. 1.0) to cut useless geometry
+ALLOW_SHARED_MESH_DATA = False  # set True only if editing every linked instance is intentional
 # ----------------------------------------------------------------------------
 
 import math
@@ -26,8 +27,12 @@ if not objs:
 for ob in objs:
     if ob.type != 'MESH':
         continue
+    if ob.data.users > 1 and not ALLOW_SHARED_MESH_DATA:
+        print(f"[{ob.name}] SKIP: mesh data is shared by {ob.data.users} users. "
+              "Make the mesh single-user or set ALLOW_SHARED_MESH_DATA=True intentionally.")
+        continue
     if ob.data.users > 1:
-        print(f"[{ob.name}] note: mesh data shared by {ob.data.users} users, edits affect all instances")
+        print(f"[{ob.name}] WARNING: editing shared mesh data used by {ob.data.users} objects")
     me = ob.data
     bm = bmesh.new()
     bm.from_mesh(me)
