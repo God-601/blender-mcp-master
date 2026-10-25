@@ -34,7 +34,10 @@ for suffix, ratio in RATIOS.items():
     name = f"{SOURCE}_{suffix}"
     old = bpy.data.objects.get(name)
     if old:
-        bpy.data.objects.remove(old, do_unlink=True)
+        raise RuntimeError(
+            f"LOD output '{name}' already exists. Rename or remove it manually, "
+            "then rerun; existing scene objects are never deleted automatically."
+        )
     lod = src.copy()
     lod.data = src.data.copy()
     lod.name = name
@@ -56,10 +59,14 @@ for suffix, ratio in RATIOS.items():
     ev = lod.evaluated_get(dg)
     new_me = bpy.data.meshes.new_from_object(ev)
     old_me = lod.data
-    lod.modifiers.clear()
+    # Remove modifiers explicitly for compatibility with Blender versions where
+    # the modifier collection does not provide a clear() method.
+    for modifier in list(lod.modifiers):
+        lod.modifiers.remove(modifier)
     lod.data = new_me
     new_me.name = name
-    bpy.data.meshes.remove(old_me)
+    if old_me.users == 0:
+        bpy.data.meshes.remove(old_me)
 
     # offset sideways so LODs are visible side by side
     lod.location.x = src.location.x + (list(RATIOS).index(suffix) + 1) * (src.dimensions.x * 1.3 + 0.1)
