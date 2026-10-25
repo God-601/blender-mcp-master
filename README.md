@@ -3,6 +3,7 @@
 An agent skill that makes AI agents better at modeling in Blender through MCP: cleaner topology, correct scale, good materials, game-ready exports and fewer wasted tool calls.
 
 - Works with any agent that reads `SKILL.md` (Claude, Codex, Cursor, Gemini CLI, etc.).
+- Uses an inspect → blockout → refine → validate → correct loop, with context-aware mesh diagnostics instead of treating every warning as a defect.
 - Built for the Blender MCP toolset: `execute_blender_code`, `look`, `get_scene_info`, `get_addon_status`, `search_assets`, `import_asset`, `generate_3d`.
 
 ## Structure
@@ -11,7 +12,7 @@ An agent skill that makes AI agents better at modeling in Blender through MCP: c
 SKILL.md                 main instructions: golden rules, workflow, quality bar
 references/              loaded on demand (hard-surface, organic, character-rig, environment,
                          stylized-lowpoly, materials, lighting-render, game-ready-export,
-                         performance, troubleshooting, budgets)
+                         performance, troubleshooting, budgets, modeling-quality-loop)
 scripts/                 paste-into-Blender utilities (validate, cleanup, origin, bevel/shade,
                          LODs, PBR material, export, scene setup)
 ```
