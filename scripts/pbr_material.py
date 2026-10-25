@@ -1,0 +1,102 @@
+"""pbr_material.py - create (or update) a clean Principled BSDF material and optionally assign it.
+Works on Blender 3.x and 4.x socket names. Paste into execute_blender_code.
+"""
+import bpy
+
+# ---- CONFIG ----------------------------------------------------------------
+NAME = "MAT_Example"
+BASE_COLOR = (0.8, 0.8, 0.8, 1.0)   # linear RGBA
+METALLIC = 0.0
+ROUGHNESS = 0.5
+EMISSION_COLOR = None               # e.g. (1, 0.4, 0.1, 1) or None
+EMISSION_STRENGTH = 0.0
+ALPHA = 1.0                         # <1 uses blend/clip, see ALPHA_MODE
+ALPHA_MODE = "CLIP"                 # "CLIP" (cheap, games) or "BLEND"
+IOR = 1.45
+TEXTURES = {}                       # e.g. {"color": "C:/tex/wood_diff.png", "rough": "...", "normal": "...", "metal": "..."}
+ASSIGN_TO = []                      # object names to assign (replaces all slots with this one material)
+# ----------------------------------------------------------------------------
+
+
+def set_input(node, names, value):
+    """Set the first existing socket from a list of possible names."""
+    for n in names:
+        s = node.inputs.get(n)
+        if s is not None:
+            try:
+                s.default_value = value
+            except TypeError:
+                s.default_value = (value, value, value, 1.0) if isinstance(value, (int, float)) else value
+            return True
+    return False
+
+
+mat = bpy.data.materials.get(NAME) or bpy.data.materials.new(NAME)
+mat.use_nodes = True
+nt = mat.node_tree
+nodes, links = nt.nodes, nt.links
+bsdf = next((n for n in nodes if n.type == 'BSDF_PRINCIPLED'), None)
+if bsdf is None:
+    bsdf = nodes.new('ShaderNodeBsdfPrincipled')
+out = next((n for n in nodes if n.type == 'OUTPUT_MATERIAL'), None) or nodes.new('ShaderNodeOutputMaterial')
+if not any(l.to_node == out and l.from_node == bsdf for l in links):
+    links.new(bsdf.outputs['BSDF'], out.inputs['Surface'])
+
+set_input(bsdf, ["Base Color"], BASE_COLOR)
+set_input(bsdf, ["Metallic"], METALLIC)
+set_input(bsdf, ["Roughness"], ROUGHNESS)
+set_input(bsdf, ["IOR"], IOR)
+if EMISSION_COLOR is not None:
+    set_input(bsdf, ["Emission Color", "Emission"], EMISSION_COLOR)
+    set_input(bsdf, ["Emission Strength"], EMISSION_STRENGTH)
+if ALPHA < 1.0:
+    set_input(bsdf, ["Alpha"], ALPHA)
+    try:
+        mat.surface_render_method = 'BLENDED' if ALPHA_MODE == "BLEND" else 'DITHERED'   # 4.2+
+    except AttributeError:
+        try:
+            mat.blend_method = 'BLEND' if ALPHA_MODE == "BLEND" else 'CLIP'
+        except AttributeError:
+            pass
+
+
+def add_tex(path, label, noncolor, x, y):
+    img = bpy.data.images.load(path, check_existing=True)
+    img.colorspace_settings.name = 'Non-Color' if noncolor else 'sRGB'
+    n = nodes.new('ShaderNodeTexImage')
+    n.image = img
+    n.label = label
+    n.location = (x, y)
+    return n
+
+
+if TEXTURES:
+    if "color" in TEXTURES:
+        n = add_tex(TEXTURES["color"], "Base Color", False, -600, 300)
+        links.new(n.outputs['Color'], bsdf.inputs['Base Color'])
+    if "rough" in TEXTURES:
+        n = add_tex(TEXTURES["rough"], "Roughness", True, -600, 0)
+        links.new(n.outputs['Color'], bsdf.inputs['Roughness'])
+    if "metal" in TEXTURES:
+        n = add_tex(TEXTURES["metal"], "Metallic", True, -600, -300)
+        links.new(n.outputs['Color'], bsdf.inputs['Metallic'])
+    if "normal" in TEXTURES:
+        n = add_tex(TEXTURES["normal"], "Normal", True, -900, -600)
+        nm = nodes.new('ShaderNodeNormalMap')
+        nm.location = (-300, -600)
+        links.new(n.outputs['Color'], nm.inputs['Color'])
+        links.new(nm.outputs['Normal'], bsdf.inputs['Normal'])
+
+for name in ASSIGN_TO:
+    ob = bpy.data.objects.get(name)
+    if ob is None or ob.type != 'MESH':
+        print("skip", name)
+        continue
+    ob.data.materials.clear()
+    ob.data.materials.append(mat)
+    print(f"assigned {NAME} -> {name}")
+
+print(f"Material '{NAME}' ready: color={tuple(round(c,3) for c in BASE_COLOR)} metallic={METALLIC} roughness={ROUGHNESS} users={mat.users}")
+if mat.users == 0:
+    mat.use_fake_user = True
+    print("note: no users yet, fake user set so it is kept when saving. Assign it to an object.")
