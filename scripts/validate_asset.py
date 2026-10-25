@@ -13,13 +13,13 @@ MAX_MATERIALS = 2
 MAX_TEX_SIZE = 2048
 CHECK_SCALE = True
 CHECK_UV = True
+MISSING_TARGETS = []
 
 
 def pick_objects():
     if TARGETS:
         missing = [name for name in TARGETS if name not in bpy.data.objects]
-        if missing:
-            print("WARN missing target object(s): " + ", ".join(missing))
+        MISSING_TARGETS.extend(missing)
         return [bpy.data.objects[name] for name in TARGETS if name in bpy.data.objects]
     selected = [obj for obj in bpy.context.selected_objects if obj.type == "MESH"]
     if selected:
@@ -137,7 +137,11 @@ objects = pick_objects()
 print(f"=== validate_asset: {len(objects)} mesh object(s), Blender {bpy.app.version_string} ===")
 counts = {"PASS": 0, "WARN": 0, "INFO": 0}
 total_triangles = 0
+for missing_name in MISSING_TARGETS:
+    counts["WARN"] += 1
+    print(f"WARN: target object not found: {missing_name!r}")
 if not objects:
+    counts["WARN"] += 1
     print("WARN: no mesh objects found; set TARGETS or select/unhide the intended meshes.")
 
 for obj in objects:
@@ -158,4 +162,10 @@ for level, message in check_images():
 
 print(f"\nTOTAL triangles with modifiers: {total_triangles}")
 print(f"SUMMARY: {counts['PASS']} pass, {counts['WARN']} warn, {counts['INFO']} info")
-print("RESULT:", "REVIEW WARNINGS" if counts["WARN"] else "NO WARNINGS REPORTED")
+if not objects or MISSING_TARGETS:
+    result = "INCOMPLETE - CHECK TARGETS"
+elif counts["WARN"]:
+    result = "REVIEW WARNINGS"
+else:
+    result = "NO WARNINGS REPORTED"
+print("RESULT:", result)
