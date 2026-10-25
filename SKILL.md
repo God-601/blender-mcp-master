@@ -13,9 +13,9 @@ Works with any agent that can read this file (Claude, Codex, Cursor, Gemini CLI,
 
 1. **Probe before you build.** Call `get_addon_status` once, then `get_scene_info`. Never assume Blender version, units, or what is already in the scene.
 2. **Small steps, print everything.** One logical operation per `execute_blender_code` call. Always `print()` what you need to verify (counts, dimensions, names). Never write a 300-line script blind.
-3. **Look after every meaningful change.** Use `look` (not guesses). Quick checks: `max_size=512`, `solid`. Final checks: `mode="angles"` with 4 to 6 views, then `wireframe` once.
+3. **Inspect, then correct.** Use `look` after changes that affect silhouette, shading, topology or composition; inspect multiple angles before adding detail and before delivery. See `references/modeling-quality-loop.md`.
 4. **Never leave the scene dirty.** Don't delete or modify user objects you didn't create. Work in a dedicated collection named after the asset. Prefix or tag your objects.
-5. **Real-world scale, applied transforms.** 1 Blender unit = 1 m. Model at real size. `Ctrl+A` equivalent (apply scale/rotation) before UV, export or rigging.
+5. **Explicit scale and transforms.** Treat 1 Blender unit as 1 m only when the scene/workflow uses metric units; confirm the destination's scale convention (especially Roblox). Apply transforms when required for UVs, baking, rigging or export, without destructively changing user-owned objects.
 6. **Non-destructive first, destructive last.** Use modifiers (Bevel, Mirror, Array, Subdivision, Boolean) while iterating; apply only when finishing or when export requires it.
 7. **Budget before detail.** Decide the target (triangles, texture size, material count) from the target use *before* modeling (see `references/budgets.md`). Detail beyond the budget is a bug.
 8. **Verify, then report.** Finish with measurable facts (tri count, dimensions, materials, issues found/fixed), not adjectives.
@@ -59,7 +59,7 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Something looks wrong | Troubleshooting | `references/troubleshooting.md` |
 | Need triangle / texture / scale numbers | Budgets | `references/budgets.md` |
 
-Always also follow sections 3 to 6 below.
+Always also follow sections 3 to 6 below. For cross-cutting visual review, contextual diagnostics, and reliable MCP iteration, load `references/modeling-quality-loop.md`.
 
 ## 3. The core loop
 
@@ -73,7 +73,7 @@ VALIDATE -> run scripts/validate_asset.py; fix every FAIL; re-run
 DELIVER -> save/export if asked; report facts
 ```
 
-**Blockout gate:** do not add detail until the silhouette reads correctly from front, side and three-quarter views. Most bad models are wrong proportions, not missing detail.
+**Blockout gate:** do not add detail until the silhouette reads correctly from front, side and three-quarter views. Most bad models are wrong proportions, not missing detail. Follow `references/modeling-quality-loop.md` for the visual review and correction cycle.
 
 ## 4. How to call the MCP tools well
 
@@ -92,7 +92,7 @@ DELIVER -> save/export if asked; report facts
 ## 5. Quality bar (what "good" means)
 
 - **Proportions** match the reference or real-world dimensions (see `references/budgets.md` for common sizes).
-- **Topology**: quads where it deforms or subdivides; tris are fine for static game meshes. No n-gons on curved/deforming surfaces, no non-manifold edges, no loose verts, no zero-area faces, no flipped normals, no interior faces.
+- **Topology**: quads where it deforms or subdivides; tris are fine for static game meshes. Avoid n-gons on curved/deforming surfaces. Investigate non-manifold edges, loose geometry, zero-area faces, flipped normals and interior faces in context; open surfaces and foliage cards can legitimately have boundaries.
 - **Edges catch light**: real objects have bevels. Add small bevels (0.5 to 2 percent of object size) on hard edges; use `harden_normals` or weighted normals to avoid shading artifacts.
 - **Shading**: smooth where organic, flat where faceted, use auto-smooth / sharp edges by angle (30 degrees default). No shading artifacts on flat surfaces.
 - **Origin and pivot** at a meaningful point (base center for props, hinge for doors, feet for characters).
