@@ -58,6 +58,7 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Slow viewport, heavy scene, crashes | Performance | `references/performance.md` |
 | Something looks wrong | Troubleshooting | `references/troubleshooting.md` |
 | Need triangle / texture / scale numbers | Budgets | `references/budgets.md` |
+| Quality loop, visual review, contextual validation | Modeling QA | `references/modeling-quality-loop.md` |
 
 Always also follow sections 3 to 6 below. For cross-cutting visual review, contextual diagnostics, and reliable MCP iteration, load `references/modeling-quality-loop.md`.
 
