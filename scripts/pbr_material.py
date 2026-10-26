@@ -65,6 +65,10 @@ set_input(bsdf, ["IOR"], IOR)
 if EMISSION_COLOR is not None:
     set_input(bsdf, ["Emission Color", "Emission"], EMISSION_COLOR)
     set_input(bsdf, ["Emission Strength"], EMISSION_STRENGTH)
+else:
+    # Prevent stale emission from a previous run when this config disables it.
+    set_input(bsdf, ["Emission Color", "Emission"], (0.0, 0.0, 0.0, 1.0))
+    set_input(bsdf, ["Emission Strength"], 0.0)
 # Always set alpha and the blend mode so rerunning with ALPHA = 1.0 undoes an earlier transparent run.
 set_input(bsdf, ["Alpha"], ALPHA)
 if hasattr(mat, "surface_render_method"):                      # Blender 4.2+
