@@ -248,7 +248,7 @@ class BlenderRuntimeTests(unittest.TestCase):
         return [n for n in material.node_tree.nodes if n.get("_blender_mcp_generated")]
 
     def test_pbr_clip_uses_binary_threshold_on_blender_42_plus(self):
-        if not hasattr(bpy.data.materials.new("ProbeAlpha"), "surface_render_method"):
+        if bpy.app.version < (4, 2, 0):
             self.skipTest("surface_render_method is available in Blender 4.2+")
         out, err = run_script("pbr_material.py", NAME="ClipAlpha", ALPHA=0.4, ALPHA_MODE="CLIP")
         self.assertIsNone(err, out)
