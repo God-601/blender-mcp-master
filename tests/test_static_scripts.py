@@ -26,11 +26,14 @@ class RepositoryStaticChecks(unittest.TestCase):
         self.assertIn("MISSING_TARGETS", source)
         self.assertIn("INVALID_TARGETS", source)
         self.assertIn("target object is not a mesh", source)
+        self.assertIn("falling back to all visible", source)
 
     def test_lod_script_does_not_delete_existing_lods_automatically(self):
         source = (ROOT / "scripts" / "make_lods.py").read_text(encoding="utf-8")
         self.assertIn("existing scene objects are never deleted automatically", source)
         self.assertIn("for modifier in list(lod.modifiers)", source)
+        self.assertIn("def bounds_overlap", source)
+        self.assertIn("place_lod_without_overlap", source)
 
     def test_cleanup_skips_shared_mesh_data_by_default(self):
         source = (ROOT / "scripts" / "cleanup_mesh.py").read_text(encoding="utf-8")
@@ -53,6 +56,8 @@ class RepositoryStaticChecks(unittest.TestCase):
     def test_export_script_restores_state_in_finally(self):
         source = (ROOT / "scripts" / "export_asset.py").read_text(encoding="utf-8")
         self.assertIn("finally:", source)
+        self.assertIn("temp_prefix", source)
+        self.assertIn("shutil.rmtree", source)
         self.assertNotIn("INCLUDE_ARMATURE", source)
 
 
