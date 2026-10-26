@@ -115,7 +115,7 @@ Blender side:
 - Disable heavy viewport modifiers (Subdivision level > 2, Array with high counts, Boolean with dense meshes) during iteration via `show_viewport = False`; keep render levels.
 - Prefer EEVEE / Workbench for checks. Cycles only for final renders, with denoise and a sample cap.
 - Reduce texture sizes to the budget; pack or save images explicitly.
-- Remove orphans: `bpy.data.orphans_purge(do_recursive=True)` after cleanup.
+- Avoid global orphan purges during routine cleanup; remove only datablocks created by the current operation and only after confirming they have no users.
 - Details in `references/performance.md`.
 
 ## 7. Ready-made scripts
