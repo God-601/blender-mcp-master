@@ -4,6 +4,8 @@ import { readFileSync, readdirSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { Client } from "@modelcontextprotocol/sdk/client/index.js";
+import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const pkg = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
@@ -40,4 +42,31 @@ test("CLI list command reports bundled references and scripts", () => {
   assert.match(result.stdout, /References:/);
   assert.match(result.stdout, /Scripts:/);
   assert.match(result.stdout, /validate_asset\.py/);
+});
+
+
+test("MCP server starts over stdio and exposes the expected tools", async () => {
+  const transport = new StdioClientTransport({
+    command: process.execPath,
+    args: [resolve(root, "src/server.js")]
+  });
+  const client = new Client({ name: "blender-mcp-master-test", version: "0.0.0" });
+  try {
+    await client.connect(transport);
+    const result = await client.listTools();
+    const names = result.tools.map((tool) => tool.name);
+    assert.deepEqual(names.sort(), [
+      "get_blender_mcp_setup",
+      "get_blender_reference",
+      "get_blender_script",
+      "get_blender_skill",
+      "list_blender_resources"
+    ].sort());
+    const skill = await client.callTool({ name: "get_blender_skill", arguments: {} });
+    assert.match(skill.content[0].text, /# Blender MCP Master/);
+    const resources = await client.callTool({ name: "list_blender_resources", arguments: {} });
+    assert.match(resources.content[0].text, /validate_asset\\.py/);
+  } finally {
+    await client.close();
+  }
 });
