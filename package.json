@@ -1,0 +1,48 @@
+{
+  "name": "blender-mcp-master",
+  "version": "0.1.0",
+  "description": "Blender modeling agent skill and MCP resource server",
+  "type": "module",
+  "license": "MIT",
+  "author": "God-601",
+  "homepage": "https://github.com/God-601/blender-mcp-master#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/God-601/blender-mcp-master.git"
+  },
+  "bugs": {
+    "url": "https://github.com/God-601/blender-mcp-master/issues"
+  },
+  "keywords": [
+    "blender",
+    "mcp",
+    "model-context-protocol",
+    "agent-skill",
+    "3d-modeling",
+    "game-ready"
+  ],
+  "engines": {
+    "node": ">=18.18"
+  },
+  "bin": {
+    "blender-mcp-master": "./bin/blender-mcp-master.js"
+  },
+  "files": [
+    "bin/",
+    "src/",
+    "SKILL.md",
+    "references/",
+    "scripts/",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "node ./bin/blender-mcp-master.js",
+    "test": "node --test",
+    "pack:check": "npm pack --dry-run"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.32.2",
+    "zod": "3.25.76"
+  }
+}
