@@ -107,6 +107,13 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertIsNone(err)
         self.assertIn("90.0", out)
 
+    def test_validate_ignores_unrelated_images(self):
+        add_mesh("Box", cube)
+        bpy.data.images.new("UnrelatedHugeImage", 4096, 4)
+        out, err = run_script("validate_asset.py", TARGETS=["Box"])
+        self.assertIsNone(err, out)
+        self.assertNotIn("UnrelatedHugeImage", out)
+
     # --- cleanup_mesh.py ---------------------------------------------------
     def test_cleanup_merges_duplicate_vertices(self):
         def doubled(bm):
@@ -149,6 +156,17 @@ class BlenderRuntimeTests(unittest.TestCase):
         out, err = run_script("cleanup_mesh.py", TARGETS=["Nope"])
         self.assertIsNone(err)
         self.assertIn("target object not found", out)
+
+    def test_cleanup_skips_shape_key_mesh(self):
+        obj = add_mesh("Morph", cube)
+        obj.shape_key_add(name="Basis")
+        obj.shape_key_add(name="Smile")
+        before = (len(obj.data.vertices), len(obj.data.edges), len(obj.data.polygons))
+        out, err = run_script("cleanup_mesh.py", TARGETS=["Morph"])
+        self.assertIsNone(err, out)
+        self.assertIn("SKIP: mesh has Shape Keys", out)
+        self.assertEqual(before, (len(obj.data.vertices), len(obj.data.edges), len(obj.data.polygons)))
+        self.assertEqual(len(obj.data.shape_keys.key_blocks), 2)
 
     # --- make_lods.py ------------------------------------------------------
     def test_lods_missing_source_raises_regular_exception(self):
@@ -302,6 +320,28 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertIsNone(err, out)
         self.assertTrue(os.path.getsize(path) > 0)
 
+
+    def test_export_refuses_to_overwrite_existing_file(self):
+        add_mesh("Crate", cube)
+        path = os.path.join(self.tmp.name, "existing.fbx")
+        with open(path, "wb") as stream:
+            stream.write(b"preserve existing export")
+        out, err = run_script("export_asset.py", OBJECTS=["Crate"], PATH=path, FORMAT="FBX")
+        self.assertIsInstance(err, FileExistsError)
+        with open(path, "rb") as stream:
+            self.assertEqual(stream.read(), b"preserve existing export")
+        self.assertEqual([o.name for o in bpy.data.objects], ["Crate"])
+
+    def test_apply_and_origin_skips_shape_key_mesh(self):
+        obj = add_mesh("Morph", cube)
+        obj.shape_key_add(name="Basis")
+        obj.shape_key_add(name="Smile")
+        obj.scale = (2, 2, 2)
+        out, err = run_script("apply_and_origin.py", TARGETS=["Morph"])
+        self.assertIsNone(err, out)
+        self.assertIn("SKIP: mesh has Shape Keys", out)
+        self.assertEqual(tuple(obj.scale), (2.0, 2.0, 2.0))
+        self.assertEqual(len(obj.data.shape_keys.key_blocks), 2)
 
     # --- scripts covered only by smoke/behaviour tests ----------------------
     def test_apply_and_origin_bakes_transforms_and_grounds_object(self):
