@@ -29,7 +29,7 @@
 - Low poly with clean UVs + high poly (or procedural material) -> bake Normal, AO, Base Color, Roughness at the budgeted size. Cage extrusion about 0.01 to 0.05. Cycles required for bake. Use margin 8 to 16 px, `use_selected_to_active=True`, then reconnect the baked images in a simple Principled setup before export.
 
 ## Using `scripts/export_asset.py`
-Set `OBJECTS`, `PATH`, `FORMAT`, `ENGINE` at the top; the script exports only listed objects, triangulates copies if requested, and prints the file size. Always report the exported path and tri count to the user.
+Set `OBJECTS`, `PATH`, `FORMAT`, `ENGINE` at the top; the script exports only listed objects, triangulates copies if requested, and prints the file size. It restores object names, selection, active object and mode afterwards, and raises an error if no file was written. Rigged or shape-keyed meshes are not handled by this script; export those manually. Always report the exported path and tri count to the user.
 
 ## Don't
 - Don't export with hidden helpers/cutters selected.

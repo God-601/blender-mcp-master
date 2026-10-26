@@ -1,6 +1,11 @@
 # Budgets and real-world sizes
 
-Decide these BEFORE modeling. Treat them as hard limits.
+Decide these BEFORE modeling and state the chosen numbers in your plan.
+
+There are three kinds of number here, and they are not equally strict:
+- **Platform limits** (for example the Roblox MeshPart cap of 21,844 triangles): hard. Never exceed them.
+- **Project targets** (what this game, scene or client needs): set by the user or the destination. Ask or state an assumption; once chosen, stay within it.
+- **Reference values in the tables below**: starting points. Adjust them for camera distance, how often the asset repeats, and how important it is. A hero prop may exceed a background default, and a distant plant should sit well under it.
 
 ## Triangle budgets (per single asset, rough guidance)
 

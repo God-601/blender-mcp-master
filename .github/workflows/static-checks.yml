@@ -1,0 +1,41 @@
+name: Static checks
+
+on:
+  push:
+    branches: ["**"]
+  pull_request:
+
+jobs:
+  python-static:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      # Without bpy the runtime tests are skipped; only parsing and text checks run here.
+      - run: python -m unittest discover -s tests -v
+
+  blender-runtime:
+    # Runs the scripts in a real Blender (bpy wheel). Covers the Blender version of the wheel only.
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: System libraries needed by the bpy wheel
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libxi6 libxrender1 libxxf86vm1 libxfixes3 libsm6 libxkbcommon0
+      - run: pip install bpy==5.2.3
+      - name: Run all tests (fails if bpy cannot be imported)
+        env:
+          REQUIRE_BPY: "1"
+        run: python -m unittest discover -s tests -v

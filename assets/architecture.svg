@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 380" width="1200" height="380" role="img" aria-labelledby="t d">
+  <title id="t">How the skill fits in</title>
+  <desc id="d">The agent loads the skill, then calls MCP tools that drive a live Blender session</desc>
+  <rect width="1200" height="380" rx="16" fill="#14181f"/>
+  <g font-family="Segoe UI, Helvetica, Arial, sans-serif" text-anchor="middle">
+    <text x="600" y="42" font-size="24" font-weight="700" fill="#ffffff">How the skill fits in</text>
+
+    <!-- Agent -->
+    <rect x="40" y="90" width="250" height="230" rx="14" fill="#243245"/>
+    <text x="165" y="125" font-size="20" font-weight="700" fill="#fff">AI agent</text>
+    <text x="165" y="150" font-size="14" fill="#c9d4e3">Claude, Codex, Cursor...</text>
+    <rect x="62" y="172" width="206" height="124" rx="10" fill="#ea7600"/>
+    <text x="165" y="202" font-size="17" font-weight="700" fill="#14181f">blender-mcp-master</text>
+    <text x="165" y="228" font-size="14" fill="#14181f">golden rules</text>
+    <text x="165" y="248" font-size="14" fill="#14181f">workflow + quality bar</text>
+    <text x="165" y="268" font-size="14" fill="#14181f">guides + scripts</text>
+
+    <!-- MCP -->
+    <rect x="450" y="90" width="300" height="230" rx="14" fill="#243245"/>
+    <text x="600" y="125" font-size="20" font-weight="700" fill="#fff">MCP tools</text>
+    <g font-size="15" fill="#c9d4e3" font-family="Consolas, Menlo, monospace">
+      <text x="600" y="160">get_addon_status</text>
+      <text x="600" y="186">get_scene_info</text>
+      <text x="600" y="212">execute_blender_code</text>
+      <text x="600" y="238">look</text>
+      <text x="600" y="264">search_assets / import_asset</text>
+      <text x="600" y="290">generate_3d</text>
+    </g>
+
+    <!-- Blender -->
+    <rect x="910" y="90" width="250" height="230" rx="14" fill="#243245"/>
+    <text x="1035" y="125" font-size="20" font-weight="700" fill="#fff">Live Blender</text>
+    <text x="1035" y="150" font-size="14" fill="#c9d4e3">scene, meshes, materials</text>
+    <g transform="translate(1035 225)">
+      <polygon points="0,-55 48,-27 0,0 -48,-27" fill="#f5b041"/>
+      <polygon points="-48,-27 0,0 0,55 -48,27" fill="#ea7600"/>
+      <polygon points="48,-27 0,0 0,55 48,27" fill="#b85a00"/>
+    </g>
+
+    <!-- arrows -->
+    <g stroke="#8fa3bd" stroke-width="2.5" fill="none">
+      <line x1="290" y1="205" x2="450" y2="205"/><polygon points="450,205 438,199 438,211" fill="#8fa3bd"/>
+      <line x1="750" y1="205" x2="910" y2="205"/><polygon points="910,205 898,199 898,211" fill="#8fa3bd"/>
+    </g>
+    <text x="370" y="192" font-size="13" fill="#8fa3bd">plans</text>
+    <text x="830" y="192" font-size="13" fill="#8fa3bd">bpy code</text>
+    <text x="600" y="352" font-size="14" fill="#8fa3bd">The skill changes what the agent decides and verifies. The tools stay exactly the same.</text>
+  </g>
+</svg>

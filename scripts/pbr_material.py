@@ -1,6 +1,7 @@
 """pbr_material.py - create (or update) a clean Principled BSDF material and optionally assign it.
-Works on Blender 3.x and 4.x socket names. Paste into execute_blender_code.
+Supports Blender 3.x-5.x socket names. Paste into execute_blender_code.
 """
+import os
 import bpy
 
 # ---- CONFIG ----------------------------------------------------------------
@@ -11,7 +12,8 @@ ROUGHNESS = 0.5
 EMISSION_COLOR = None               # e.g. (1, 0.4, 0.1, 1) or None
 EMISSION_STRENGTH = 0.0
 ALPHA = 1.0                         # <1 uses blend/clip, see ALPHA_MODE
-ALPHA_MODE = "CLIP"                 # "CLIP" (cheap, games) or "BLEND"
+ALPHA_MODE = "CLIP"                 # "CLIP" (binary cutout), "DITHERED", or "BLEND"
+ALPHA_THRESHOLD = 0.5               # alpha values must be strictly greater than this for CLIP
 IOR = 1.45
 TEXTURES = {}                       # e.g. {"color": "C:/tex/wood_diff.png", "rough": "...", "normal": "...", "metal": "..."}
 ASSIGN_TO = []                      # object names to assign (replaces all slots with this one material)
@@ -31,10 +33,44 @@ def set_input(node, names, value):
     return False
 
 
-mat = bpy.data.materials.get(NAME) or bpy.data.materials.new(NAME)
-mat.use_nodes = True
+# Validate everything that can fail BEFORE touching the material, so a bad path
+# cannot leave a half-updated material or delete textures from a previous run.
+if ALPHA_MODE not in {"CLIP", "DITHERED", "BLEND"}:
+    raise ValueError("ALPHA_MODE must be CLIP, DITHERED or BLEND")
+if not 0.0 <= ALPHA_THRESHOLD <= 1.0:
+    raise ValueError("ALPHA_THRESHOLD must be in [0, 1]")
+for key, path in TEXTURES.items():
+    if key not in ("color", "rough", "metal", "normal"):
+        raise ValueError(f"Unknown texture slot {key!r}; use color, rough, metal or normal")
+    if not os.path.isfile(bpy.path.abspath(path)):
+        raise FileNotFoundError(f"Texture file for {key!r} not found: {path}")
+
+# Load every replacement image before modifying any material nodes. A file may
+# exist but still be unreadable by Blender; that must not destroy the old setup.
+_loaded_images = {}
+_existing_image_names = {image.name for image in bpy.data.images}
+try:
+    for key, path in TEXTURES.items():
+        _loaded_images[key] = bpy.data.images.load(bpy.path.abspath(path), check_existing=True)
+except Exception:
+    for image in _loaded_images.values():
+        if image.name not in _existing_image_names and image.users == 0:
+            bpy.data.images.remove(image)
+    raise
+
+existing_mat = bpy.data.materials.get(NAME)
+if existing_mat is not None:
+    print(f"Updating existing material {NAME!r} (Principled values are overwritten).")
+mat = existing_mat or bpy.data.materials.new(NAME)
+# use_nodes is required before Blender 5.0 and deprecated afterwards (node trees always exist there).
+if mat.node_tree is None or bpy.app.version < (5, 0, 0):
+    mat.use_nodes = True
 nt = mat.node_tree
 nodes, links = nt.nodes, nt.links
+# Remove nodes created by this script on previous runs; preserve user-authored nodes.
+for node in list(nodes):
+    if node.get("_blender_mcp_generated", False):
+        nodes.remove(node)
 bsdf = next((n for n in nodes if n.type == 'BSDF_PRINCIPLED'), None)
 if bsdf is None:
     bsdf = nodes.new('ShaderNodeBsdfPrincipled')
@@ -49,49 +85,78 @@ set_input(bsdf, ["IOR"], IOR)
 if EMISSION_COLOR is not None:
     set_input(bsdf, ["Emission Color", "Emission"], EMISSION_COLOR)
     set_input(bsdf, ["Emission Strength"], EMISSION_STRENGTH)
-if ALPHA < 1.0:
-    set_input(bsdf, ["Alpha"], ALPHA)
-    try:
-        mat.surface_render_method = 'BLENDED' if ALPHA_MODE == "BLEND" else 'DITHERED'   # 4.2+
-    except AttributeError:
-        try:
-            mat.blend_method = 'BLEND' if ALPHA_MODE == "BLEND" else 'CLIP'
-        except AttributeError:
-            pass
+else:
+    # Prevent stale emission from a previous run when this config disables it.
+    set_input(bsdf, ["Emission Color", "Emission"], (0.0, 0.0, 0.0, 1.0))
+    set_input(bsdf, ["Emission Strength"], 0.0)
+# Set alpha and render method. Blender 4.2+ removed the old Alpha Clip render mode;
+# reproduce it with a Greater Than node, as recommended by Blender's migration docs.
+set_input(bsdf, ["Alpha"], ALPHA)
+if hasattr(mat, "surface_render_method"):                      # Blender 4.2+
+    if ALPHA < 1.0 and ALPHA_MODE == "BLEND":
+        mat.surface_render_method = 'BLENDED'
+    else:
+        mat.surface_render_method = 'DITHERED'
+    if ALPHA < 1.0 and ALPHA_MODE == "CLIP":
+        clip = nodes.new('ShaderNodeMath')
+        clip.operation = 'GREATER_THAN'
+        clip.inputs[0].default_value = ALPHA
+        clip.inputs[1].default_value = ALPHA_THRESHOLD
+        clip.location = (-250, 250)
+        clip.label = "Alpha Clip Threshold"
+        clip["_blender_mcp_generated"] = True
+        for old_link in list(bsdf.inputs["Alpha"].links):
+            links.remove(old_link)
+        links.new(clip.outputs[0], bsdf.inputs["Alpha"])
+elif hasattr(mat, "blend_method"):                             # Blender 4.1 and older
+    mat.alpha_threshold = ALPHA_THRESHOLD
+    if ALPHA < 1.0:
+        mat.blend_method = 'BLEND' if ALPHA_MODE == "BLEND" else ('HASHED' if ALPHA_MODE == "DITHERED" else 'CLIP')
+    else:
+        mat.blend_method = 'OPAQUE'
 
 
-def add_tex(path, label, noncolor, x, y):
-    img = bpy.data.images.load(path, check_existing=True)
+def add_tex(img, label, noncolor, x, y):
     img.colorspace_settings.name = 'Non-Color' if noncolor else 'sRGB'
     n = nodes.new('ShaderNodeTexImage')
+    n["_blender_mcp_generated"] = True
     n.image = img
     n.label = label
     n.location = (x, y)
     return n
 
+def replace_input_link(output_socket, input_socket):
+    """Replace an existing connection to this input rather than stacking links."""
+    for link in list(input_socket.links):
+        links.remove(link)
+    links.new(output_socket, input_socket)
+
 
 if TEXTURES:
     if "color" in TEXTURES:
-        n = add_tex(TEXTURES["color"], "Base Color", False, -600, 300)
-        links.new(n.outputs['Color'], bsdf.inputs['Base Color'])
+        n = add_tex(_loaded_images["color"], "Base Color", False, -600, 300)
+        replace_input_link(n.outputs['Color'], bsdf.inputs['Base Color'])
     if "rough" in TEXTURES:
-        n = add_tex(TEXTURES["rough"], "Roughness", True, -600, 0)
-        links.new(n.outputs['Color'], bsdf.inputs['Roughness'])
+        n = add_tex(_loaded_images["rough"], "Roughness", True, -600, 0)
+        replace_input_link(n.outputs['Color'], bsdf.inputs['Roughness'])
     if "metal" in TEXTURES:
-        n = add_tex(TEXTURES["metal"], "Metallic", True, -600, -300)
-        links.new(n.outputs['Color'], bsdf.inputs['Metallic'])
+        n = add_tex(_loaded_images["metal"], "Metallic", True, -600, -300)
+        replace_input_link(n.outputs['Color'], bsdf.inputs['Metallic'])
     if "normal" in TEXTURES:
-        n = add_tex(TEXTURES["normal"], "Normal", True, -900, -600)
+        n = add_tex(_loaded_images["normal"], "Normal", True, -900, -600)
         nm = nodes.new('ShaderNodeNormalMap')
+        nm["_blender_mcp_generated"] = True
         nm.location = (-300, -600)
-        links.new(n.outputs['Color'], nm.inputs['Color'])
-        links.new(nm.outputs['Normal'], bsdf.inputs['Normal'])
+        replace_input_link(n.outputs['Color'], nm.inputs['Color'])
+        replace_input_link(nm.outputs['Normal'], bsdf.inputs['Normal'])
 
 for name in ASSIGN_TO:
     ob = bpy.data.objects.get(name)
     if ob is None or ob.type != 'MESH':
         print("skip", name)
         continue
+    if ob.data.users > 1:
+        print(f"WARNING: {name} shares mesh data with {ob.data.users - 1} other user(s); they get this material too.")
     ob.data.materials.clear()
     ob.data.materials.append(mat)
     print(f"assigned {NAME} -> {name}")
