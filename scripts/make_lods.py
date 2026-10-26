@@ -72,7 +72,10 @@ try:
 
         # apply modifiers through the evaluated mesh (no operators needed)
         ev = lod.evaluated_get(bpy.context.evaluated_depsgraph_get())
-        new_me = bpy.data.meshes.new_from_object(ev)
+        new_me = bpy.data.meshes.new_from_object(
+            ev, preserve_all_data_layers=True,
+            depsgraph=bpy.context.evaluated_depsgraph_get()
+        )
         old_me = lod.data
         # Remove modifiers one by one: older Blender versions have no modifiers.clear().
         for modifier in list(lod.modifiers):
