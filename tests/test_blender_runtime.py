@@ -188,6 +188,7 @@ class BlenderRuntimeTests(unittest.TestCase):
 
     def test_lods_preserve_multiple_uv_layers(self):
         source = add_mesh("UVRock", ico)
+        source.data.uv_layers.new(name="UVMap")
         source.data.uv_layers.new(name="ExtraUV")
         out, err = run_script("make_lods.py", SOURCE="UVRock", RATIOS={"LOD1": 0.5})
         self.assertIsNone(err, out)
