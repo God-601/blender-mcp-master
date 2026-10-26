@@ -45,6 +45,19 @@ for key, path in TEXTURES.items():
     if not os.path.isfile(bpy.path.abspath(path)):
         raise FileNotFoundError(f"Texture file for {key!r} not found: {path}")
 
+# Load every replacement image before modifying any material nodes. A file may
+# exist but still be unreadable by Blender; that must not destroy the old setup.
+_loaded_images = {}
+_existing_image_names = {image.name for image in bpy.data.images}
+try:
+    for key, path in TEXTURES.items():
+        _loaded_images[key] = bpy.data.images.load(bpy.path.abspath(path), check_existing=True)
+except Exception:
+    for image in _loaded_images.values():
+        if image.name not in _existing_image_names and image.users == 0:
+            bpy.data.images.remove(image)
+    raise
+
 existing_mat = bpy.data.materials.get(NAME)
 if existing_mat is not None:
     print(f"Updating existing material {NAME!r} (Principled values are overwritten).")
@@ -103,8 +116,7 @@ elif hasattr(mat, "blend_method"):                             # Blender 4.1 and
         mat.blend_method = 'OPAQUE'
 
 
-def add_tex(path, label, noncolor, x, y):
-    img = bpy.data.images.load(path, check_existing=True)
+def add_tex(img, label, noncolor, x, y):
     img.colorspace_settings.name = 'Non-Color' if noncolor else 'sRGB'
     n = nodes.new('ShaderNodeTexImage')
     n["_blender_mcp_generated"] = True
@@ -122,16 +134,16 @@ def replace_input_link(output_socket, input_socket):
 
 if TEXTURES:
     if "color" in TEXTURES:
-        n = add_tex(TEXTURES["color"], "Base Color", False, -600, 300)
+        n = add_tex(_loaded_images["color"], "Base Color", False, -600, 300)
         replace_input_link(n.outputs['Color'], bsdf.inputs['Base Color'])
     if "rough" in TEXTURES:
-        n = add_tex(TEXTURES["rough"], "Roughness", True, -600, 0)
+        n = add_tex(_loaded_images["rough"], "Roughness", True, -600, 0)
         replace_input_link(n.outputs['Color'], bsdf.inputs['Roughness'])
     if "metal" in TEXTURES:
-        n = add_tex(TEXTURES["metal"], "Metallic", True, -600, -300)
+        n = add_tex(_loaded_images["metal"], "Metallic", True, -600, -300)
         replace_input_link(n.outputs['Color'], bsdf.inputs['Metallic'])
     if "normal" in TEXTURES:
-        n = add_tex(TEXTURES["normal"], "Normal", True, -900, -600)
+        n = add_tex(_loaded_images["normal"], "Normal", True, -900, -600)
         nm = nodes.new('ShaderNodeNormalMap')
         nm["_blender_mcp_generated"] = True
         nm.location = (-300, -600)
