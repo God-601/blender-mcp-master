@@ -88,7 +88,9 @@ if hasattr(mat, "surface_render_method"):                      # Blender 4.2+
         clip.location = (-250, 250)
         clip.label = "Alpha Clip Threshold"
         clip["_blender_mcp_generated"] = True
-        replace_input_link(clip.outputs[0], bsdf.inputs["Alpha"])
+        for old_link in list(bsdf.inputs["Alpha"].links):
+            links.remove(old_link)
+        links.new(clip.outputs[0], bsdf.inputs["Alpha"])
 elif hasattr(mat, "blend_method"):                             # Blender 4.1 and older
     mat.alpha_threshold = ALPHA_THRESHOLD
     if ALPHA < 1.0:
