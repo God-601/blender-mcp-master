@@ -83,6 +83,9 @@ for ob in objs:
     if ob.mode != 'OBJECT':
         print(f"[{ob.name}] SKIP: object is in {ob.mode} mode; switch to Object Mode so edits are not lost.")
         continue
+    if ob.data.shape_keys and ob.data.shape_keys.key_blocks:
+        print(f"[{ob.name}] SKIP: mesh has Shape Keys; topology cleanup can invalidate shape-key data.")
+        continue
     users = real_users(ob.data)
     if users > 1 and not ALLOW_SHARED_MESH_DATA:
         print(f"[{ob.name}] SKIP: mesh data is shared by {users} users. "
