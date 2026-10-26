@@ -14,13 +14,21 @@ MAX_TEX_SIZE = 2048
 CHECK_SCALE = True
 CHECK_UV = True
 MISSING_TARGETS = []
+INVALID_TARGETS = []
 
 
 def pick_objects():
     if TARGETS:
-        missing = [name for name in TARGETS if name not in bpy.data.objects]
-        MISSING_TARGETS.extend(missing)
-        return [bpy.data.objects[name] for name in TARGETS if name in bpy.data.objects]
+        selected = []
+        for name in TARGETS:
+            obj = bpy.data.objects.get(name)
+            if obj is None:
+                MISSING_TARGETS.append(name)
+            elif obj.type != "MESH":
+                INVALID_TARGETS.append((name, obj.type))
+            else:
+                selected.append(obj)
+        return selected
     selected = [obj for obj in bpy.context.selected_objects if obj.type == "MESH"]
     if selected:
         return selected
@@ -152,6 +160,9 @@ total_triangles = 0
 for missing_name in MISSING_TARGETS:
     counts["WARN"] += 1
     print(f"WARN: target object not found: {missing_name!r}")
+for invalid_name, invalid_type in INVALID_TARGETS:
+    counts["WARN"] += 1
+    print(f"WARN: target object is not a mesh: {invalid_name!r} (type: {invalid_type})")
 if not objects:
     counts["WARN"] += 1
     print("WARN: no mesh objects found; set TARGETS or select/unhide the intended meshes.")
@@ -174,7 +185,7 @@ for level, message in check_images(objects):
 
 print(f"\nTOTAL triangles with modifiers: {total_triangles}")
 print(f"SUMMARY: {counts['PASS']} pass, {counts['WARN']} warn, {counts['INFO']} info")
-if not objects or MISSING_TARGETS:
+if not objects or MISSING_TARGETS or INVALID_TARGETS:
     result = "INCOMPLETE - CHECK TARGETS"
 elif counts["WARN"]:
     result = "REVIEW WARNINGS"
