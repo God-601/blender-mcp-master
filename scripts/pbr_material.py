@@ -1,5 +1,5 @@
 """pbr_material.py - create (or update) a clean Principled BSDF material and optionally assign it.
-Works on Blender 3.x and 4.x socket names. Paste into execute_blender_code.
+Supports Blender 3.x-5.x socket names. Paste into execute_blender_code.
 """
 import os
 import bpy
@@ -35,6 +35,10 @@ def set_input(node, names, value):
 
 # Validate everything that can fail BEFORE touching the material, so a bad path
 # cannot leave a half-updated material or delete textures from a previous run.
+if ALPHA_MODE not in {"CLIP", "DITHERED", "BLEND"}:
+    raise ValueError("ALPHA_MODE must be CLIP, DITHERED or BLEND")
+if not 0.0 <= ALPHA_THRESHOLD <= 1.0:
+    raise ValueError("ALPHA_THRESHOLD must be in [0, 1]")
 for key, path in TEXTURES.items():
     if key not in ("color", "rough", "metal", "normal"):
         raise ValueError(f"Unknown texture slot {key!r}; use color, rough, metal or normal")
