@@ -15,7 +15,7 @@ An agent skill that helps AI agents create better Blender assets through MCP: cl
 
 ## How it works
 
-The skill does not add tools. It changes what the agent decides and verifies while using the Blender MCP tools it already has.
+The skill changes what the agent decides and verifies while using Blender-control MCP tools. The npm package also includes a small stdio MCP server that exposes this skill, its reference guides, and script templates. That resource server does not itself control a live Blender scene; pair it with a separate Blender-control MCP server for live operations.
 
 <p align="center"><img src="assets/architecture.svg" alt="The agent loads the skill, then calls MCP tools that drive a live Blender" width="100%"></p>
 
@@ -30,6 +30,18 @@ npx skills add God-601/blender-mcp-master
 ```
 
 If your client does not support the Skills CLI, clone/download this repository and point the agent to the root `SKILL.md`, or install the repository in that client's skills directory.
+
+### npm / npx MCP resource server
+
+The npm package bundles `SKILL.md`, the `references/` guides, and the `scripts/` templates:
+
+```bash
+npx -y blender-mcp-master
+```
+
+Add it to an MCP client configuration using command `npx` and args `["-y", "blender-mcp-master"]`. It exposes `get_blender_skill`, `list_blender_resources`, `get_blender_reference`, `get_blender_script`, and `get_blender_mcp_setup` over stdio. The package is a skill/resource server, **not** a replacement for a Blender-control MCP server; configure a separate live Blender integration for scene editing.
+
+Other CLI commands: `npx -y blender-mcp-master skill` prints the skill, and `npx -y blender-mcp-master list` lists bundled guides and scripts.
 
 ## Repository layout
 
@@ -91,6 +103,18 @@ npx skills add God-601/blender-mcp-master
 ```
 
 Se o seu cliente não oferecer suporte ao Skills CLI, clone/baixe este repositório e indique o arquivo `SKILL.md` na raiz, ou instale o repositório na pasta de skills desse cliente.
+
+### Servidor MCP via npm/npx
+
+O pacote npm inclui `SKILL.md`, os guias de `references/` e os scripts de `scripts/`:
+
+```bash
+npx -y blender-mcp-master
+```
+
+Na configuração do cliente MCP, use o comando `npx` e os argumentos `["-y", "blender-mcp-master"]`. O servidor stdio disponibiliza `get_blender_skill`, `list_blender_resources`, `get_blender_reference`, `get_blender_script` e `get_blender_mcp_setup`. Ele fornece a skill e os recursos, mas **não controla sozinho uma cena Blender ao vivo**; para editar cenas, configure também um servidor MCP separado que controle o Blender.
+
+Comandos adicionais: `npx -y blender-mcp-master skill` imprime a skill e `npx -y blender-mcp-master list` lista os guias e scripts.
 
 ## Estrutura do repositório
 
