@@ -7,9 +7,13 @@ on:
 
 jobs:
   python-static:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
@@ -18,6 +22,8 @@ jobs:
 
   blender-runtime:
     # Runs the scripts in a real Blender (bpy wheel). Covers the Blender version of the wheel only.
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
