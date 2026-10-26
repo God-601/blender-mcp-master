@@ -9,6 +9,7 @@ Not supported: rigged / animated characters (armatures, shape keys). Export thos
 Reports success only when the output file exists; otherwise it raises an error.
 """
 import os
+import shutil
 import tempfile
 import bpy
 import bmesh
@@ -36,6 +37,12 @@ extension = os.path.splitext(out_path)[1] or (".glb" if FORMAT == "GLB" else "."
 fd, temp_path = tempfile.mkstemp(prefix="._blender_mcp_export_", suffix=extension, dir=os.path.dirname(out_path))
 os.close(fd)
 os.remove(temp_path)
+temp_dir = os.path.dirname(temp_path)
+temp_prefix = os.path.splitext(os.path.basename(temp_path))[0]
+# tempfile gives this run a unique prefix; preserve any matching entries that existed before export.
+preexisting_temp_artifacts = {
+    name for name in os.listdir(temp_dir) if name.startswith(temp_prefix)
+}
 
 view_layer = bpy.context.view_layer
 saved_selection = [o.name for o in bpy.context.selected_objects]
@@ -139,12 +146,22 @@ try:
     print(f"Exported {len(temps)} object(s), {total_tris} tris -> {out_path} "
           f"({os.path.getsize(out_path) / 1024:.1f} KB), engine={ENGINE}")
 finally:
-    for temporary_path in (temp_path, os.path.splitext(temp_path)[0] + ".mtl"):
-        if os.path.exists(temporary_path):
-            try:
-                os.remove(temporary_path)
-            except OSError:
-                print(f"note: temporary export file could not be removed: {temporary_path}")
+    try:
+        current_artifacts = os.listdir(temp_dir)
+    except OSError as cleanup_error:
+        print(f"note: temporary export artifacts could not be listed in {temp_dir}: {cleanup_error}")
+        current_artifacts = []
+    for artifact_name in current_artifacts:
+        if not artifact_name.startswith(temp_prefix) or artifact_name in preexisting_temp_artifacts:
+            continue
+        artifact_path = os.path.join(temp_dir, artifact_name)
+        try:
+            if os.path.islink(artifact_path) or not os.path.isdir(artifact_path):
+                os.remove(artifact_path)
+            else:
+                shutil.rmtree(artifact_path)
+        except OSError as cleanup_error:
+            print(f"note: temporary export artifact could not be removed: {artifact_path} ({cleanup_error})")
     for t in temps:
         bpy.data.objects.remove(t, do_unlink=True)
     for me in temp_meshes:
