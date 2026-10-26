@@ -46,7 +46,7 @@ The scripts are designed to be pasted into Blender's Python/MCP execution enviro
 | Blender | Status |
 |---|---|
 | 5.2.3 | Automated: `tests/test_blender_runtime.py` runs every script through the `bpy` module, locally and in GitHub Actions (job `blender-runtime`). |
-| 3.1.2 | Limited manual smoke check using condensed scripts, not the repository files. Not automated; does not validate these exact script versions. |
+| 3.1.2 | An independent agent reported 54/54 tests passing in headless Blender 3.1.2 on the reviewed revision. The latest follow-up changes have not yet been rerun on 3.1.2. |
 | 3.2 to 5.1 | Not tested. The scripts contain version checks for known API differences, but they have not been run there. |
 
 Run the tests yourself:
@@ -57,7 +57,7 @@ pip install bpy==5.2.3                           # needs the matching Python ver
 python -m unittest discover -s tests -v          # now includes the Blender runtime tests
 ```
 
-The runtime tests do not cover GLB export, rigged meshes or the rollback of a failed LOD run. Armatures and shape keys are not supported by `export_asset.py` and `make_lods.py`.
+The runtime suite covers GLB export and rollback after a failed LOD run. Rigged meshes/armatures and shape keys are not supported by `export_asset.py` and `make_lods.py`.
 
 ## Safety notes
 
@@ -107,7 +107,7 @@ Os scripts foram feitos para serem executados no ambiente Python/MCP do Blender.
 | Blender | Status |
 |---|---|
 | 5.2.3 | Automatizado: `tests/test_blender_runtime.py` roda todos os scripts pelo módulo `bpy`, localmente e no GitHub Actions (job `blender-runtime`). |
-| 3.1.2 | Teste manual limitado com scripts condensados, não com os arquivos do repositório. Não automatizado; não valida estas versões exatas dos scripts. |
+| 3.1.2 | Um agente independente informou 54/54 testes aprovados no Blender 3.1.2 headless na revisão analisada. As alterações mais recentes ainda não foram testadas novamente nessa versão. |
 | 3.2 a 5.1 | Não testado. Os scripts têm verificações de versão para diferenças conhecidas da API, mas não foram executados nessas versões. |
 
 Para rodar os testes:
@@ -118,7 +118,7 @@ pip install bpy==5.2.3                           # exige a versão correspondent
 python -m unittest discover -s tests -v          # agora inclui os testes de runtime no Blender
 ```
 
-Os testes de runtime não cobrem exportação GLB, malhas com rig nem o desfazer de uma geração de LOD que falhou. Armatures e shape keys não são suportados por `export_asset.py` e `make_lods.py`.
+A suíte de runtime cobre exportação GLB e rollback após falha na geração de LOD. Malhas com rig/armatures e shape keys não são suportadas por `export_asset.py` e `make_lods.py`.
 
 Os diagramas do fluxo estão na seção em inglês, acima.
 
