@@ -9,6 +9,7 @@ Not supported: rigged / animated characters (armatures, shape keys). Export thos
 Reports success only when the output file exists; otherwise it raises an error.
 """
 import os
+import tempfile
 import bpy
 import bmesh
 
@@ -19,6 +20,7 @@ FORMAT = "FBX"                         # "FBX", "GLB", "OBJ"
 ENGINE = "GENERIC"                     # "UNITY", "UNREAL", "ROBLOX", "GODOT", "GENERIC"
 TRIANGULATE = True                     # triangulate export copies
 APPLY_MODIFIERS = True                 # bake modifier stack into the exported copy
+OVERWRITE = False                      # refuse to replace an existing file unless explicitly enabled
 # ----------------------------------------------------------------------------
 
 if FORMAT not in ("FBX", "GLB", "OBJ"):
@@ -26,6 +28,12 @@ if FORMAT not in ("FBX", "GLB", "OBJ"):
 
 out_path = os.path.abspath(bpy.path.abspath(PATH))
 os.makedirs(os.path.dirname(out_path), exist_ok=True)
+if os.path.exists(out_path) and not OVERWRITE:
+    raise FileExistsError(f"Refusing to overwrite existing export: {out_path}. Set OVERWRITE=True to replace it.")
+extension = os.path.splitext(out_path)[1] or (".glb" if FORMAT == "GLB" else "." + FORMAT.lower())
+fd, temp_path = tempfile.mkstemp(prefix="._blender_mcp_export_", suffix=extension, dir=os.path.dirname(out_path))
+os.close(fd)
+os.remove(temp_path)
 
 view_layer = bpy.context.view_layer
 saved_selection = [o.name for o in bpy.context.selected_objects]
@@ -57,7 +65,9 @@ try:
         if any(m.type == 'ARMATURE' for m in ob.modifiers) or (ob.data.shape_keys and ob.data.shape_keys.key_blocks):
             print(f"WARNING: {name} has an armature modifier or shape keys; they are not exported by this script.")
         if APPLY_MODIFIERS:
-            me = bpy.data.meshes.new_from_object(ob.evaluated_get(depsgraph))
+            me = bpy.data.meshes.new_from_object(
+                ob.evaluated_get(depsgraph), preserve_all_data_layers=True, depsgraph=depsgraph
+            )
         else:
             me = ob.data.copy()
         temp_meshes.append(me)
@@ -89,7 +99,7 @@ try:
     view_layer.objects.active = temps[0]
 
     if FORMAT == "FBX":
-        kw = dict(filepath=out_path, use_selection=True, object_types={'MESH'},
+        kw = dict(filepath=temp_path, use_selection=True, object_types={'MESH'},
                   use_mesh_modifiers=False, mesh_smooth_type='FACE', add_leaf_bones=False,
                   bake_anim=False, path_mode='COPY', embed_textures=False)
         if ENGINE == "UNITY":
@@ -98,7 +108,7 @@ try:
             kw.update(apply_scale_options='FBX_SCALE_NONE', axis_forward='-Y', axis_up='Z', global_scale=1.0)
         elif ENGINE == "ROBLOX":
             kw.update(apply_scale_options='FBX_SCALE_NONE', axis_forward='-Z', axis_up='Y')
-        bpy.ops.export_scene.fbx(**kw)
+        export_result = bpy.ops.export_scene.fbx(**kw)
     elif FORMAT == "GLB":
         bpy.ops.export_scene.gltf(filepath=out_path, export_format='GLB', use_selection=True,
                                   export_apply=False, export_yup=True, export_materials='EXPORT')
@@ -109,11 +119,19 @@ try:
         else:                                                       # Blender 3.1 and older
             bpy.ops.export_scene.obj(filepath=out_path, use_selection=True, use_materials=True)
 
-    if not os.path.exists(out_path):
-        raise RuntimeError(f"Export failed: file not created at {out_path}. Check the path is writable.")
+    if 'FINISHED' not in locals().get("export_result", set()):
+        raise RuntimeError(f"Export operator did not finish successfully for {out_path}.")
+    if not os.path.isfile(temp_path) or os.path.getsize(temp_path) == 0:
+        raise RuntimeError(f"Export failed: no non-empty output was written for {out_path}.")
+    os.replace(temp_path, out_path)
     print(f"Exported {len(temps)} object(s), {total_tris} tris -> {out_path} "
           f"({os.path.getsize(out_path) / 1024:.1f} KB), engine={ENGINE}")
 finally:
+    if os.path.exists(temp_path):
+        try:
+            os.remove(temp_path)
+        except OSError:
+            print(f"note: temporary export file could not be removed: {temp_path}")
     for t in temps:
         bpy.data.objects.remove(t, do_unlink=True)
     for me in temp_meshes:
