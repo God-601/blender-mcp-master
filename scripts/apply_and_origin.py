@@ -31,6 +31,9 @@ for ob in objs:
     if ob.data.users > 1:
         print(f"[{ob.name}] SKIP: shared mesh data ({ob.data.users} users). Make single-user first (ob.data = ob.data.copy()).")
         continue
+    if ob.data.shape_keys and ob.data.shape_keys.key_blocks:
+        print(f"[{ob.name}] SKIP: mesh has Shape Keys; applying transforms/origin directly can desynchronize key data.")
+        continue
     if ob.mode != 'OBJECT':
         print(f"[{ob.name}] SKIP: object is in {ob.mode} mode; switch to Object Mode so the change is not lost.")
         continue
