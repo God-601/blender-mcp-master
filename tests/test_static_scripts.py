@@ -24,6 +24,8 @@ class RepositoryStaticChecks(unittest.TestCase):
         source = (ROOT / "scripts" / "validate_asset.py").read_text(encoding="utf-8")
         self.assertIn("INCOMPLETE - CHECK TARGETS", source)
         self.assertIn("MISSING_TARGETS", source)
+        self.assertIn("INVALID_TARGETS", source)
+        self.assertIn("target object is not a mesh", source)
 
     def test_lod_script_does_not_delete_existing_lods_automatically(self):
         source = (ROOT / "scripts" / "make_lods.py").read_text(encoding="utf-8")
@@ -71,6 +73,16 @@ class RepositoryStaticChecks(unittest.TestCase):
         for path in sorted((ROOT / "scripts").glob("*.py")):
             with self.subTest(script=path.name):
                 self.assertNotIn("orphans_purge", path.read_text(encoding="utf-8"))
+
+    def test_skill_does_not_recommend_global_orphan_purge(self):
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        self.assertNotIn("bpy.data.orphans_purge", skill)
+        self.assertIn("Avoid global orphan purges", skill)
+
+    def test_github_actions_checkouts_do_not_persist_credentials(self):
+        workflow = (ROOT / ".github" / "workflows" / "static-checks.yml").read_text(encoding="utf-8")
+        self.assertEqual(workflow.count("persist-credentials: false"), 2)
+        self.assertEqual(workflow.count("contents: read"), 2)
 
 
 if __name__ == "__main__":
