@@ -25,6 +25,11 @@ SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
 def run_script(name, **config):
     """Exec a script with single-line CONFIG overrides; return (stdout, exception or None)."""
     source = (SCRIPTS / name).read_text(encoding="utf-8")
+    source_replacements = config.pop("_source_replacements", {})
+    for old_text, new_text in source_replacements.items():
+        if old_text not in source:
+            raise AssertionError(f"source snippet not found in {name}: {old_text!r}")
+        source = source.replace(old_text, new_text, 1)
     for key, value in config.items():
         source, count = re.subn(rf"^{key}\s*=.*$", lambda _m, k=key, v=value: f"{k} = {v!r}",
                                 source, count=1, flags=re.M)
@@ -203,6 +208,25 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertEqual({o.name for o in bpy.data.objects}, before)
         self.assertIn(existing.name, bpy.data.objects)
 
+    def test_lods_rolls_back_objects_after_mid_run_failure(self):
+        source = add_mesh("RollbackRock", ico)
+        before_objects = {o.name for o in bpy.data.objects}
+        before_meshes = {m.name for m in bpy.data.meshes}
+        out, err = run_script(
+            "make_lods.py",
+            SOURCE="RollbackRock",
+            RATIOS={"LOD1": 0.5, "LOD2": 0.25},
+            _source_replacements={
+                '        name = f"{SOURCE}_{suffix}"':
+                '        if index == 2:\n            raise RuntimeError("injected LOD failure")\n        name = f"{SOURCE}_{suffix}"'
+            }
+        )
+        self.assertIsInstance(err, RuntimeError)
+        self.assertIn("injected LOD failure", str(err))
+        self.assertEqual({o.name for o in bpy.data.objects}, before_objects)
+        self.assertEqual({m.name for m in bpy.data.meshes}, before_meshes)
+        self.assertIs(source, bpy.data.objects["RollbackRock"])
+
     def test_lods_reject_invalid_ratio_before_creating_anything(self):
         add_mesh("Rock", ico)
         before = {o.name for o in bpy.data.objects}
@@ -222,6 +246,25 @@ class BlenderRuntimeTests(unittest.TestCase):
 
     def _generated_nodes(self, material):
         return [n for n in material.node_tree.nodes if n.get("_blender_mcp_generated")]
+
+    def test_pbr_clip_uses_binary_threshold_on_blender_42_plus(self):
+        if not hasattr(bpy.data.materials.new("ProbeAlpha"), "surface_render_method"):
+            self.skipTest("surface_render_method is available in Blender 4.2+")
+        out, err = run_script("pbr_material.py", NAME="ClipAlpha", ALPHA=0.4, ALPHA_MODE="CLIP")
+        self.assertIsNone(err, out)
+        mat = bpy.data.materials["ClipAlpha"]
+        bsdf = mat.node_tree.nodes["Principled BSDF"]
+        self.assertEqual(mat.surface_render_method, "DITHERED")
+        clip_nodes = [n for n in mat.node_tree.nodes if n.get("_blender_mcp_generated") and n.type == "MATH" and n.operation == "GREATER_THAN"]
+        self.assertEqual(len(clip_nodes), 1)
+        self.assertAlmostEqual(clip_nodes[0].inputs[0].default_value, 0.4)
+        self.assertAlmostEqual(clip_nodes[0].inputs[1].default_value, 0.5)
+        self.assertEqual(len(bsdf.inputs["Alpha"].links), 1)
+        out, err = run_script("pbr_material.py", NAME="ClipAlpha", ALPHA=0.8, ALPHA_MODE="CLIP")
+        self.assertIsNone(err, out)
+        clip_nodes = [n for n in mat.node_tree.nodes if n.get("_blender_mcp_generated") and n.type == "MATH" and n.operation == "GREATER_THAN"]
+        self.assertEqual(len(clip_nodes), 1)
+        self.assertAlmostEqual(clip_nodes[0].inputs[0].default_value, 0.8)
 
     def test_pbr_rerun_with_opaque_alpha_resets_transparency(self):
         run_script("pbr_material.py", NAME="M", ALPHA=0.5)
@@ -334,6 +377,16 @@ class BlenderRuntimeTests(unittest.TestCase):
         path, (out, err) = self._export(OBJECTS=["Crate"], FORMAT="XYZ")
         self.assertIsInstance(err, ValueError)
         self.assertEqual([o.name for o in bpy.data.objects], ["Crate"])
+
+    def test_export_glb_format(self):
+        add_mesh("Crate", cube)
+        path, (out, err) = self._export("out.glb", OBJECTS=["Crate"], FORMAT="GLB")
+        self.assertIsNone(err, out)
+        self.assertTrue(os.path.isfile(path))
+        self.assertGreater(os.path.getsize(path), 0)
+        with open(path, "rb") as stream:
+            self.assertEqual(stream.read(4), b"glTF")
+        self.assertNotIn("_EXPORT_TMP", bpy.data.collections)
 
     def test_export_obj_format(self):
         add_mesh("Crate", cube)
