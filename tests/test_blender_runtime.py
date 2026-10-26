@@ -114,6 +114,18 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertIn("[Box]", out)
         self.assertIn("INCOMPLETE - CHECK TARGETS", out)
 
+    def test_validate_warns_when_empty_targets_fall_back_to_visible_meshes(self):
+        add_mesh("UnselectedBox", cube)
+        self.assertEqual(list(bpy.context.selected_objects), [])
+        out, err = run_script("validate_asset.py", TARGETS=[])
+        self.assertIsNone(err, out)
+        self.assertIn(
+            "WARN: TARGETS is empty and no mesh is selected; falling back to all visible "
+            "mesh object(s): 'UnselectedBox'",
+            out,
+        )
+        self.assertIn("[UnselectedBox]", out)
+
     def test_validate_reads_rotation_from_quaternion_objects(self):
         import math
         obj = add_mesh("Quat", cube)
@@ -209,6 +221,20 @@ class BlenderRuntimeTests(unittest.TestCase):
         out, err = run_script("make_lods.py", SOURCE="UVRock", RATIOS={"LOD1": 0.5})
         self.assertIsNone(err, out)
         self.assertGreaterEqual(len(bpy.data.objects["UVRock_LOD1"].data.uv_layers), 2)
+
+    def test_lods_shift_outputs_when_target_position_overlaps_mesh(self):
+        source = add_mesh("Rock", cube)
+        obstacle = add_mesh("Obstacle", cube)
+        # Match the script's initial LOD offset, independent of the primitive's edge length.
+        obstacle.location.x = source.location.x + source.dimensions.x * 1.3 + 0.1
+        bpy.context.view_layer.update()
+        out, err = run_script("make_lods.py", SOURCE="Rock", RATIOS={"LOD1": 0.5})
+        self.assertIsNone(err, out)
+        lod = bpy.data.objects["Rock_LOD1"]
+        self.assertIn("target position overlapped 'Obstacle'", out)
+        self.assertIn("shifted along +X", out)
+        self.assertGreater(lod.location.x, obstacle.location.x)
+        self.assertEqual(len(source.modifiers), 0)
 
     def test_lods_existing_output_creates_nothing_and_deletes_nothing(self):
         add_mesh("Rock", ico)
@@ -377,6 +403,26 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertEqual([o.name for o in bpy.context.selected_objects], ["Other"])
         self.assertEqual(asset.name, "Crate")
         self.assertEqual(len([m for m in bpy.data.meshes if m.users == 0]), 0)
+
+    def test_export_textured_fbx_leaves_no_temporary_sidecars(self):
+        asset = add_mesh("TexturedCrate", cube)
+        texture_path = self._png("export-texture.png")
+        image = bpy.data.images.load(texture_path)
+        material = bpy.data.materials.new("ExportTextureMaterial")
+        material.use_nodes = True
+        image_node = material.node_tree.nodes.new("ShaderNodeTexImage")
+        image_node.image = image
+        bsdf = material.node_tree.nodes.get("Principled BSDF")
+        material.node_tree.links.new(image_node.outputs["Color"], bsdf.inputs["Base Color"])
+        asset.data.materials.append(material)
+
+        output_dir = os.path.join(self.tmp.name, "textured-export")
+        os.makedirs(output_dir)
+        path = os.path.join(output_dir, "textured.fbx")
+        out, err = run_script("export_asset.py", OBJECTS=["TexturedCrate"], PATH=path, FORMAT="FBX")
+        self.assertIsNone(err, out)
+        self.assertTrue(os.path.isfile(path), out)
+        self.assertEqual(os.listdir(output_dir), ["textured.fbx"], out)
 
     def test_export_relative_path_does_not_crash(self):
         add_mesh("Crate", cube)

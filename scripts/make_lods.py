@@ -10,6 +10,7 @@ not supported (a warning is printed). Decimate may distort UVs on heavy reductio
 the result before using it.
 """
 import bpy
+from mathutils import Vector
 
 # ---- CONFIG ----------------------------------------------------------------
 SOURCE = "MyAsset"                      # name of the LOD0 object
@@ -27,6 +28,52 @@ def tris_of(ob):
         return len(me.loop_triangles)
     finally:
         e.to_mesh_clear()
+
+
+GEOMETRY_TYPES = {'MESH', 'CURVE', 'SURFACE', 'FONT', 'META'}
+
+
+def world_bounds(obj):
+    corners = [obj.matrix_world @ Vector(corner) for corner in obj.bound_box]
+    return (
+        tuple(min(corner[axis] for corner in corners) for axis in range(3)),
+        tuple(max(corner[axis] for corner in corners) for axis in range(3)),
+    )
+
+
+def bounds_overlap(first, second, clearance=0.05):
+    first_min, first_max = world_bounds(first)
+    second_min, second_max = world_bounds(second)
+    return all(
+        first_min[axis] < second_max[axis] + clearance
+        and first_max[axis] > second_min[axis] - clearance
+        for axis in range(3)
+    )
+
+
+def place_lod_without_overlap(lod, desired_x, step):
+    first_conflicts = []
+    for attempt in range(100):
+        lod.location.x = desired_x + attempt * step
+        bpy.context.view_layer.update()
+        conflicts = [
+            other for other in bpy.data.objects
+            if other != lod and other.type in GEOMETRY_TYPES and bounds_overlap(lod, other)
+        ]
+        if not conflicts:
+            if attempt:
+                names = ", ".join(repr(obj.name) for obj in first_conflicts)
+                print(
+                    f"WARN: {lod.name} target position overlapped {names}; "
+                    f"shifted along +X from {desired_x:.3f} to {lod.location.x:.3f} "
+                    "to avoid bounding-box overlap."
+                )
+            return
+        if not first_conflicts:
+            first_conflicts = conflicts
+    raise RuntimeError(
+        f"Could not find a collision-free position for {lod.name} after 100 attempts."
+    )
 
 
 src = bpy.data.objects.get(SOURCE)
@@ -85,8 +132,10 @@ try:
         if old_me.users == 0:
             bpy.data.meshes.remove(old_me)
 
-        # offset sideways so LODs are visible side by side
-        lod.location.x = src.location.x + index * (src.dimensions.x * 1.3 + 0.1)
+        # Offset sideways, then move farther +X if another geometry object's bounds overlap.
+        step = max(src.dimensions.x * 1.3 + 0.1, 0.5)
+        desired_x = src.location.x + index * step
+        place_lod_without_overlap(lod, desired_x, step)
         n = tris_of(lod)
         print(f"{name}: {n} tris ({n / max(base, 1):.0%} of LOD0)")
 except Exception:
