@@ -65,7 +65,7 @@ test("MCP server starts over stdio and exposes the expected tools", async () => 
     const skill = await client.callTool({ name: "get_blender_skill", arguments: {} });
     assert.match(skill.content[0].text, /# Blender MCP Master/);
     const resources = await client.callTool({ name: "list_blender_resources", arguments: {} });
-    assert.match(resources.content[0].text, /validate_asset\\.py/);
+    assert.ok(resources.content[0].text.includes("validate_asset.py"));
   } finally {
     await client.close();
   }
