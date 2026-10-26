@@ -30,6 +30,8 @@ out_path = os.path.abspath(bpy.path.abspath(PATH))
 os.makedirs(os.path.dirname(out_path), exist_ok=True)
 if os.path.exists(out_path) and not OVERWRITE:
     raise FileExistsError(f"Refusing to overwrite existing export: {out_path}. Set OVERWRITE=True to replace it.")
+if FORMAT == "OBJ" and os.path.exists(os.path.splitext(out_path)[0] + ".mtl") and not OVERWRITE:
+    raise FileExistsError(f"Refusing to overwrite existing OBJ material file: {os.path.splitext(out_path)[0] + '.mtl'}. Set OVERWRITE=True to replace it.")
 extension = os.path.splitext(out_path)[1] or (".glb" if FORMAT == "GLB" else "." + FORMAT.lower())
 fd, temp_path = tempfile.mkstemp(prefix="._blender_mcp_export_", suffix=extension, dir=os.path.dirname(out_path))
 os.close(fd)
@@ -137,11 +139,12 @@ try:
     print(f"Exported {len(temps)} object(s), {total_tris} tris -> {out_path} "
           f"({os.path.getsize(out_path) / 1024:.1f} KB), engine={ENGINE}")
 finally:
-    if os.path.exists(temp_path):
-        try:
-            os.remove(temp_path)
-        except OSError:
-            print(f"note: temporary export file could not be removed: {temp_path}")
+    for temporary_path in (temp_path, os.path.splitext(temp_path)[0] + ".mtl"):
+        if os.path.exists(temporary_path):
+            try:
+                os.remove(temporary_path)
+            except OSError:
+                print(f"note: temporary export file could not be removed: {temporary_path}")
     for t in temps:
         bpy.data.objects.remove(t, do_unlink=True)
     for me in temp_meshes:
