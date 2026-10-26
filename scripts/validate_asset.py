@@ -120,9 +120,18 @@ def check_object(obj):
     return results
 
 
-def check_images():
+def check_images(objects):
     findings = []
-    for image in bpy.data.images:
+    images = {}
+    for obj in objects:
+        for slot in obj.material_slots:
+            material = slot.material
+            if not material or not material.use_nodes or not material.node_tree:
+                continue
+            for node in material.node_tree.nodes:
+                if node.type == "TEX_IMAGE" and node.image:
+                    images[node.image.name] = node.image
+    for image in images.values():
         if image.type in {"RENDER_RESULT", "COMPOSITING"}:
             continue
         width, height = image.size
@@ -159,7 +168,7 @@ for obj in objects:
     finally:
         evaluated_obj.to_mesh_clear()
 
-for level, message in check_images():
+for level, message in check_images(objects):
     counts[level] = counts.get(level, 0) + 1
     print(f"  {level:4s} {message}")
 
