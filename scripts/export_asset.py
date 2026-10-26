@@ -1,78 +1,95 @@
-"""export_asset.py - export objects as FBX / GLB / OBJ with safe engine-specific settings.
-Exports temporary evaluated duplicates (modifiers applied), so the user's scene is not modified.
+"""export_asset.py - export mesh objects as FBX / GLB / OBJ with engine-specific axis settings.
 Paste into execute_blender_code.
+
+Exports temporary evaluated copies (modifiers applied), so the scene's objects keep their data.
+The scene state is always restored afterwards, even if the export fails: original object names,
+selection, active object, Edit Mode, and the temporary copies/collection/meshes.
+
+Not supported: rigged / animated characters (armatures, shape keys). Export those by hand.
+Reports success only when the output file exists; otherwise it raises an error.
 """
-import bpy
 import os
+import bpy
+import bmesh
 
 # ---- CONFIG ----------------------------------------------------------------
-OBJECTS = ["MyAsset"]                  # objects to export (children are NOT auto-included)
-PATH = "C:/Users/Public/Documents/MyAsset.fbx"   # full output path (extension decides default format)
+OBJECTS = ["MyAsset"]                  # mesh objects to export (children are NOT auto-included)
+PATH = "C:/Users/Public/Documents/MyAsset.fbx"   # output path; relative paths resolve against the .blend folder / cwd
 FORMAT = "FBX"                         # "FBX", "GLB", "OBJ"
 ENGINE = "GENERIC"                     # "UNITY", "UNREAL", "ROBLOX", "GODOT", "GENERIC"
 TRIANGULATE = True                     # triangulate export copies
 APPLY_MODIFIERS = True                 # bake modifier stack into the exported copy
-INCLUDE_ARMATURE = False               # also export the armature found on the objects (skinned characters)
 # ----------------------------------------------------------------------------
 
-os.makedirs(os.path.dirname(PATH), exist_ok=True)
+if FORMAT not in ("FBX", "GLB", "OBJ"):
+    raise ValueError(f"Unknown FORMAT {FORMAT!r}; use FBX, GLB or OBJ")
 
-if bpy.context.object and bpy.context.object.mode != 'OBJECT':
-    bpy.ops.object.mode_set(mode='OBJECT')
+out_path = os.path.abspath(bpy.path.abspath(PATH))
+os.makedirs(os.path.dirname(out_path), exist_ok=True)
 
-dg = bpy.context.evaluated_depsgraph_get()
-temps = []
-tmp_col = bpy.data.collections.new("_EXPORT_TMP")
-bpy.context.scene.collection.children.link(tmp_col)
+view_layer = bpy.context.view_layer
+saved_selection = [o.name for o in bpy.context.selected_objects]
+saved_active = view_layer.objects.active.name if view_layer.objects.active else None
+saved_mode = view_layer.objects.active.mode if view_layer.objects.active else 'OBJECT'
 
+renamed = []          # (object, original name)
+temps = []            # temporary export copies
+temp_meshes = []      # meshes created for the copies
+tmp_col = None
 total_tris = 0
-renamed = []
-for name in OBJECTS:
-    ob = bpy.data.objects.get(name)
-    if ob is None:
-        print("missing:", name)
-        continue
-    if ob.type != 'MESH':
-        print("skip non-mesh:", name)
-        continue
-    if APPLY_MODIFIERS:
-        ev = ob.evaluated_get(dg)
-        me = bpy.data.meshes.new_from_object(ev)
-    else:
-        me = ob.data.copy()
-    renamed.append((ob, ob.name))
-    ob.name = ob.name + "__orig"              # free the clean name so the exported copy keeps it
-    dup = bpy.data.objects.new(renamed[-1][1], me)
-    dup.matrix_world = ob.matrix_world
-    tmp_col.objects.link(dup)
-    if INCLUDE_ARMATURE:
-        for m in ob.modifiers:
-            if m.type == 'ARMATURE' and m.object:
-                am = dup.modifiers.new("Armature", 'ARMATURE')
-                am.object = m.object
-                for vg in ob.vertex_groups:
-                    dup.vertex_groups.new(name=vg.name)
-        dup.parent = ob.parent
-    if TRIANGULATE:
-        import bmesh
-        bm = bmesh.new()
-        bm.from_mesh(me)
-        bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method='BEAUTY', ngon_method='BEAUTY')
-        bm.to_mesh(me)
-        bm.free()
-    me.calc_loop_triangles()
-    total_tris += len(me.loop_triangles)
-    temps.append(dup)
-
-bpy.ops.object.select_all(action='DESELECT')
-for t in temps:
-    t.select_set(True)
-if temps:
-    bpy.context.view_layer.objects.active = temps[0]
 
 try:
+    if saved_mode != 'OBJECT':
+        bpy.ops.object.mode_set(mode='OBJECT')
+
+    tmp_col = bpy.data.collections.new("_EXPORT_TMP")
+    bpy.context.scene.collection.children.link(tmp_col)
+    depsgraph = bpy.context.evaluated_depsgraph_get()
+
+    for name in OBJECTS:
+        ob = bpy.data.objects.get(name)
+        if ob is None:
+            print("missing:", name)
+            continue
+        if ob.type != 'MESH':
+            print("skip non-mesh:", name)
+            continue
+        if any(m.type == 'ARMATURE' for m in ob.modifiers) or (ob.data.shape_keys and ob.data.shape_keys.key_blocks):
+            print(f"WARNING: {name} has an armature modifier or shape keys; they are not exported by this script.")
+        if APPLY_MODIFIERS:
+            me = bpy.data.meshes.new_from_object(ob.evaluated_get(depsgraph))
+        else:
+            me = ob.data.copy()
+        temp_meshes.append(me)
+        if TRIANGULATE:
+            bm = bmesh.new()
+            try:
+                bm.from_mesh(me)
+                bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method='BEAUTY', ngon_method='BEAUTY')
+                bm.to_mesh(me)
+            finally:
+                bm.free()
+        me.calc_loop_triangles()
+        total_tris += len(me.loop_triangles)
+
+        # Free the clean name for the copy, then restore it in `finally`.
+        renamed.append((ob, ob.name))
+        ob.name = ob.name + "__orig"
+        dup = bpy.data.objects.new(name, me)
+        dup.matrix_world = ob.matrix_world
+        tmp_col.objects.link(dup)
+        temps.append(dup)
+
+    if not temps:
+        raise RuntimeError("Nothing to export: no valid mesh objects found in OBJECTS.")
+
+    bpy.ops.object.select_all(action='DESELECT')
+    for t in temps:
+        t.select_set(True)
+    view_layer.objects.active = temps[0]
+
     if FORMAT == "FBX":
-        kw = dict(filepath=PATH, use_selection=True, object_types={'MESH', 'ARMATURE'} if INCLUDE_ARMATURE else {'MESH'},
+        kw = dict(filepath=out_path, use_selection=True, object_types={'MESH'},
                   use_mesh_modifiers=False, mesh_smooth_type='FACE', add_leaf_bones=False,
                   bake_anim=False, path_mode='COPY', embed_textures=False)
         if ENGINE == "UNITY":
@@ -83,27 +100,41 @@ try:
             kw.update(apply_scale_options='FBX_SCALE_NONE', axis_forward='-Z', axis_up='Y')
         bpy.ops.export_scene.fbx(**kw)
     elif FORMAT == "GLB":
-        bpy.ops.export_scene.gltf(filepath=PATH, export_format='GLB', use_selection=True,
+        bpy.ops.export_scene.gltf(filepath=out_path, export_format='GLB', use_selection=True,
                                   export_apply=False, export_yup=True, export_materials='EXPORT')
-    elif FORMAT == "OBJ":
-        try:
-            bpy.ops.wm.obj_export(filepath=PATH, export_selected_objects=True, export_materials=True,
+    else:  # OBJ
+        if hasattr(bpy.ops.wm, "obj_export"):                       # Blender 3.2+
+            bpy.ops.wm.obj_export(filepath=out_path, export_selected_objects=True, export_materials=True,
                                   apply_modifiers=False, export_triangulated_mesh=False)
-        except AttributeError:
-            bpy.ops.export_scene.obj(filepath=PATH, use_selection=True, use_materials=True)
-    else:
-        print("Unknown FORMAT", FORMAT)
+        else:                                                       # Blender 3.1 and older
+            bpy.ops.export_scene.obj(filepath=out_path, use_selection=True, use_materials=True)
+
+    if not os.path.exists(out_path):
+        raise RuntimeError(f"Export failed: file not created at {out_path}. Check the path is writable.")
+    print(f"Exported {len(temps)} object(s), {total_tris} tris -> {out_path} "
+          f"({os.path.getsize(out_path) / 1024:.1f} KB), engine={ENGINE}")
 finally:
     for t in temps:
-        me = t.data
         bpy.data.objects.remove(t, do_unlink=True)
+    for me in temp_meshes:
         if me.users == 0:
             bpy.data.meshes.remove(me)
-    bpy.data.collections.remove(tmp_col)
+    if tmp_col is not None:
+        bpy.data.collections.remove(tmp_col)
     for orig, orig_name in renamed:
-        orig.name = orig_name                 # restore original names
-
-if os.path.exists(PATH):
-    print(f"Exported {len(temps)} object(s), {total_tris} tris -> {PATH} ({os.path.getsize(PATH) / 1024:.1f} KB), engine={ENGINE}")
-else:
-    print("Export failed: file not created. Check the path is writable and Blender has permission.")
+        orig.name = orig_name
+    # restore selection, active object and mode
+    for o in bpy.context.selected_objects:
+        o.select_set(False)
+    for name in saved_selection:
+        o = bpy.data.objects.get(name)
+        if o is not None and o.name in view_layer.objects:
+            o.select_set(True)
+    active = bpy.data.objects.get(saved_active) if saved_active else None
+    if active is not None and active.name in view_layer.objects:
+        view_layer.objects.active = active
+        if saved_mode != 'OBJECT':
+            try:
+                bpy.ops.object.mode_set(mode=saved_mode)
+            except RuntimeError:
+                print(f"note: could not return to {saved_mode} mode")

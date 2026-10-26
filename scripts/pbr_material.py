@@ -1,6 +1,7 @@
 """pbr_material.py - create (or update) a clean Principled BSDF material and optionally assign it.
 Works on Blender 3.x and 4.x socket names. Paste into execute_blender_code.
 """
+import os
 import bpy
 
 # ---- CONFIG ----------------------------------------------------------------
@@ -31,7 +32,18 @@ def set_input(node, names, value):
     return False
 
 
-mat = bpy.data.materials.get(NAME) or bpy.data.materials.new(NAME)
+# Validate everything that can fail BEFORE touching the material, so a bad path
+# cannot leave a half-updated material or delete textures from a previous run.
+for key, path in TEXTURES.items():
+    if key not in ("color", "rough", "metal", "normal"):
+        raise ValueError(f"Unknown texture slot {key!r}; use color, rough, metal or normal")
+    if not os.path.isfile(bpy.path.abspath(path)):
+        raise FileNotFoundError(f"Texture file for {key!r} not found: {path}")
+
+existing_mat = bpy.data.materials.get(NAME)
+if existing_mat is not None:
+    print(f"Updating existing material {NAME!r} (Principled values are overwritten).")
+mat = existing_mat or bpy.data.materials.new(NAME)
 mat.use_nodes = True
 nt = mat.node_tree
 nodes, links = nt.nodes, nt.links
@@ -53,15 +65,15 @@ set_input(bsdf, ["IOR"], IOR)
 if EMISSION_COLOR is not None:
     set_input(bsdf, ["Emission Color", "Emission"], EMISSION_COLOR)
     set_input(bsdf, ["Emission Strength"], EMISSION_STRENGTH)
-if ALPHA < 1.0:
-    set_input(bsdf, ["Alpha"], ALPHA)
-    try:
-        mat.surface_render_method = 'BLENDED' if ALPHA_MODE == "BLEND" else 'DITHERED'   # 4.2+
-    except AttributeError:
-        try:
-            mat.blend_method = 'BLEND' if ALPHA_MODE == "BLEND" else 'CLIP'
-        except AttributeError:
-            pass
+# Always set alpha and the blend mode so rerunning with ALPHA = 1.0 undoes an earlier transparent run.
+set_input(bsdf, ["Alpha"], ALPHA)
+if hasattr(mat, "surface_render_method"):                      # Blender 4.2+
+    mat.surface_render_method = 'BLENDED' if (ALPHA < 1.0 and ALPHA_MODE == "BLEND") else 'DITHERED'
+elif hasattr(mat, "blend_method"):                             # Blender 4.1 and older
+    if ALPHA < 1.0:
+        mat.blend_method = 'BLEND' if ALPHA_MODE == "BLEND" else 'CLIP'
+    else:
+        mat.blend_method = 'OPAQUE'
 
 
 def add_tex(path, label, noncolor, x, y):
@@ -104,6 +116,8 @@ for name in ASSIGN_TO:
     if ob is None or ob.type != 'MESH':
         print("skip", name)
         continue
+    if ob.data.users > 1:
+        print(f"WARNING: {name} shares mesh data with {ob.data.users - 1} other user(s); they get this material too.")
     ob.data.materials.clear()
     ob.data.materials.append(mat)
     print(f"assigned {NAME} -> {name}")

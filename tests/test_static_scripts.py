@@ -42,5 +42,17 @@ class RepositoryStaticChecks(unittest.TestCase):
         self.assertIn("replace_input_link", source)
 
 
+    def test_scripts_never_use_systemexit(self):
+        # SystemExit is a BaseException: MCP executors that catch Exception would not handle it.
+        for path in sorted((ROOT / "scripts").glob("*.py")):
+            with self.subTest(script=path.name):
+                self.assertNotIn("SystemExit", path.read_text(encoding="utf-8"))
+
+    def test_export_script_restores_state_in_finally(self):
+        source = (ROOT / "scripts" / "export_asset.py").read_text(encoding="utf-8")
+        self.assertIn("finally:", source)
+        self.assertNotIn("INCLUDE_ARMATURE", source)
+
+
 if __name__ == "__main__":
     unittest.main()

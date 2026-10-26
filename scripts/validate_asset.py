@@ -47,15 +47,17 @@ def check_object(obj):
             bm.from_mesh(mesh)
             loose_verts = sum(1 for vert in bm.verts if not vert.link_edges)
             loose_edges = sum(1 for edge in bm.edges if not edge.link_faces)
-            nonmanifold = sum(1 for edge in bm.edges if edge.link_faces and not edge.is_manifold)
-            boundaries = sum(1 for edge in bm.edges if edge.is_boundary)
+            # BMEdge.is_manifold is False for boundary edges too, so count real non-manifold
+            # edges (3+ faces) separately from boundary (open) edges.
+            nonmanifold = sum(1 for edge in bm.edges if len(edge.link_faces) > 2)
+            boundaries = sum(1 for edge in bm.edges if len(edge.link_faces) == 1)
             zero_area = sum(1 for face in bm.faces if face.calc_area() < 1e-10)
             ngons = sum(1 for face in bm.faces if len(face.verts) > 4)
             results.extend([
                 ("PASS" if not loose_verts else "WARN", f"loose vertices: {loose_verts}"),
                 ("PASS" if not loose_edges else "WARN", f"wire/loose edges: {loose_edges}"),
                 ("PASS" if not zero_area else "WARN", f"near-zero-area faces: {zero_area}"),
-                ("PASS" if not nonmanifold else "WARN", f"non-manifold edges: {nonmanifold}"),
+                ("PASS" if not nonmanifold else "WARN", f"non-manifold edges (3+ faces): {nonmanifold}"),
                 ("INFO", f"boundary/open edges: {boundaries} (may be expected on cards/open surfaces)"),
                 ("INFO", f"n-gons: {ngons} (review on curved/deforming surfaces; not automatically wrong)"),
                 ("INFO", f"vertices: {len(bm.verts)}, edges: {len(bm.edges)}, faces: {len(bm.faces)}"),
@@ -83,7 +85,8 @@ def check_object(obj):
         scale_ok = all(abs(value - 1.0) < 1e-4 for value in scale)
         results.append(("PASS" if scale_ok else "INFO",
                         f"scale: {tuple(round(value, 4) for value in scale)} (apply only if required)"))
-        rotation = obj.rotation_euler
+        # rotation_euler is stale when the object uses quaternion/axis-angle rotation.
+        rotation = obj.matrix_basis.to_euler()
         rotation_ok = all(abs(value) < 1e-4 for value in rotation)
         results.append(("PASS" if rotation_ok else "INFO",
                         f"rotation: {tuple(round(math.degrees(value), 2) for value in rotation)} degrees"))
