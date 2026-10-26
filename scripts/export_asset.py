@@ -110,19 +110,29 @@ try:
             kw.update(apply_scale_options='FBX_SCALE_NONE', axis_forward='-Z', axis_up='Y')
         export_result = bpy.ops.export_scene.fbx(**kw)
     elif FORMAT == "GLB":
-        bpy.ops.export_scene.gltf(filepath=out_path, export_format='GLB', use_selection=True,
-                                  export_apply=False, export_yup=True, export_materials='EXPORT')
+        export_result = bpy.ops.export_scene.gltf(filepath=temp_path, export_format='GLB', use_selection=True,
+                                                  export_apply=False, export_yup=True, export_materials='EXPORT')
     else:  # OBJ
         if hasattr(bpy.ops.wm, "obj_export"):                       # Blender 3.2+
-            bpy.ops.wm.obj_export(filepath=out_path, export_selected_objects=True, export_materials=True,
-                                  apply_modifiers=False, export_triangulated_mesh=False)
+            export_result = bpy.ops.wm.obj_export(filepath=temp_path, export_selected_objects=True, export_materials=True,
+                                                  apply_modifiers=False, export_triangulated_mesh=False)
         else:                                                       # Blender 3.1 and older
-            bpy.ops.export_scene.obj(filepath=out_path, use_selection=True, use_materials=True)
+            export_result = bpy.ops.export_scene.obj(filepath=temp_path, use_selection=True, use_materials=True)
 
     if 'FINISHED' not in locals().get("export_result", set()):
         raise RuntimeError(f"Export operator did not finish successfully for {out_path}.")
     if not os.path.isfile(temp_path) or os.path.getsize(temp_path) == 0:
         raise RuntimeError(f"Export failed: no non-empty output was written for {out_path}.")
+    if FORMAT == "OBJ":
+        temp_mtl = os.path.splitext(temp_path)[0] + ".mtl"
+        out_mtl = os.path.splitext(out_path)[0] + ".mtl"
+        if os.path.isfile(temp_mtl):
+            with open(temp_path, "r", encoding="utf-8", errors="replace") as stream:
+                obj_text = stream.read()
+            obj_text = obj_text.replace(os.path.basename(temp_mtl), os.path.basename(out_mtl))
+            with open(temp_path, "w", encoding="utf-8", newline="\\n") as stream:
+                stream.write(obj_text)
+            os.replace(temp_mtl, out_mtl)
     os.replace(temp_path, out_path)
     print(f"Exported {len(temps)} object(s), {total_tris} tris -> {out_path} "
           f"({os.path.getsize(out_path) / 1024:.1f} KB), engine={ENGINE}")
