@@ -12,7 +12,8 @@ ROUGHNESS = 0.5
 EMISSION_COLOR = None               # e.g. (1, 0.4, 0.1, 1) or None
 EMISSION_STRENGTH = 0.0
 ALPHA = 1.0                         # <1 uses blend/clip, see ALPHA_MODE
-ALPHA_MODE = "CLIP"                 # "CLIP" (cheap, games) or "BLEND"
+ALPHA_MODE = "CLIP"                 # "CLIP" (binary cutout), "DITHERED", or "BLEND"
+ALPHA_THRESHOLD = 0.5               # alpha values must be strictly greater than this for CLIP
 IOR = 1.45
 TEXTURES = {}                       # e.g. {"color": "C:/tex/wood_diff.png", "rough": "...", "normal": "...", "metal": "..."}
 ASSIGN_TO = []                      # object names to assign (replaces all slots with this one material)
@@ -71,13 +72,27 @@ else:
     # Prevent stale emission from a previous run when this config disables it.
     set_input(bsdf, ["Emission Color", "Emission"], (0.0, 0.0, 0.0, 1.0))
     set_input(bsdf, ["Emission Strength"], 0.0)
-# Always set alpha and the blend mode so rerunning with ALPHA = 1.0 undoes an earlier transparent run.
+# Set alpha and render method. Blender 4.2+ removed the old Alpha Clip render mode;
+# reproduce it with a Greater Than node, as recommended by Blender's migration docs.
 set_input(bsdf, ["Alpha"], ALPHA)
 if hasattr(mat, "surface_render_method"):                      # Blender 4.2+
-    mat.surface_render_method = 'BLENDED' if (ALPHA < 1.0 and ALPHA_MODE == "BLEND") else 'DITHERED'
+    if ALPHA < 1.0 and ALPHA_MODE == "BLEND":
+        mat.surface_render_method = 'BLENDED'
+    else:
+        mat.surface_render_method = 'DITHERED'
+    if ALPHA < 1.0 and ALPHA_MODE == "CLIP":
+        clip = nodes.new('ShaderNodeMath')
+        clip.operation = 'GREATER_THAN'
+        clip.inputs[0].default_value = ALPHA
+        clip.inputs[1].default_value = ALPHA_THRESHOLD
+        clip.location = (-250, 250)
+        clip.label = "Alpha Clip Threshold"
+        clip["_blender_mcp_generated"] = True
+        replace_input_link(clip.outputs[0], bsdf.inputs["Alpha"])
 elif hasattr(mat, "blend_method"):                             # Blender 4.1 and older
+    mat.alpha_threshold = ALPHA_THRESHOLD
     if ALPHA < 1.0:
-        mat.blend_method = 'BLEND' if ALPHA_MODE == "BLEND" else 'CLIP'
+        mat.blend_method = 'BLEND' if ALPHA_MODE == "BLEND" else ('HASHED' if ALPHA_MODE == "DITHERED" else 'CLIP')
     else:
         mat.blend_method = 'OPAQUE'
 
