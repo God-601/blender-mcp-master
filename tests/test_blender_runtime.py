@@ -318,7 +318,7 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertIsInstance(err, FileNotFoundError)
         self.assertEqual(sorted(n.name for n in mat.node_tree.nodes), nodes_before)
 
-    def test_pbr_unreadable_replacement_image_preserves_existing_material(self):
+    def test_pbr_image_load_failure_preserves_existing_material(self):
         texture = self._png("valid.png")
         run_script("pbr_material.py", NAME="KeepOnLoadFailure", TEXTURES={"color": texture})
         mat = bpy.data.materials["KeepOnLoadFailure"]
@@ -326,12 +326,17 @@ class BlenderRuntimeTests(unittest.TestCase):
         links_before = sorted((link.from_node.name, link.from_socket.name,
                                link.to_node.name, link.to_socket.name)
                               for link in mat.node_tree.links)
-        bad_path = os.path.join(self.tmp.name, "not-an-image.png")
-        with open(bad_path, "w", encoding="utf-8") as handle:
-            handle.write("this file exists but is not a valid image")
-        out, err = run_script("pbr_material.py", NAME="KeepOnLoadFailure",
-                              TEXTURES={"color": bad_path})
-        self.assertIsNotNone(err)
+        out, err = run_script(
+            "pbr_material.py",
+            NAME="KeepOnLoadFailure",
+            TEXTURES={"color": texture},
+            _source_replacements={
+                "bpy.data.images.load(bpy.path.abspath(path), check_existing=True)":
+                    '(_ for _ in ()).throw(RuntimeError("simulated image load failure"))'
+            },
+        )
+        self.assertIsInstance(err, RuntimeError)
+        self.assertIn("simulated image load failure", str(err))
         self.assertEqual(sorted((n.name, n.type) for n in mat.node_tree.nodes), nodes_before)
         self.assertEqual(sorted((link.from_node.name, link.from_socket.name,
                                  link.to_node.name, link.to_socket.name)
