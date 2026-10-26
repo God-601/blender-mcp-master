@@ -31,9 +31,15 @@ def pick_objects():
         return selected
     selected = [obj for obj in bpy.context.selected_objects if obj.type == "MESH"]
     if selected:
+        print("INFO: TARGETS is empty; validating selected mesh object(s): "
+              + ", ".join(repr(obj.name) for obj in selected))
         return selected
-    return [obj for obj in bpy.context.view_layer.objects
-            if obj.type == "MESH" and obj.visible_get()]
+    visible = [obj for obj in bpy.context.view_layer.objects
+               if obj.type == "MESH" and obj.visible_get()]
+    if visible:
+        print("WARN: TARGETS is empty and no mesh is selected; falling back to all visible "
+              "mesh object(s): " + ", ".join(repr(obj.name) for obj in visible))
+    return visible
 
 
 def tri_count(mesh):
