@@ -13,7 +13,7 @@ An agent skill that helps AI agents create better Blender assets through MCP: cl
 
 <p align="center"><img src="assets/without-vs-with.svg" alt="What changes for the agent: without vs with the skill" width="100%"></p>
 
-### How it works
+## How it works
 
 The skill does not add tools. It changes what the agent decides and verifies while using the Blender MCP tools it already has.
 
@@ -46,7 +46,7 @@ The scripts are designed to be pasted into Blender's Python/MCP execution enviro
 | Blender | Status |
 |---|---|
 | 5.2.3 | Automated: `tests/test_blender_runtime.py` runs every script through the `bpy` module, locally and in GitHub Actions (job `blender-runtime`). |
-| 3.1.2 | Main scenarios (validate, cleanup, LODs, PBR, export) run once by hand in a live Blender session. Not automated. |
+| 3.1.2 | Limited manual smoke check using condensed scripts, not the repository files. Not automated; does not validate these exact script versions. |
 | 3.2 to 5.1 | Not tested. The scripts contain version checks for known API differences, but they have not been run there. |
 
 Run the tests yourself:
@@ -107,7 +107,7 @@ Os scripts foram feitos para serem executados no ambiente Python/MCP do Blender.
 | Blender | Status |
 |---|---|
 | 5.2.3 | Automatizado: `tests/test_blender_runtime.py` roda todos os scripts pelo módulo `bpy`, localmente e no GitHub Actions (job `blender-runtime`). |
-| 3.1.2 | Cenários principais (validate, cleanup, LODs, PBR, export) executados uma vez, manualmente, em uma sessão real do Blender. Não automatizado. |
+| 3.1.2 | Teste manual limitado com scripts condensados, não com os arquivos do repositório. Não automatizado; não valida estas versões exatas dos scripts. |
 | 3.2 a 5.1 | Não testado. Os scripts têm verificações de versão para diferenças conhecidas da API, mas não foram executados nessas versões. |
 
 Para rodar os testes:
