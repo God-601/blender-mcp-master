@@ -15,6 +15,8 @@ try:
     import bpy
     import bmesh
 except ImportError:  # pragma: no cover - depends on environment
+    if os.environ.get("REQUIRE_BPY") == "1":
+        raise   # CI sets this so a broken bpy install fails instead of silently skipping every test
     bpy = None
 
 SCRIPTS = Path(__file__).resolve().parents[1] / "scripts"
