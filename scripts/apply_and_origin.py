@@ -31,8 +31,14 @@ for ob in objs:
     if ob.data.users > 1:
         print(f"[{ob.name}] SKIP: shared mesh data ({ob.data.users} users). Make single-user first (ob.data = ob.data.copy()).")
         continue
-    if ob.parent or ob.children:
-        print(f"[{ob.name}] note: has parent/children; children keep their world positions only if you re-parent carefully.")
+    if ob.mode != 'OBJECT':
+        print(f"[{ob.name}] SKIP: object is in {ob.mode} mode; switch to Object Mode so the change is not lost.")
+        continue
+    if ob.parent:
+        print(f"[{ob.name}] note: object has a parent; origin changes for parented objects are not verified.")
+    # Children must keep their world position when this object's origin moves.
+    bpy.context.view_layer.update()
+    child_worlds = [(child, child.matrix_world.copy()) for child in ob.children]
 
     loc, rot, scale = ob.matrix_basis.decompose()
     m = Matrix.Identity(4)
@@ -87,6 +93,10 @@ for ob in objs:
         ws = [ob.matrix_world @ v.co for v in ob.data.vertices]
         ob.location.z -= min(v.z for v in ws)
         bpy.context.view_layer.update()
+
+    for child, world in child_worlds:
+        child.matrix_world = world
+    bpy.context.view_layer.update()
 
     d = ob.dimensions
     print(f"[{ob.name}] scale={tuple(round(x,4) for x in ob.scale)} origin={tuple(round(x,4) for x in ob.location)} "

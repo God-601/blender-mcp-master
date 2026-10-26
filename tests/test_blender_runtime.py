@@ -327,6 +327,36 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertIn("SKIP: shared mesh data", out)
         self.assertEqual(tuple(first.scale), (2.0, 2.0, 2.0))
 
+    def test_apply_and_origin_keeps_children_in_place(self):
+        parent = add_mesh("Parent", cube)
+        parent.location = (0, 0, 2)
+        child = add_mesh("Child", cube)
+        child.parent = parent
+        child.matrix_parent_inverse = parent.matrix_world.inverted()
+        child.location = (1, 0, 0)
+        bpy.context.view_layer.update()
+        before = child.matrix_world.translation.copy()
+        out, err = run_script("apply_and_origin.py", TARGETS=["Parent"], ORIGIN="CUSTOM",
+                              CUSTOM_ORIGIN_WORLD=(5.0, 5.0, 0.0))
+        self.assertIsNone(err, out)
+        bpy.context.view_layer.update()
+        self.assertAlmostEqual((child.matrix_world.translation - before).length, 0.0, places=4)
+        self.assertAlmostEqual(parent.location.x, 5.0, places=4)
+
+    def test_apply_and_origin_skips_objects_in_edit_mode(self):
+        obj = add_mesh("Box", cube)
+        obj.scale = (2, 2, 2)
+        bpy.context.view_layer.objects.active = obj
+        bpy.ops.object.mode_set(mode='EDIT')
+        try:
+            out, err = run_script("apply_and_origin.py", TARGETS=["Box"])
+        finally:
+            bpy.ops.object.mode_set(mode='OBJECT')
+        self.assertIsNone(err)
+        self.assertIn("SKIP: object is in EDIT mode", out)
+        self.assertEqual(tuple(obj.scale), (2.0, 2.0, 2.0))
+        self.assertAlmostEqual(obj.dimensions.x, 2.0, places=4)
+
     def test_bevel_and_shade_applies_modifiers_cleanly(self):
         obj = add_mesh("Box", cube)
         out, err = run_script("bevel_and_shade.py", TARGETS=["Box"], APPLY_MODIFIERS=True)
