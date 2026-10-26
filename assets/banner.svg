@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" width="1280" height="320" role="img" aria-labelledby="t d">
+  <title id="t">blender-mcp-master</title>
+  <desc id="d">Agent skill for better 3D modeling in Blender through MCP</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#14181f"/>
+      <stop offset="1" stop-color="#1f2a3a"/>
+    </linearGradient>
+    <linearGradient id="ac" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ea7600"/>
+      <stop offset="1" stop-color="#f5b041"/>
+    </linearGradient>
+  </defs>
+  <rect width="1280" height="320" rx="20" fill="url(#bg)"/>
+  <!-- isometric cube mark -->
+  <g transform="translate(150 160)">
+    <polygon points="0,-90 78,-45 0,0 -78,-45" fill="#f5b041"/>
+    <polygon points="-78,-45 0,0 0,90 -78,45" fill="#ea7600"/>
+    <polygon points="78,-45 0,0 0,90 78,45" fill="#b85a00"/>
+    <polyline points="0,-90 78,-45 78,45 0,90 -78,45 -78,-45 0,-90" fill="none" stroke="#14181f" stroke-width="3" stroke-linejoin="round"/>
+    <polyline points="-78,-45 0,0 78,-45" fill="none" stroke="#14181f" stroke-width="3" stroke-linejoin="round"/>
+    <line x1="0" y1="0" x2="0" y2="90" stroke="#14181f" stroke-width="3"/>
+  </g>
+  <text x="290" y="150" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="72" font-weight="700" fill="#ffffff">blender-mcp-master</text>
+  <rect x="292" y="168" width="360" height="6" rx="3" fill="url(#ac)"/>
+  <text x="292" y="218" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="28" fill="#c9d4e3">Agent skill for cleaner, faster, game-ready 3D models</text>
+  <text x="292" y="256" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="22" fill="#8fa3bd">Works with Claude, Codex, Cursor and any agent that reads SKILL.md</text>
+</svg>

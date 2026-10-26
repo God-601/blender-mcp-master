@@ -1,5 +1,7 @@
 # blender-mcp-master
 
+<p align="center"><img src="assets/banner.svg" alt="blender-mcp-master: agent skill for cleaner, faster, game-ready 3D models" width="100%"></p>
+
 **English** | [Português](#português)
 
 An agent skill that helps AI agents create better Blender assets through MCP: cleaner geometry, deliberate scale, better materials, reliable validation, and game-ready exports.
@@ -8,6 +10,16 @@ An agent skill that helps AI agents create better Blender assets through MCP: cl
 - Uses an inspect → blockout → refine → validate → correct workflow.
 - Includes reusable Blender Python scripts and focused reference guides.
 - MCP tool names vary by implementation. Discover the tools available in your active Blender MCP server instead of assuming every integration exposes the same tools.
+
+<p align="center"><img src="assets/without-vs-with.svg" alt="What changes for the agent: without vs with the skill" width="100%"></p>
+
+### How it works
+
+The skill does not add tools. It changes what the agent decides and verifies while using the Blender MCP tools it already has.
+
+<p align="center"><img src="assets/architecture.svg" alt="The agent loads the skill, then calls MCP tools that drive a live Blender" width="100%"></p>
+
+<p align="center"><img src="assets/workflow.svg" alt="Core loop: plan, blockout, refine, UV, material, validate, deliver, with a gate after blockout and a fix loop after validate" width="100%"></p>
 
 ## Install
 
@@ -30,6 +42,22 @@ If your client does not support the Skills CLI, clone/download this repository a
 The scripts are designed to be pasted into Blender's Python/MCP execution environment. They use Blender's `bpy` API and cannot be fully tested by ordinary Python alone.
 
 **Testing status:** repository changes must be validated in Blender before being treated as runtime-tested. Static review is not a substitute for running the scripts in the target Blender version. Check the script output and inspect the resulting asset before delivery. No compatibility claim is made for a Blender version unless it has been tested there.
+
+| Blender | Status |
+|---|---|
+| 5.2.3 | Automated: `tests/test_blender_runtime.py` runs every script through the `bpy` module, locally and in GitHub Actions (job `blender-runtime`). |
+| 3.1.2 | Main scenarios (validate, cleanup, LODs, PBR, export) run once by hand in a live Blender session. Not automated. |
+| 3.2 to 5.1 | Not tested. The scripts contain version checks for known API differences, but they have not been run there. |
+
+Run the tests yourself:
+
+```bash
+python -m unittest discover -s tests -v          # static checks only; runtime tests are skipped without bpy
+pip install bpy==5.2.3                           # needs the matching Python version (3.13 for this wheel)
+python -m unittest discover -s tests -v          # now includes the Blender runtime tests
+```
+
+The runtime tests do not cover GLB export, rigged meshes or the rollback of a failed LOD run. Armatures and shape keys are not supported by `export_asset.py` and `make_lods.py`.
 
 ## Safety notes
 
@@ -75,6 +103,24 @@ Se o seu cliente não oferecer suporte ao Skills CLI, clone/baixe este repositó
 Os scripts foram feitos para serem executados no ambiente Python/MCP do Blender. Eles usam a API `bpy` e não podem ser testados completamente com Python comum fora do Blender.
 
 **Status dos testes:** alterações no repositório precisam ser validadas dentro do Blender antes de serem consideradas testadas em execução. Revisão estática não substitui a execução dos scripts na versão-alvo do Blender. Confira a saída dos scripts e inspecione o modelo resultante antes da entrega. Não declare compatibilidade com uma versão do Blender sem testá-la.
+
+| Blender | Status |
+|---|---|
+| 5.2.3 | Automatizado: `tests/test_blender_runtime.py` roda todos os scripts pelo módulo `bpy`, localmente e no GitHub Actions (job `blender-runtime`). |
+| 3.1.2 | Cenários principais (validate, cleanup, LODs, PBR, export) executados uma vez, manualmente, em uma sessão real do Blender. Não automatizado. |
+| 3.2 a 5.1 | Não testado. Os scripts têm verificações de versão para diferenças conhecidas da API, mas não foram executados nessas versões. |
+
+Para rodar os testes:
+
+```bash
+python -m unittest discover -s tests -v          # só verificações estáticas; os testes de runtime são pulados sem bpy
+pip install bpy==5.2.3                           # exige a versão correspondente do Python (3.13 neste wheel)
+python -m unittest discover -s tests -v          # agora inclui os testes de runtime no Blender
+```
+
+Os testes de runtime não cobrem exportação GLB, malhas com rig nem o desfazer de uma geração de LOD que falhou. Armatures e shape keys não são suportados por `export_asset.py` e `make_lods.py`.
+
+Os diagramas do fluxo estão na seção em inglês, acima.
 
 ## Segurança
 

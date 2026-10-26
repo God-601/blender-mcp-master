@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 440" width="1200" height="440" role="img" aria-labelledby="t d">
+  <title id="t">Without vs with the skill</title>
+  <desc id="d">Typical agent habits on the left, behavior with the skill on the right</desc>
+  <rect width="1200" height="440" rx="16" fill="#14181f"/>
+  <g font-family="Segoe UI, Helvetica, Arial, sans-serif">
+    <text x="600" y="42" font-size="24" font-weight="700" fill="#ffffff" text-anchor="middle">What changes for the agent</text>
+
+    <rect x="40" y="70" width="540" height="340" rx="14" fill="#2a1f22"/>
+    <rect x="620" y="70" width="540" height="340" rx="14" fill="#1b2d24"/>
+    <text x="70" y="108" font-size="20" font-weight="700" fill="#e5534b">Without the skill</text>
+    <text x="650" y="108" font-size="20" font-weight="700" fill="#4cc38a">With the skill</text>
+
+    <g font-size="16" fill="#e6c9cc">
+      <text x="70" y="150">x  Guesses version, units and scene state</text>
+      <text x="70" y="188">x  One 300-line script, no checks</text>
+      <text x="70" y="226">x  Details first, wrong proportions</text>
+      <text x="70" y="264">x  Operators that fail on context</text>
+      <text x="70" y="302">x  Scale off, floating, flipped normals</text>
+      <text x="70" y="340">x  Procedural materials engines ignore</text>
+      <text x="70" y="378">x  "Looks good" with no numbers</text>
+    </g>
+    <g font-size="16" fill="#c4ead7">
+      <text x="650" y="150">+  Probes addon and scene first</text>
+      <text x="650" y="188">+  Small steps, print and look each time</text>
+      <text x="650" y="226">+  Blockout gate before any detail</text>
+      <text x="650" y="264">+  Data API and bmesh, version-safe</text>
+      <text x="650" y="302">+  Applied transforms, grounded, clean mesh</text>
+      <text x="650" y="340">+  Budgets, UVs, baked PBR for games</text>
+      <text x="650" y="378">+  Report with tris, size, validation result</text>
+    </g>
+  </g>
+</svg>
