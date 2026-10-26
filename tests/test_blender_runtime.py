@@ -225,7 +225,8 @@ class BlenderRuntimeTests(unittest.TestCase):
     def test_lods_shift_outputs_when_target_position_overlaps_mesh(self):
         source = add_mesh("Rock", cube)
         obstacle = add_mesh("Obstacle", cube)
-        obstacle.location.x = 2.7
+        # Match the script's initial LOD offset, independent of the primitive's edge length.
+        obstacle.location.x = source.location.x + source.dimensions.x * 1.3 + 0.1
         bpy.context.view_layer.update()
         out, err = run_script("make_lods.py", SOURCE="Rock", RATIOS={"LOD1": 0.5})
         self.assertIsNone(err, out)
