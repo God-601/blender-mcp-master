@@ -418,6 +418,46 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertEqual(tuple(obj.scale), (2.0, 2.0, 2.0))
         self.assertAlmostEqual(obj.dimensions.x, 2.0, places=4)
 
+    def test_setup_scene_does_not_silently_skip_on_name_collision(self):
+        user_mesh = add_mesh("Key", cube)
+        user_camera_data = bpy.data.cameras.new("Cam")
+        user_camera = bpy.data.objects.new("Cam", user_camera_data)
+        bpy.context.scene.collection.objects.link(user_camera)
+        bpy.context.scene.camera = user_camera
+        out, err = run_script("setup_scene.py", ASSET_NAME="Probe", ADD_STUDIO_LIGHTS=True, ADD_CAMERA=True)
+        self.assertIsNone(err, out)
+        self.assertEqual(user_mesh.type, 'MESH')                       # the user's object is untouched
+        lights = [o for o in bpy.data.objects if o.type == 'LIGHT']
+        self.assertEqual(len(lights), 3)                                # Key, Fill and Rim all exist as lights
+        self.assertEqual(bpy.context.scene.camera, user_camera)         # active camera is not replaced
+        self.assertIn("Key", out)                                       # the conflict is reported
+
+    def test_setup_scene_is_repeatable(self):
+        run_script("setup_scene.py", ASSET_NAME="Probe", ADD_STUDIO_LIGHTS=True, ADD_CAMERA=True)
+        out, err = run_script("setup_scene.py", ASSET_NAME="Probe", ADD_STUDIO_LIGHTS=True, ADD_CAMERA=True)
+        self.assertIsNone(err, out)
+        self.assertEqual(len([o for o in bpy.data.objects if o.type == 'LIGHT']), 3)
+        self.assertEqual(len([o for o in bpy.data.objects if o.type == 'CAMERA']), 1)
+
+    def test_pbr_material_does_not_use_deprecated_use_nodes_api(self):
+        import warnings
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            out, err = run_script("pbr_material.py", NAME="NoWarn")
+        self.assertIsNone(err, out)
+        self.assertFalse([w for w in caught if "use_nodes" in str(w.message)], [str(w.message) for w in caught])
+        self.assertIsNotNone(bpy.data.materials["NoWarn"].node_tree)
+
+    def test_validate_does_not_use_deprecated_use_nodes_api(self):
+        import warnings
+        obj = add_mesh("Box", cube)
+        obj.data.materials.append(bpy.data.materials.new("M"))
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            out, err = run_script("validate_asset.py", TARGETS=["Box"])
+        self.assertIsNone(err, out)
+        self.assertFalse([w for w in caught if "use_nodes" in str(w.message)], [str(w.message) for w in caught])
+
     def test_bevel_and_shade_applies_modifiers_cleanly(self):
         obj = add_mesh("Box", cube)
         out, err = run_script("bevel_and_shade.py", TARGETS=["Box"], APPLY_MODIFIERS=True)

@@ -126,7 +126,7 @@ def check_images(objects):
     for obj in objects:
         for slot in obj.material_slots:
             material = slot.material
-            if not material or not material.use_nodes or not material.node_tree:
+            if not material or not material.node_tree:
                 continue
             for node in material.node_tree.nodes:
                 if node.type == "TEX_IMAGE" and node.image:

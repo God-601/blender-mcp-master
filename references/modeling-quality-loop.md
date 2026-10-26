@@ -56,7 +56,7 @@ Do not call visual-inspection tools after every trivial property change. Do call
 
 ## 4. Interpret diagnostics in context
 
-A script's PASS/WARN/FAIL is a useful signal, not universal truth:
+A script's PASS/WARN/INFO is a useful signal, not universal truth:
 - **Non-manifold edges:** often an issue for watertight solids and 3D printing; may be expected on planes, foliage cards, cloth shells, or intentionally open surfaces.
 - **Boundary edges:** normal for open surfaces; investigate on a closed solid.
 - **N-gons:** not automatically wrong on a flat static surface; avoid relying on them on curved, subdivided, or deforming regions.

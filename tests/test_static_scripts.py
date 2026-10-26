@@ -54,5 +54,24 @@ class RepositoryStaticChecks(unittest.TestCase):
         self.assertNotIn("INCLUDE_ARMATURE", source)
 
 
+    def test_docs_do_not_promise_a_fail_level_the_validator_never_emits(self):
+        validator = (ROOT / "scripts" / "validate_asset.py").read_text(encoding="utf-8")
+        self.assertNotIn('"FAIL"', validator)
+        for name in ("SKILL.md", "references/modeling-quality-loop.md", "assets/workflow.svg"):
+            with self.subTest(doc=name):
+                text = (ROOT / name).read_text(encoding="utf-8").replace("INCOMPLETE", "")
+                self.assertNotIn("FAIL", text)
+
+    def test_budgets_are_not_described_as_universal_hard_limits(self):
+        text = (ROOT / "references" / "budgets.md").read_text(encoding="utf-8")
+        self.assertNotIn("Treat them as hard limits", text)
+        self.assertIn("Platform limits", text)
+
+    def test_no_script_calls_orphans_purge(self):
+        for path in sorted((ROOT / "scripts").glob("*.py")):
+            with self.subTest(script=path.name):
+                self.assertNotIn("orphans_purge", path.read_text(encoding="utf-8"))
+
+
 if __name__ == "__main__":
     unittest.main()

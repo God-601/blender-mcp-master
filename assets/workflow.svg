@@ -27,7 +27,7 @@
       <text x="420"  y="152">bevels, details,</text><text x="420"  y="170">wireframe check</text>
       <text x="580"  y="152">seams, margins,</text><text x="580"  y="170">texel density</text>
       <text x="740"  y="152">PBR, named,</text><text x="740"  y="170">shared</text>
-      <text x="900"  y="152" font-size="13" fill="#14181f">validate_asset.py</text><text x="900" y="170" font-size="13" fill="#14181f">PASS / WARN / FAIL</text>
+      <text x="900"  y="152" font-size="13" fill="#14181f">validate_asset.py</text><text x="900" y="170" font-size="13" fill="#14181f">PASS / WARN / INFO</text>
       <text x="1080" y="152">facts: tris, size,</text><text x="1080" y="170">materials, path</text>
     </g>
 
@@ -46,7 +46,7 @@
     <!-- fix loop -->
     <path d="M 900 176 C 900 270, 420 270, 420 178" stroke="#e5534b" stroke-width="2.5" fill="none" stroke-dasharray="7 5"/>
     <polygon points="420,178 414,192 426,192" fill="#e5534b"/>
-    <text x="660" y="288" font-size="15" font-weight="700" fill="#e5534b">any FAIL: fix and re-run, never ship</text>
+    <text x="660" y="288" font-size="15" font-weight="700" fill="#e5534b">unexplained WARN: fix or justify, then re-run</text>
 
     <text x="600" y="316" font-size="13" fill="#8fa3bd">Every step: one small script, print the result, look, then continue</text>
   </g>

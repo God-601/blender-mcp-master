@@ -70,12 +70,17 @@ if RENDER_ENGINE:
 if ADD_STUDIO_LIGHTS:
     studio = get_or_make_collection("Studio")
     def add_area(name, loc, power, size):
-        if name in bpy.data.objects:
-            return bpy.data.objects[name]
+        existing = bpy.data.objects.get(name)
+        if existing is not None and existing.type == 'LIGHT':
+            print(f"Reusing existing light {name!r}")
+            return existing
+        if existing is not None:
+            print(f"WARNING: an object named {name!r} already exists ({existing.type}); "
+                  "it is left untouched and a new light with a suffixed name is created.")
         data = bpy.data.lights.new(name, 'AREA')
         data.energy = power
         data.size = size
-        ob = bpy.data.objects.new(name, data)
+        ob = bpy.data.objects.new(name, data)   # Blender adds a suffix (Key.001) if the name is taken
         ob.location = loc
         direction = Vector((0, 0, 0.5)) - Vector(loc)
         ob.rotation_euler = direction.to_track_quat('-Z', 'Y').to_euler()
@@ -85,15 +90,26 @@ if ADD_STUDIO_LIGHTS:
     add_area("Fill", (-3.5, -2.0, 2.0), 350, 3.0)
     add_area("Rim", (0.0, 3.5, 3.0), 600, 1.5)
 
-if ADD_CAMERA and "Cam" not in bpy.data.objects:
-    studio = get_or_make_collection("Studio")
-    cam_data = bpy.data.cameras.new("Cam")
-    cam_data.lens = 50
-    cam = bpy.data.objects.new("Cam", cam_data)
-    cam.location = (3.5, -3.5, 2.2)
-    cam.rotation_euler = (Vector((0, 0, 0.5)) - cam.location).to_track_quat('-Z', 'Y').to_euler()
-    studio.objects.link(cam)
-    scene.camera = cam
+if ADD_CAMERA:
+    existing_cam = bpy.data.objects.get("Cam")
+    if existing_cam is not None and existing_cam.type == 'CAMERA':
+        print("Reusing existing camera 'Cam'")
+        cam = existing_cam
+    else:
+        if existing_cam is not None:
+            print(f"WARNING: an object named 'Cam' already exists ({existing_cam.type}); "
+                  "it is left untouched and a new camera with a suffixed name is created.")
+        studio = get_or_make_collection("Studio")
+        cam_data = bpy.data.cameras.new("Cam")
+        cam_data.lens = 50
+        cam = bpy.data.objects.new("Cam", cam_data)
+        cam.location = (3.5, -3.5, 2.2)
+        cam.rotation_euler = (Vector((0, 0, 0.5)) - cam.location).to_track_quat('-Z', 'Y').to_euler()
+        studio.objects.link(cam)
+    if scene.camera is None:
+        scene.camera = cam
+    elif scene.camera != cam:
+        print(f"Active scene camera {scene.camera.name!r} was kept; set scene.camera = bpy.data.objects[{cam.name!r}] to use the new one.")
 
 print("Units:", scene.unit_settings.system, "scale", scene.unit_settings.scale_length)
 print("Active collection:", bpy.context.view_layer.active_layer_collection.name)

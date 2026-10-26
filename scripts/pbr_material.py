@@ -44,7 +44,9 @@ existing_mat = bpy.data.materials.get(NAME)
 if existing_mat is not None:
     print(f"Updating existing material {NAME!r} (Principled values are overwritten).")
 mat = existing_mat or bpy.data.materials.new(NAME)
-mat.use_nodes = True
+# use_nodes is required before Blender 5.0 and deprecated afterwards (node trees always exist there).
+if mat.node_tree is None or bpy.app.version < (5, 0, 0):
+    mat.use_nodes = True
 nt = mat.node_tree
 nodes, links = nt.nodes, nt.links
 # Remove nodes created by this script on previous runs; preserve user-authored nodes.
