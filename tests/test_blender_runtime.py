@@ -186,6 +186,13 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertEqual(len(source.data.polygons), source_tris)
         self.assertEqual(len(source.modifiers), 0)
 
+    def test_lods_preserve_multiple_uv_layers(self):
+        source = add_mesh("UVRock", ico)
+        source.data.uv_layers.new(name="ExtraUV")
+        out, err = run_script("make_lods.py", SOURCE="UVRock", RATIOS={"LOD1": 0.5})
+        self.assertIsNone(err, out)
+        self.assertGreaterEqual(len(bpy.data.objects["UVRock_LOD1"].data.uv_layers), 2)
+
     def test_lods_existing_output_creates_nothing_and_deletes_nothing(self):
         add_mesh("Rock", ico)
         existing = add_mesh("Rock_LOD2", cube)
@@ -222,6 +229,19 @@ class BlenderRuntimeTests(unittest.TestCase):
         out, err = run_script("pbr_material.py", NAME="M", ALPHA=1.0)
         self.assertIsNone(err, out)
         self.assertAlmostEqual(mat.node_tree.nodes["Principled BSDF"].inputs["Alpha"].default_value, 1.0)
+
+    def test_pbr_rerun_disables_previous_emission(self):
+        run_script("pbr_material.py", NAME="Glow", EMISSION_COLOR=(1.0, 0.2, 0.1, 1.0), EMISSION_STRENGTH=4.0)
+        mat = bpy.data.materials["Glow"]
+        bsdf = mat.node_tree.nodes["Principled BSDF"]
+        strength = bsdf.inputs.get("Emission Strength")
+        if strength is not None:
+            self.assertAlmostEqual(strength.default_value, 4.0)
+        out, err = run_script("pbr_material.py", NAME="Glow", EMISSION_COLOR=None)
+        self.assertIsNone(err, out)
+        strength = bsdf.inputs.get("Emission Strength")
+        if strength is not None:
+            self.assertAlmostEqual(strength.default_value, 0.0)
 
     def test_pbr_is_idempotent_with_textures(self):
         textures = {"color": self._png("c.png"), "rough": self._png("r.png"), "normal": self._png("n.png")}
