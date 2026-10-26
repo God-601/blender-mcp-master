@@ -356,10 +356,18 @@ class BlenderRuntimeTests(unittest.TestCase):
 
     def test_export_restores_state_when_exporter_fails(self):
         add_mesh("Crate", cube)
-        long_name = "x" * 300 + ".fbx"          # the OS rejects the file name inside the exporter
-        out, err = run_script("export_asset.py", OBJECTS=["Crate"],
-                              PATH=os.path.join(self.tmp.name, long_name), FORMAT="FBX")
-        self.assertIsNotNone(err)
+        out, err = run_script(
+            "export_asset.py",
+            OBJECTS=["Crate"],
+            PATH=os.path.join(self.tmp.name, "failed.fbx"),
+            FORMAT="FBX",
+            _source_replacements={
+                "export_result = bpy.ops.export_scene.fbx(**kw)":
+                    'raise RuntimeError("simulated exporter failure")'
+            },
+        )
+        self.assertIsInstance(err, RuntimeError)
+        self.assertIn("simulated exporter failure", str(err))
         self.assertEqual([o.name for o in bpy.data.objects], ["Crate"])
         self.assertNotIn("_EXPORT_TMP", bpy.data.collections)
         self.assertEqual(len(bpy.data.meshes), 1)
