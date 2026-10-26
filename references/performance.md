@@ -5,10 +5,10 @@
 - Large arrays: `mesh.vertices.foreach_set("co", flat_list)` / `foreach_get` + numpy when available.
 - Avoid `bpy.ops` inside loops. Avoid `bpy.context.view_layer.update()` per iteration (call once after the loop).
 - Disable undo / redraw side effects by not switching modes repeatedly; do edits in Object Mode with bmesh (`bmesh.new()`, `bm.from_mesh`, `bm.to_mesh`, `bm.free()`).
-- Always `bm.free()`; call `bpy.data.orphans_purge(do_recursive=True)` after big cleanups.
+- Always `bm.free()`. Do not run a global `bpy.data.orphans_purge(do_recursive=True)` as routine cleanup: it can remove unrelated orphan datablocks from the user's file. Only purge after inspecting the affected datablocks and getting explicit approval.
 - Time heavy steps (`time.perf_counter()`) and print the result; split anything longer than about 10 seconds into several calls so the MCP request doesn't time out.
 
-### Pattern: greedy voxel surface extraction
+### Pattern: voxel surface extraction (visible-face culling)
 ```python
 import bmesh, bpy
 def voxels_to_mesh(cells, size=0.1, name="Voxels"):
