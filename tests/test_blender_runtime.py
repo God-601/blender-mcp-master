@@ -103,6 +103,17 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertIn("Ghost", out)
         self.assertIn("INCOMPLETE - CHECK TARGETS", out)
 
+    def test_validate_reports_non_mesh_target_as_incomplete(self):
+        add_mesh("Box", cube)
+        camera_data = bpy.data.cameras.new("CameraData")
+        camera = bpy.data.objects.new("CameraTarget", camera_data)
+        bpy.context.scene.collection.objects.link(camera)
+        out, err = run_script("validate_asset.py", TARGETS=["Box", "CameraTarget"])
+        self.assertIsNone(err, out)
+        self.assertIn("target object is not a mesh: 'CameraTarget' (type: CAMERA)", out)
+        self.assertIn("[Box]", out)
+        self.assertIn("INCOMPLETE - CHECK TARGETS", out)
+
     def test_validate_reads_rotation_from_quaternion_objects(self):
         import math
         obj = add_mesh("Quat", cube)
@@ -306,6 +317,25 @@ class BlenderRuntimeTests(unittest.TestCase):
         out, err = run_script("pbr_material.py", NAME="Keep", TEXTURES={"color": "/no/such/file.png"})
         self.assertIsInstance(err, FileNotFoundError)
         self.assertEqual(sorted(n.name for n in mat.node_tree.nodes), nodes_before)
+
+    def test_pbr_unreadable_replacement_image_preserves_existing_material(self):
+        texture = self._png("valid.png")
+        run_script("pbr_material.py", NAME="KeepOnLoadFailure", TEXTURES={"color": texture})
+        mat = bpy.data.materials["KeepOnLoadFailure"]
+        nodes_before = sorted((n.name, n.type) for n in mat.node_tree.nodes)
+        links_before = sorted((link.from_node.name, link.from_socket.name,
+                               link.to_node.name, link.to_socket.name)
+                              for link in mat.node_tree.links)
+        bad_path = os.path.join(self.tmp.name, "not-an-image.png")
+        with open(bad_path, "w", encoding="utf-8") as handle:
+            handle.write("this file exists but is not a valid image")
+        out, err = run_script("pbr_material.py", NAME="KeepOnLoadFailure",
+                              TEXTURES={"color": bad_path})
+        self.assertIsNotNone(err)
+        self.assertEqual(sorted((n.name, n.type) for n in mat.node_tree.nodes), nodes_before)
+        self.assertEqual(sorted((link.from_node.name, link.from_socket.name,
+                                 link.to_node.name, link.to_socket.name)
+                                for link in mat.node_tree.links), links_before)
 
     def test_pbr_missing_texture_does_not_create_material(self):
         out, err = run_script("pbr_material.py", NAME="Ghost", TEXTURES={"color": "/no/such/file.png"})
