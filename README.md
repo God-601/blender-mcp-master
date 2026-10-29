@@ -54,7 +54,7 @@ Runtime tests may require the matching Blender Python environment and dependenci
 
 ## Documentation
 
-Start with `SKILL.md`, then load only the references relevant to the task. Key specialist guides include [hand-painted workflow](references/hand-painted-pipeline.md), [UV and baking](references/uv-baking.md), [topology and retopology](references/topology-retopology.md), [sculpting and high-poly](references/sculpting-highpoly.md), [architecture/interiors](references/architecture-interiors.md), and [CAD/technical modeling](references/cad-technical.md). Existing guides cover hard-surface, organic forms, characters/rigging, stylized art, materials, environments, rendering, budgets, optimization, export, and troubleshooting.
+Start with `SKILL.md`, then load only the references relevant to the task. Key specialist guides include [hand-painted workflow](references/hand-painted-pipeline.md), [UV and baking](references/uv-baking.md), [topology and retopology](references/topology-retopology.md), [sculpting and high-poly](references/sculpting-highpoly.md), [architecture/interiors](references/architecture-interiors.md), and [CAD/technical modeling](references/cad-technical.md). Tested bpy snippets: [hand-painting recipes](references/handpaint-recipes.md) and [shading recipes](references/shading-recipes.md). Existing guides cover hard-surface, organic forms, characters/rigging, stylized art, materials, environments, rendering, budgets, optimization, export, and troubleshooting.
 
 ## License
 
