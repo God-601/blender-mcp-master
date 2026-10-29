@@ -54,11 +54,12 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Architecture, interiors, walkthroughs, spatial blockouts | Architecture/interiors | `references/architecture-interiors.md` |
 | Dimension-driven parts, CAD-like meshes, 3D printing | Technical modeling | `references/cad-technical.md` |
 | Low-poly, stylized, fantasy, voxel, retro/PS1, Roblox-like blockiness | Stylized art direction | `references/stylized-lowpoly.md` |
-| Hand-painted textures, painterly highlights, color atlases | Hand-painted pipeline | `references/hand-painted-pipeline.md`; add `references/uv-baking.md` when texturing/baking is involved |
+| Hand-painted textures, painterly highlights, color atlases | Hand-painted pipeline | `references/hand-painted-pipeline.md`; add `references/uv-baking.md` when texturing/baking is involved; runnable snippets in `references/handpaint-recipes.md` |
 | UV layout, texture painting setup, baking maps, high-to-low projection | UV and baking | `references/uv-baking.md` |
 | Edge flow, mesh density, cleanup strategy, retopology | Topology and retopology | `references/topology-retopology.md` |
 | Sculpting, high-poly detail, remesh, high-to-low production | Sculpt/high-poly | `references/sculpting-highpoly.md` |
 | PBR, procedural nodes, toon shading, material diagnostics | Shading and materials | `references/materials.md` |
+| Smooth/sharp normals, bevel highlights, toon ramp, outline | Shading recipes | `references/shading-recipes.md` |
 | Render, lighting, camera, turntable | Lighting/render | `references/lighting-render.md` |
 | Game engine target (Roblox, Unity, Unreal, Godot) | Game-ready + export | `references/game-ready-export.md`; add `references/uv-baking.md` for texture workflows |
 | Slow viewport, heavy scene, crashes | Performance | `references/performance.md` |

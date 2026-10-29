@@ -47,6 +47,8 @@ class RepositoryStaticChecks(unittest.TestCase):
             "sculpting-highpoly.md",
             "architecture-interiors.md",
             "cad-technical.md",
+            "handpaint-recipes.md",
+            "shading-recipes.md",
         )
         for guide in guides:
             with self.subTest(guide=guide):
