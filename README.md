@@ -22,7 +22,7 @@ Example request:
 ## Repository map
 
 - `SKILL.md` — core workflow, module routing, safety, and delivery rules.
-- `references/` — focused modeling, materials, environment, export, performance, and troubleshooting guides.
+- `references/` — focused guides for hard-surface, organic/characters, stylized/retro, hand-painted textures, UV/baking, topology/retopology, sculpting/high-poly, architecture/interiors, CAD, materials, environments, export, performance, and troubleshooting.
 - `scripts/` — reusable Blender Python utilities and templates.
 - `tests/` — static checks and Blender-runtime tests.
 - [Universal quality checklist](references/quality-checklist.md) — common acceptance checks for every asset.
@@ -47,7 +47,7 @@ Runtime tests may require the matching Blender Python environment and dependenci
 
 ## Documentation
 
-Start with `SKILL.md`, then load only the references relevant to the task. The detailed guides explain discipline-specific techniques and caveats.
+Start with `SKILL.md`, then load only the references relevant to the task. Key specialist guides include [hand-painted workflow](references/hand-painted-pipeline.md), [UV and baking](references/uv-baking.md), [topology and retopology](references/topology-retopology.md), [sculpting and high-poly](references/sculpting-highpoly.md), [architecture/interiors](references/architecture-interiors.md), and [CAD/technical modeling](references/cad-technical.md). Existing guides cover hard-surface, organic forms, characters/rigging, stylized art, materials, environments, rendering, budgets, optimization, export, and troubleshooting.
 
 ## License
 
