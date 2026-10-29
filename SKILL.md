@@ -80,7 +80,7 @@ After planning, inspect the scene and tools before modifying anything. Complete 
 
 ## 2B. Universal quality gate
 
-Use `references/quality-checklist.md` for the common acceptance checklist, then add the relevant discipline-specific checks. Mark each check as **PASS**, **FAIL**, **N/A**, or **NOT VERIFIED**. Never present an unverified check as passed. Interpret warnings in the context of the asset and target pipeline; a warning is not automatically a defect.
+Use `references/quality-checklist.md` for the common acceptance checklist, then add the relevant discipline-specific checks. Mark each check as **PASS**, **ISSUE**, **N/A**, or **NOT VERIFIED**. Never present an unverified check as passed. Interpret warnings in the context of the asset and target pipeline; a warning is not automatically a defect.
 
 At delivery, fix high-impact defects when feasible. If the asset is usable but not excellent, deliver it with a concise, honest list of known issues and what was not verified rather than hiding defects or iterating indefinitely.
 
