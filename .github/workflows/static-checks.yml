@@ -21,20 +21,31 @@ jobs:
       - run: python -m unittest discover -s tests -v
 
   blender-runtime:
-    # Runs the scripts in a real Blender (bpy wheel). Covers the Blender version of the wheel only.
+    # Runs the scripts in a real Blender (bpy wheel) once per Blender version. PyPI only ships
+    # bpy 4.2 and newer, so Blender 3.x and 4.0/4.1 are NOT covered by CI.
+    name: blender-runtime (bpy ${{ matrix.bpy }})
     permissions:
       contents: read
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { bpy: "4.2.23", python: "3.11" }   # LTS
+          - { bpy: "4.5.15", python: "3.11" }   # LTS
+          - { bpy: "5.0.1", python: "3.11" }
+          - { bpy: "5.1.2", python: "3.13" }
+          - { bpy: "5.2.3", python: "3.13" }
     steps:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.13"
+          python-version: ${{ matrix.python }}
       - name: System libraries needed by the bpy wheel
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libxi6 libxrender1 libxxf86vm1 libxfixes3 libsm6 libxkbcommon0
-      - run: pip install bpy==5.2.3
+      - run: pip install bpy==${{ matrix.bpy }}
       - name: Run all tests (fails if bpy cannot be imported)
         env:
           REQUIRE_BPY: "1"
