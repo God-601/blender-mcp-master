@@ -1,5 +1,9 @@
 # Blender MCP Master
 
+<p align="center"><img src="assets/banner.svg" alt="Blender MCP Master — agent skill for higher-quality 3D workflows" width="100%"></p>
+
+**English** | [Português](#português)
+
 A cross-agent Blender skill for planning, creating, inspecting, refining, and validating 3D assets across hard-surface, organic, stylized, hand-painted, PBR, environment, character, and game-ready workflows.
 
 - **Plan before modeling:** define purpose, style, constraints, deliverables, and acceptance criteria.
@@ -8,6 +12,16 @@ A cross-agent Blender skill for planning, creating, inspecting, refining, and va
 - **Safety first:** protect existing scene content and disclose unverified results.
 
 Works with compatible agents that can read Agent Skills and use a Blender-control MCP integration. MCP tool names vary; the agent must discover the tools actually available. This repository's skill does not replace the MCP server that controls a live Blender session.
+
+<p align="center"><img src="assets/without-vs-with.svg" alt="Comparison of agent workflows without and with Blender MCP Master" width="100%"></p>
+
+## How it works
+
+The skill guides the agent's decisions and verification steps while a separate Blender-control MCP server operates the live scene. The resource server, if configured, only exposes skill documentation and templates; it does not control Blender by itself.
+
+<p align="center"><img src="assets/architecture.svg" alt="Architecture showing the agent, skill resources, Blender-control MCP and live Blender" width="100%"></p>
+
+<p align="center"><img src="assets/workflow.svg" alt="Blender asset workflow from planning and blockout through refinement, validation and delivery" width="100%"></p>
 
 ## Install
 
