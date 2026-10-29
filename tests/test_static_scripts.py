@@ -38,6 +38,28 @@ class RepositoryStaticChecks(unittest.TestCase):
                 self.assertIn(status, skill)
                 self.assertIn(status, checklist)
 
+    def test_specialist_guides_exist_and_are_routed(self):
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        guides = (
+            "hand-painted-pipeline.md",
+            "uv-baking.md",
+            "topology-retopology.md",
+            "sculpting-highpoly.md",
+            "architecture-interiors.md",
+            "cad-technical.md",
+        )
+        for guide in guides:
+            with self.subTest(guide=guide):
+                path = ROOT / "references" / guide
+                self.assertTrue(path.is_file(), f"Missing guide: {guide}")
+                self.assertGreater(len(path.read_text(encoding="utf-8")), 1500)
+                self.assertIn(f"references/{guide}", skill)
+
+    def test_materials_reference_does_not_recommend_global_orphan_cleanup(self):
+        materials = (ROOT / "references" / "materials.md").read_text(encoding="utf-8").lower()
+        self.assertIn("never run global orphan purges", materials)
+        self.assertNotIn("purge orphan materials at end", materials)
+
     def test_validator_reports_incomplete_target_selection(self):
         source = (ROOT / "scripts" / "validate_asset.py").read_text(encoding="utf-8")
         self.assertIn("INCOMPLETE - CHECK TARGETS", source)
@@ -96,6 +118,12 @@ class RepositoryStaticChecks(unittest.TestCase):
         for path in sorted((ROOT / "scripts").glob("*.py")):
             with self.subTest(script=path.name):
                 self.assertNotIn("orphans_purge", path.read_text(encoding="utf-8"))
+
+    def test_budgets_cite_current_official_roblox_mesh_specification(self):
+        budgets = (ROOT / "references" / "budgets.md").read_text(encoding="utf-8")
+        self.assertNotIn("21,844", budgets)
+        self.assertIn("create.roblox.com/docs/art/modeling/specifications", budgets)
+        self.assertIn("current official documentation", budgets)
 
     def test_skill_does_not_recommend_global_orphan_purge(self):
         skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")

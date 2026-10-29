@@ -1,5 +1,7 @@
 # Environments (rooms, buildings, streets, levels)
 
+For architectural/interior layouts, circulation, and spatial validation, also read references/architecture-interiors.md. For precise mating parts, tolerances, and dimension-driven mesh workflows, read references/cad-technical.md.
+
 ## Workflow
 1. **Layout in 2D first**: define footprint, grid and key dimensions (print them). Use real metric sizes (corridors >= 1.2 m, doors 0.9 x 2.05, ceilings 2.4 to 2.7).
 2. **Modular kit**: build a few modules (wall 4 m, corner, door, window, floor tile 2x2 or 4x4) with consistent pivots on the grid, then assemble with linked duplicates. This is the single biggest win for performance and consistency.
