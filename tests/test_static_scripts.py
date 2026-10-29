@@ -114,6 +114,12 @@ class RepositoryStaticChecks(unittest.TestCase):
             with self.subTest(script=path.name):
                 self.assertNotIn("orphans_purge", path.read_text(encoding="utf-8"))
 
+    def test_budgets_cite_current_official_roblox_mesh_specification(self):
+        budgets = (ROOT / "references" / "budgets.md").read_text(encoding="utf-8")
+        self.assertNotIn("21,844", budgets)
+        self.assertIn("create.roblox.com/docs/art/modeling/specifications", budgets)
+        self.assertIn("current official documentation", budgets)
+
     def test_skill_does_not_recommend_global_orphan_purge(self):
         skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
         self.assertNotIn("bpy.data.orphans_purge", skill)
