@@ -100,7 +100,10 @@ mat.node_tree.nodes.active = node        # bake writes to the ACTIVE image node
 bpy.ops.object.bake(type='AO')
 img.filepath_raw = "//T_AO.png"          # relative to the saved .blend; save the .blend first
 img.file_format = 'PNG'
-print("baked", img.name, "mean value", round(sum(img.pixels[:4000:4]) / 1000, 3))
+import numpy as np
+buf = np.empty(len(img.pixels), dtype=np.float32)
+img.pixels.foreach_get(buf)              # slicing img.pixels with a step fails on some versions
+print("baked", img.name, "mean red", round(float(buf[0::4].mean()), 3))
 ```
 Remove the temporary image node and material afterwards if they were not part of the asset. Restore the render engine the user had.
 
