@@ -14,11 +14,13 @@ class RepositoryStaticChecks(unittest.TestCase):
             with self.subTest(script=path.name):
                 ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
 
-    def test_readme_documents_skills_cli_and_both_languages(self):
+    def test_readme_documents_manual_skill_setup_and_both_languages(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
-        self.assertIn("npx skills add God-601/blender-mcp-master", readme)
+        self.assertIn("SKILL.md", readme)
+        self.assertIn("separate Blender-control MCP", readme)
         self.assertIn("# Português", readme)
-        self.assertIn("# blender-mcp-master", readme)
+        self.assertIn("# Blender MCP Master", readme)
+        self.assertIn("references/quality-checklist.md", readme)
 
     def test_validator_reports_incomplete_target_selection(self):
         source = (ROOT / "scripts" / "validate_asset.py").read_text(encoding="utf-8")
