@@ -9,11 +9,18 @@ A cross-agent Blender skill for planning, creating, inspecting, refining, and va
 
 Works with compatible agents that can read Agent Skills and use a Blender-control MCP integration. MCP tool names vary; the agent must discover the tools actually available. This repository's skill does not replace the MCP server that controls a live Blender session.
 
-## Quick start
+## Install
 
-1. Install or copy this repository's `SKILL.md` and relevant `references/` into the skills directory supported by your agent.
-2. Configure a separate Blender-control MCP server and start Blender with its addon/extension enabled.
-3. Ask the agent to create or modify an asset. It should inspect the scene, plan the workflow, and verify its changes.
+```bash
+npx skills add God-601/blender-mcp-master
+```
+
+Other ways:
+
+- **Claude Desktop / other clients without the Skills CLI:** put `SKILL.md`, `references/` and `scripts/` in one folder named `blender-mcp-master`, zip it, and upload it as a custom skill (or copy the folder into the client's skills directory).
+- **MCP resource server (optional):** serves the skill, guides and script templates over MCP. Use command `npx` with args `["-y", "github:God-601/blender-mcp-master"]`. It does **not** control Blender. (The package is not published on the npm registry yet, so the plain name `blender-mcp-master` will not resolve.)
+
+Then configure a separate Blender-control MCP server and start Blender with its addon enabled. The agent should inspect the scene, plan the workflow, and verify its changes.
 
 Example request:
 
@@ -66,11 +73,18 @@ A Blender MCP Master é uma skill para agentes compatíveis que planejam, criam,
 
 Funciona com agentes que suportam o formato Agent Skills e possuem acesso a uma integração MCP que controle o Blender. Os nomes e recursos das ferramentas MCP variam. A skill não substitui o servidor MCP necessário para controlar uma sessão do Blender.
 
-## Início rápido
+## Instalação
 
-1. Instale ou copie o `SKILL.md` e a pasta `references/` para o diretório de skills reconhecido pelo agente.
-2. Configure separadamente um servidor MCP de controle do Blender e inicie o Blender com o addon/extensão habilitado.
-3. Peça ao agente para criar ou editar um asset. Ele deve inspecionar a cena, planejar o trabalho e verificar as alterações.
+```bash
+npx skills add God-601/blender-mcp-master
+```
+
+Outras formas:
+
+- **Claude Desktop / clientes sem Skills CLI:** coloque `SKILL.md`, `references/` e `scripts/` em uma pasta chamada `blender-mcp-master`, compacte em .zip e envie como skill personalizada (ou copie a pasta para o diretório de skills do cliente).
+- **Servidor MCP de recursos (opcional):** entrega a skill, os guias e os modelos de script via MCP. Use o comando `npx` com os argumentos `["-y", "github:God-601/blender-mcp-master"]`. Ele **não** controla o Blender. (O pacote ainda não está publicado no registro npm, então o nome simples `blender-mcp-master` não funciona.)
+
+Depois, configure separadamente um servidor MCP de controle do Blender e inicie o Blender com o addon habilitado. O agente deve inspecionar a cena, planejar o trabalho e verificar as alterações.
 
 Exemplo:
 

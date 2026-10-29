@@ -21,6 +21,11 @@ class RepositoryStaticChecks(unittest.TestCase):
         self.assertIn("# Português", readme)
         self.assertIn("# Blender MCP Master", readme)
         self.assertIn("references/quality-checklist.md", readme)
+        # Install paths that users rely on must stay documented in both languages.
+        self.assertGreaterEqual(readme.count("npx skills add God-601/blender-mcp-master"), 2)
+        self.assertGreaterEqual(readme.count("github:God-601/blender-mcp-master"), 2)
+        # The npm package is not on the registry, so the bare-name MCP config must not be advertised.
+        self.assertNotIn('["-y", "blender-mcp-master"]', readme)
 
     def test_quality_checklist_is_referenced_and_statuses_match_core_skill(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
