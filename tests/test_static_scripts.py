@@ -14,11 +14,29 @@ class RepositoryStaticChecks(unittest.TestCase):
             with self.subTest(script=path.name):
                 ast.parse(path.read_text(encoding="utf-8"), filename=str(path))
 
-    def test_readme_documents_skills_cli_and_both_languages(self):
+    def test_readme_documents_manual_skill_setup_and_both_languages(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
-        self.assertIn("npx skills add God-601/blender-mcp-master", readme)
+        self.assertIn("SKILL.md", readme)
+        self.assertIn("separate Blender-control MCP", readme)
         self.assertIn("# Português", readme)
-        self.assertIn("# blender-mcp-master", readme)
+        self.assertIn("# Blender MCP Master", readme)
+        self.assertIn("references/quality-checklist.md", readme)
+        # Install paths that users rely on must stay documented in both languages.
+        self.assertGreaterEqual(readme.count("npx skills add God-601/blender-mcp-master"), 2)
+        self.assertGreaterEqual(readme.count("github:God-601/blender-mcp-master"), 2)
+        # The npm package is not on the registry, so the bare-name MCP config must not be advertised.
+        self.assertNotIn('["-y", "blender-mcp-master"]', readme)
+
+    def test_quality_checklist_is_referenced_and_statuses_match_core_skill(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        checklist = (ROOT / "references" / "quality-checklist.md").read_text(encoding="utf-8")
+        self.assertIn("references/quality-checklist.md", readme)
+        self.assertIn("references/quality-checklist.md", skill)
+        for status in ("PASS", "ISSUE", "N/A", "NOT VERIFIED"):
+            with self.subTest(status=status):
+                self.assertIn(status, skill)
+                self.assertIn(status, checklist)
 
     def test_validator_reports_incomplete_target_selection(self):
         source = (ROOT / "scripts" / "validate_asset.py").read_text(encoding="utf-8")

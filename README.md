@@ -1,82 +1,60 @@
-# blender-mcp-master
+# Blender MCP Master
 
-<p align="center"><img src="assets/banner.svg" alt="blender-mcp-master: agent skill for cleaner, faster, game-ready 3D models" width="100%"></p>
+A cross-agent Blender skill for planning, creating, inspecting, refining, and validating 3D assets across hard-surface, organic, stylized, hand-painted, PBR, environment, character, and game-ready workflows.
 
-**English** | [Português](#português)
+- **Plan before modeling:** define purpose, style, constraints, deliverables, and acceptance criteria.
+- **Specialized guidance:** load only the reference modules relevant to the task.
+- **Quality loop:** inspect, block out, refine, validate, correct, and report.
+- **Safety first:** protect existing scene content and disclose unverified results.
 
-An agent skill that helps AI agents create better Blender assets through MCP: cleaner geometry, deliberate scale, better materials, reliable validation, and game-ready exports.
-
-- Works with agents that support the [Agent Skills](https://agentskills.io/) format, including Claude Code, Codex, Cursor, and other compatible clients.
-- Uses an inspect → blockout → refine → validate → correct workflow.
-- Includes reusable Blender Python scripts and focused reference guides.
-- MCP tool names vary by implementation. Discover the tools available in your active Blender MCP server instead of assuming every integration exposes the same tools.
-
-<p align="center"><img src="assets/without-vs-with.svg" alt="What changes for the agent: without vs with the skill" width="100%"></p>
-
-## How it works
-
-The skill changes what the agent decides and verifies while using Blender-control MCP tools. The npm package also includes a small stdio MCP server that exposes this skill, its reference guides, and script templates. That resource server does not itself control a live Blender scene; pair it with a separate Blender-control MCP server for live operations.
-
-<p align="center"><img src="assets/architecture.svg" alt="The agent loads the skill, then calls MCP tools that drive a live Blender" width="100%"></p>
-
-<p align="center"><img src="assets/workflow.svg" alt="Core loop: plan, blockout, refine, UV, material, validate, deliver, with a gate after blockout and a fix loop after validate" width="100%"></p>
+Works with compatible agents that can read Agent Skills and use a Blender-control MCP integration. MCP tool names vary; the agent must discover the tools actually available. This repository's skill does not replace the MCP server that controls a live Blender session.
 
 ## Install
-
-Install the skill with the Skills CLI:
 
 ```bash
 npx skills add God-601/blender-mcp-master
 ```
 
-If your client does not support the Skills CLI, clone/download this repository and point the agent to the root `SKILL.md`, or install the repository in that client's skills directory.
+Other ways:
 
-### npm / npx MCP resource server
+- **Claude Desktop / other clients without the Skills CLI:** put `SKILL.md`, `references/` and `scripts/` in one folder named `blender-mcp-master`, zip it, and upload it as a custom skill (or copy the folder into the client's skills directory).
+- **MCP resource server (optional):** serves the skill, guides and script templates over MCP. Use command `npx` with args `["-y", "github:God-601/blender-mcp-master"]`. It does **not** control Blender. (The package is not published on the npm registry yet, so the plain name `blender-mcp-master` will not resolve.)
 
-The npm package bundles `SKILL.md`, the `references/` guides, and the `scripts/` templates:
+Then configure a separate Blender-control MCP server and start Blender with its addon enabled. The agent should inspect the scene, plan the workflow, and verify its changes.
 
-```bash
-npx -y blender-mcp-master
-```
+Example request:
 
-Add it to an MCP client configuration using command `npx` and args `["-y", "blender-mcp-master"]`. It exposes `get_blender_skill`, `list_blender_resources`, `get_blender_reference`, `get_blender_script`, and `get_blender_mcp_setup` over stdio. The package is a skill/resource server, **not** a replacement for a Blender-control MCP server; configure a separate live Blender integration for scene editing.
+> Create a stylized, game-ready fantasy sword. Plan the modeling and texturing pipeline first, inspect the silhouette before detailing, validate the asset for the target engine, and report any remaining issues.
 
-Other CLI commands: `npx -y blender-mcp-master skill` prints the skill, and `npx -y blender-mcp-master list` lists bundled guides and scripts.
+## Repository map
 
-## Repository layout
-
-- `SKILL.md` — core instructions and workflow.
-- `references/` — focused guides for hard-surface, organic, character, environment, materials, lighting, export, performance, troubleshooting, budgets, and the modeling quality loop.
-- `scripts/` — utilities for validation, cleanup, origins, bevel/shading, LODs, PBR materials, exports, and scene setup.
+- `SKILL.md` — core workflow, module routing, safety, and delivery rules.
+- `references/` — focused modeling, materials, environment, export, performance, and troubleshooting guides.
+- `scripts/` — reusable Blender Python utilities and templates.
+- `tests/` — static checks and Blender-runtime tests.
+- [Universal quality checklist](references/quality-checklist.md) — common acceptance checks for every asset.
 
 ## Validation and compatibility
 
-The scripts are designed to be pasted into Blender's Python/MCP execution environment. They use Blender's `bpy` API and cannot be fully tested by ordinary Python alone.
-
-**Testing status:** repository changes must be validated in Blender before being treated as runtime-tested. Static review is not a substitute for running the scripts in the target Blender version. Check the script output and inspect the resulting asset before delivery. No compatibility claim is made for a Blender version unless it has been tested there.
-
-| Blender | Status |
-|---|---|
-| 5.2.3 | Automated: `tests/test_blender_runtime.py` runs every script through the `bpy` module, locally and in GitHub Actions (job `blender-runtime`). |
-| 3.1.2 | An independent agent reported 54/54 tests passing in headless Blender 3.1.2 on the reviewed revision. The latest follow-up changes have not yet been rerun on 3.1.2. |
-| 3.2 to 5.1 | Not tested. The scripts contain version checks for known API differences, but they have not been run there. |
-
-Run the tests yourself:
+The scripts use Blender's `bpy` API. Static tests do not prove that a script works in a running Blender version; run the available test suite and inspect the resulting asset in the target environment.
 
 ```bash
-python -m unittest discover -s tests -v          # static checks only; runtime tests are skipped without bpy
-pip install bpy==5.2.3                           # needs the matching Python version (3.13 for this wheel)
-python -m unittest discover -s tests -v          # now includes the Blender runtime tests
+python -m unittest discover -s tests -v
 ```
 
-The runtime suite covers GLB export and rollback after a failed LOD run. Rigged meshes/armatures and shape keys are not supported by `export_asset.py` and `make_lods.py`.
+Runtime tests may require the matching Blender Python environment and dependencies. Treat versions as supported only when tested; see the test output and workflow configuration for the current coverage.
 
-## Safety notes
+## Safety
 
-- Review a script's configuration before running it on a production scene.
-- Make a backup before running destructive mesh cleanup or export workflows.
-- Treat imported files, scene content, and code sent through an MCP server as untrusted.
-- Never assume a validation warning is a defect without considering the asset type and target pipeline.
+- Inspect the scene and target objects before editing.
+- Prefer dedicated collections and non-destructive operations while iterating.
+- Back up files before destructive operations; do not overwrite user data without permission.
+- Treat imported files, scene content, and MCP-provided code as untrusted.
+- Never claim that inspection, validation, or export succeeded without checking the actual result.
+
+## Documentation
+
+Start with `SKILL.md`, then load only the references relevant to the task. The detailed guides explain discipline-specific techniques and caveats.
 
 ## License
 
@@ -84,74 +62,59 @@ MIT
 
 ---
 
-<a id="português"></a>
 # Português
 
-Uma skill para ajudar agentes de IA a criar modelos melhores no Blender via MCP: geometria mais limpa, escala consciente, materiais melhores, validação confiável e exportação para jogos.
+A Blender MCP Master é uma skill para agentes compatíveis que planejam, criam, inspecionam, refinam e validam assets 3D no Blender — de hard surface e modelagem orgânica a hand-painted, PBR, cenários, personagens e assets para jogos.
 
-- Compatível com agentes que suportam o formato [Agent Skills](https://agentskills.io/), incluindo Claude Code, Codex, Cursor e outros clientes compatíveis.
-- Usa um fluxo de inspeção → blockout → refinamento → validação → correção.
-- Inclui scripts reutilizáveis em Python para Blender e guias de referência.
-- Os nomes das ferramentas MCP variam conforme a implementação. Descubra as ferramentas disponíveis no servidor Blender MCP ativo em vez de presumir que todas as integrações oferecem as mesmas funções.
+- **Planejamento antes da modelagem:** definir finalidade, estilo, limitações, entregáveis e critérios de aceitação.
+- **Guias especializados:** consultar somente os módulos relevantes para a tarefa.
+- **Ciclo de qualidade:** inspecionar, bloquear formas, refinar, validar, corrigir e relatar.
+- **Segurança:** preservar o conteúdo existente da cena e informar resultados não verificados.
+
+Funciona com agentes que suportam o formato Agent Skills e possuem acesso a uma integração MCP que controle o Blender. Os nomes e recursos das ferramentas MCP variam. A skill não substitui o servidor MCP necessário para controlar uma sessão do Blender.
 
 ## Instalação
-
-Instale a skill usando o Skills CLI:
 
 ```bash
 npx skills add God-601/blender-mcp-master
 ```
 
-Se o seu cliente não oferecer suporte ao Skills CLI, clone/baixe este repositório e indique o arquivo `SKILL.md` na raiz, ou instale o repositório na pasta de skills desse cliente.
+Outras formas:
 
-### Servidor MCP via npm/npx
+- **Claude Desktop / clientes sem Skills CLI:** coloque `SKILL.md`, `references/` e `scripts/` em uma pasta chamada `blender-mcp-master`, compacte em .zip e envie como skill personalizada (ou copie a pasta para o diretório de skills do cliente).
+- **Servidor MCP de recursos (opcional):** entrega a skill, os guias e os modelos de script via MCP. Use o comando `npx` com os argumentos `["-y", "github:God-601/blender-mcp-master"]`. Ele **não** controla o Blender. (O pacote ainda não está publicado no registro npm, então o nome simples `blender-mcp-master` não funciona.)
 
-O pacote npm inclui `SKILL.md`, os guias de `references/` e os scripts de `scripts/`:
+Depois, configure separadamente um servidor MCP de controle do Blender e inicie o Blender com o addon habilitado. O agente deve inspecionar a cena, planejar o trabalho e verificar as alterações.
 
-```bash
-npx -y blender-mcp-master
-```
+Exemplo:
 
-Na configuração do cliente MCP, use o comando `npx` e os argumentos `["-y", "blender-mcp-master"]`. O servidor stdio disponibiliza `get_blender_skill`, `list_blender_resources`, `get_blender_reference`, `get_blender_script` e `get_blender_mcp_setup`. Ele fornece a skill e os recursos, mas **não controla sozinho uma cena Blender ao vivo**; para editar cenas, configure também um servidor MCP separado que controle o Blender.
+> Crie uma espada fantasy estilizada e pronta para jogo. Planeje primeiro a modelagem e a texturização, confira a silhueta antes dos detalhes, valide o asset para a engine de destino e informe os problemas restantes.
 
-Comandos adicionais: `npx -y blender-mcp-master skill` imprime a skill e `npx -y blender-mcp-master list` lista os guias e scripts.
+## Estrutura
 
-## Estrutura do repositório
+- `SKILL.md` — fluxo central, seleção de módulos, segurança e entrega.
+- `references/` — guias especializados de modelagem, materiais, ambientes, exportação, desempenho e diagnóstico.
+- `scripts/` — utilitários e modelos reutilizáveis em Python para Blender.
+- `tests/` — verificações estáticas e testes executados no ambiente Blender.
+- [Checklist universal de qualidade](references/quality-checklist.md) — critérios comuns de aceitação.
 
-- `SKILL.md` — instruções principais e fluxo de trabalho.
-- `references/` — guias de hard-surface, orgânicos, personagens, ambientes, materiais, iluminação, exportação, desempenho, solução de problemas, orçamentos e ciclo de qualidade.
-- `scripts/` — utilitários de validação, limpeza, origem, bevel/sombreamento, LODs, materiais PBR, exportação e configuração de cena.
+## Testes e compatibilidade
 
-## Validação e compatibilidade
-
-Os scripts foram feitos para serem executados no ambiente Python/MCP do Blender. Eles usam a API `bpy` e não podem ser testados completamente com Python comum fora do Blender.
-
-**Status dos testes:** alterações no repositório precisam ser validadas dentro do Blender antes de serem consideradas testadas em execução. Revisão estática não substitui a execução dos scripts na versão-alvo do Blender. Confira a saída dos scripts e inspecione o modelo resultante antes da entrega. Não declare compatibilidade com uma versão do Blender sem testá-la.
-
-| Blender | Status |
-|---|---|
-| 5.2.3 | Automatizado: `tests/test_blender_runtime.py` roda todos os scripts pelo módulo `bpy`, localmente e no GitHub Actions (job `blender-runtime`). |
-| 3.1.2 | Um agente independente informou 54/54 testes aprovados no Blender 3.1.2 headless na revisão analisada. As alterações mais recentes ainda não foram testadas novamente nessa versão. |
-| 3.2 a 5.1 | Não testado. Os scripts têm verificações de versão para diferenças conhecidas da API, mas não foram executados nessas versões. |
-
-Para rodar os testes:
+Os scripts usam a API `bpy`. Testes estáticos não comprovam que um script funciona em uma versão específica do Blender; execute a suíte disponível e inspecione o asset no ambiente de destino.
 
 ```bash
-python -m unittest discover -s tests -v          # só verificações estáticas; os testes de runtime são pulados sem bpy
-pip install bpy==5.2.3                           # exige a versão correspondente do Python (3.13 neste wheel)
-python -m unittest discover -s tests -v          # agora inclui os testes de runtime no Blender
+python -m unittest discover -s tests -v
 ```
 
-A suíte de runtime cobre exportação GLB e rollback após falha na geração de LOD. Malhas com rig/armatures e shape keys não são suportadas por `export_asset.py` e `make_lods.py`.
-
-Os diagramas do fluxo estão na seção em inglês, acima.
+Os testes de runtime podem exigir o ambiente Python correspondente ao Blender e dependências específicas. Considere uma versão compatível somente quando houver testes que sustentem essa afirmação.
 
 ## Segurança
 
-- Confira a configuração de cada script antes de executá-lo em uma cena de produção.
-- Faça backup antes de usar scripts de limpeza destrutiva de malha ou exportação.
-- Trate arquivos importados, conteúdo da cena e código enviado por MCP como dados não confiáveis.
-- Não considere todo aviso de validação um defeito sem levar em conta o tipo de asset e o destino.
+- Inspecione a cena e os objetos-alvo antes de editar.
+- Prefira coleções dedicadas e operações não destrutivas durante a iteração.
+- Faça backup antes de operações destrutivas; não sobrescreva dados do usuário sem autorização.
+- Trate arquivos importados, conteúdo da cena e código recebido via MCP como dados não confiáveis.
+- Nunca afirme que uma inspeção, validação ou exportação funcionou sem verificar o resultado.
 
 ## Licença
 
