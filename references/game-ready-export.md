@@ -1,37 +1,46 @@
-# Game-ready assets and export (Roblox, Unity, Unreal, Godot, glTF)
+# Game-Ready Assets and Export
 
-## Pre-export checklist (all engines)
-1. Transforms applied (scale 1, rotation 0). Origin at a sensible point. Correct real-world scale.
-2. Modifiers applied or intentionally exported (Mirror, Bevel, Boolean, Array, Weighted Normal: apply). Hide cutters first, delete them.
-3. Geometry clean: no loose verts, doubles, interior faces, zero-area faces, non-manifold edges where it matters; normals consistent (recalculate outside).
-4. Triangulate (modifier at export, or `Triangulate` applied with `quad_method='BEAUTY'`, `ngon_method='BEAUTY'`) - do this consistently, ideally BEFORE baking normals.
-5. UVs: one non-overlapping layout (unless intentionally mirrored), margins set, inside 0 to 1 (unless tiling textures).
-6. Materials: minimal count, named, Principled BSDF with image textures only (no procedural nodes, no unsupported nodes).
-7. Names: no spaces or special characters; unique; no `.001` suffixes. Consider `_LOD0`, `_LOD1`, `UCX_` (Unreal collision) conventions.
-8. Collision: provide simple collision (box/convex hulls) when the engine needs it; never rely on the render mesh for complex physics.
-9. Budget check against `budgets.md`.
-10. Run `validate_asset.py`.
+Use this guide for assets headed to Roblox, Unity, Unreal, Godot, or another realtime engine. Verify the target-specific requirements instead of assuming one export preset is correct for every project.
 
-## LODs
-- LOD0 100 percent, LOD1 about 50 percent, LOD2 about 25 percent, LOD3 about 10 percent (`make_lods.py`). Keep UVs and silhouette. Verify with `look(shading="wireframe")`. Skip LODs for small props or cheap meshes (under about 500 tris).
+## 1. Set the target before modeling
 
-## Axis / unit settings (Blender FBX exporter)
-- Unity: `apply_scale_options='FBX_SCALE_ALL'`, `axis_forward='-Z'`, `axis_up='Y'`, `apply_unit_scale=True`.
-- Unreal: `apply_scale_options='FBX_SCALE_NONE'`, `axis_forward='-Y'`, `axis_up='Z'`, `global_scale=1.0`, add smoothing groups: `mesh_smooth_type='FACE'`.
-- Godot: prefer glTF 2.0 (`.glb`), Y-up conversion is on by default.
-- Roblox: FBX or OBJ into Studio via the Asset/Avatar Importer; Studio expects meters-to-studs conversions, so confirm scale in Studio after import; MeshPart cap 21,844 tris, keep textures <= 1024 for props (up to 2048 for hero), single material/texture per mesh is the cheapest. Don't rely on vertex-color support; use textures or the surface appearance. For "studs" assets keep grid-aligned dimensions so pieces snap in Studio.
+Choose the required format, units, forward/up axes, triangle budget, material count, texture dimensions, collision policy, LODs, pivot/origin, and allowed shader features. Read references/budgets.md for target-aware budgets and references/uv-baking.md for texture and bake preparation.
 
-## glTF / GLB
-- Best for web, Godot, three.js, Roblox-adjacent workflows with PBR. Export with `export_format='GLB'`, `export_apply=True` (apply modifiers), `export_texcoords=True`, `export_normals=True`, `export_materials='EXPORT'`, `export_yup=True`.
-- Pack textures into the GLB or export beside it.
+## 2. Pre-export checklist
 
-## Baking (high to low)
-- Low poly with clean UVs + high poly (or procedural material) -> bake Normal, AO, Base Color, Roughness at the budgeted size. Cage extrusion about 0.01 to 0.05. Cycles required for bake. Use margin 8 to 16 px, `use_selected_to_active=True`, then reconnect the baked images in a simple Principled setup before export.
+1. Confirm scale, orientation, object origins, pivots, and ground placement.
+2. Decide which modifiers must be applied or can be exported. Check version-dependent modifier behavior.
+3. Inspect geometry for loose elements, degenerate faces, unwanted interior surfaces, normals, intersections, and non-manifold edges where relevant.
+4. Decide when triangulation occurs. If normal maps are baked, keep triangulation and normal/tangent conventions consistent with the target pipeline.
+5. Confirm UV layout, overlaps, padding, and the target's texture-coordinate expectations.
+6. Confirm material count, naming, texture maps, color spaces, and supported shader features.
+7. Exclude hidden cutters, helpers, lights, cameras, and unrelated user objects from the exported set unless explicitly needed.
+8. Check collision, LOD, naming, and import conventions only where the destination uses them.
+9. Run scripts/validate_asset.py and investigate warnings in context.
+10. Export to a new path unless the user explicitly requested overwriting; verify the file exists and, where possible, reopen or import it.
 
-## Using `scripts/export_asset.py`
-Set `OBJECTS`, `PATH`, `FORMAT`, `ENGINE` at the top; the script exports only listed objects, triangulates copies if requested, and prints the file size. It restores object names, selection, active object and mode afterwards, and raises an error if no file was written. Rigged or shape-keyed meshes are not handled by this script; export those manually. Always report the exported path and tri count to the user.
+## 3. LOD and scene performance
 
-## Don't
-- Don't export with hidden helpers/cutters selected.
-- Don't change the user's .blend objects destructively to export: use temporary duplicates (the script does).
-- Don't claim the model works in an engine you did not test; say what you verified (tris, UVs, materials, scale).
+- Build LOD levels from the silhouette and screen-space role of the asset, not from a ratio alone.
+- A decimated LOD can lose thin elements, UV quality, shading, and defining facets; inspect every level.
+- Small or cheap objects may not need LODs. Repeated hero assets, vegetation, and large environment props may benefit substantially.
+- Use instances for repeated objects and simple collision meshes where the engine needs them.
+- Measure final triangles after modifiers and export conversion; do not report only the editable base-mesh count.
+
+## 4. Destination considerations
+
+- **Unity/Unreal/Godot/Roblox:** verify current import settings, scale conversion, axes, material support, texture compression, and any platform-specific limits in the actual destination.
+- **glTF/GLB:** useful for realtime PBR assets, but not all Blender nodes or modifiers are represented. Confirm exported materials and textures.
+- **FBX:** common for skeletal meshes and game assets; verify axes, scale, smoothing, armature, and animation data in the importer.
+- **OBJ/STL:** mesh interchange formats with limited material/scene information; do not assume they preserve rigs, procedural shaders, or full scene organization.
+
+Do not rely on a remembered numeric platform limit when the limit may change or depends on asset category. Verify against current official documentation for the intended engine and report the checked value/source when it affects acceptance.
+
+## 5. Export script and safety
+
+For scripts/export_asset.py, inspect its configuration and select only intended objects. The script has its own supported formats and limitations; read it before use. Rigged or shape-keyed meshes may require a dedicated, carefully checked export path.
+
+- Preserve the working .blend and export a copy.
+- Never delete user objects to make a clean export set; isolate the intended objects or use safe temporary copies.
+- Record file path, format, file size, triangle count, material/texture dependencies, and validation status when those values were actually measured.
+- If the destination application was not available, say that export settings and file presence were checked but in-engine behavior was not verified.
