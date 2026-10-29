@@ -5,7 +5,7 @@ Use this checklist for every asset, then load the discipline-specific reference 
 For each applicable item, report one status:
 
 - **PASS** — checked and acceptable for the stated target.
-- **FAIL** — checked and a relevant defect remains.
+- **ISSUE** — checked and a relevant defect remains.
 - **N/A** — not applicable to this asset or workflow.
 - **NOT VERIFIED** — the check could not be performed or evidence is insufficient.
 
