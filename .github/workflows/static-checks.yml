@@ -46,7 +46,10 @@ jobs:
       - name: System libraries needed by the bpy wheel
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libgl1 libxi6 libxrender1 libxxf86vm1 libxfixes3 libsm6 libxkbcommon0
       - run: pip install bpy==${{ matrix.bpy }}
+      # tests/run_all.py exits with the real result but skips interpreter teardown: bpy 4.2.x
+      # segfaults at exit after a glTF export (see the docstring), which would fail the job
+      # even though all tests passed.
       - name: Run all tests (fails if bpy cannot be imported)
         env:
           REQUIRE_BPY: "1"
-        run: python -m unittest discover -s tests -v
+        run: python tests/run_all.py -v
