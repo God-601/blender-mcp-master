@@ -1,11 +1,11 @@
 ---
 name: blender-mcp-master
-description: Use whenever an agent controls a live Blender through MCP (execute_blender_code, look, get_scene_info, search_assets, import_asset, generate_3d) to model, texture, light, rig, optimize or export ANY kind of 3D model - hard-surface, organic, props, characters, environments, low-poly, stylized, voxel/studs, or game-ready assets. Gives a verified workflow, quality rules, performance rules and ready-to-run bpy snippets so results are clean, fast and correct on the first try.
+description: Use when an agent plans, creates, inspects, textures, shades, lights, rigs, optimizes, validates, or exports any kind of 3D asset in Blender through MCP. Covers hard-surface, organic, characters, hand-painted, stylized/fantasy, low-poly/retro, PBR/procedural/toon materials, environments, architecture, CAD, sculpting, UVs/baking, retopology, game-ready assets, LODs, and rendering. Requires task-first planning, evidence-based quality checks, safe scene edits, and transparent delivery.
 ---
 
 # Blender MCP Master
 
-A skill for agents that drive a **live Blender session through MCP**. Goal: higher quality and better performance for any model type, with fewer retries.
+A skill for agents that drive a **live Blender session through MCP**. Goal: produce very good results across 3D disciplines by choosing a task-appropriate workflow, planning before modeling, validating with evidence, and correcting high-impact defects without unnecessary iteration.
 
 Works with any agent that can read this file (Claude, Codex, Cursor, Gemini CLI, etc.). Tool names below are the MCP Blender server's; if your agent exposes them with a prefix, use the prefixed name.
 
@@ -61,6 +61,28 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Quality loop, visual review, contextual validation | Modeling QA | `references/modeling-quality-loop.md` |
 
 Always also follow sections 3 to 6 below. For cross-cutting visual review, contextual diagnostics, and reliable MCP iteration, load `references/modeling-quality-loop.md`.
+
+
+
+## 2A. Required planning gate
+
+Before substantial modeling, write a compact plan that identifies:
+
+1. **Purpose and destination:** game engine, animation, still render, 3D printing, architecture, CAD, or another use.
+2. **Visual direction:** reference, style, silhouette, material language, and intended viewing distance.
+3. **Technical constraints:** Blender version, units/scale, topology needs, triangle and texture budgets when relevant, materials, UVs, performance, and export format.
+4. **Selected workflow:** the modeling and look-development methods plus the reference modules needed. Choose freely between procedural modeling, direct mesh editing, sculpting, external/reference assets, or a hybrid approach based on task fit and available tools.
+5. **Acceptance criteria:** how visual quality, technical validity, and delivery will be checked.
+
+Do not turn this into a long essay. If the request is clear, infer sensible defaults, state important assumptions briefly, and proceed. Ask the user only when an ambiguity could materially change the result or when a critical, irreversible choice requires approval. Research relevant documentation or references when available if a method or API is uncertain; distinguish verified facts from assumptions.
+
+After planning, inspect the scene and tools before modifying anything. Complete a primary-form blockout and inspect it before adding fine detail. For a complex task, divide execution into small stages with checkpoints. For a simple task, keep the plan proportionately short.
+
+## 2B. Universal quality gate
+
+Use `references/quality-checklist.md` for the common acceptance checklist, then add the relevant discipline-specific checks. Mark each check as **PASS**, **FAIL**, **N/A**, or **NOT VERIFIED**. Never present an unverified check as passed. Interpret warnings in the context of the asset and target pipeline; a warning is not automatically a defect.
+
+At delivery, fix high-impact defects when feasible. If the asset is usable but not excellent, deliver it with a concise, honest list of known issues and what was not verified rather than hiding defects or iterating indefinitely.
 
 ## 3. The core loop
 
@@ -137,11 +159,11 @@ Edit the config block at the top of each script (clearly marked) instead of rewr
 
 ## 8. Delivery format
 
-Finish with a short report: what was built, dimensions in meters, tri count, material count, validation result, and any known limitation. If a file was exported, give the path. No long recap of steps.
+Finish with a short report: what was built, relevant dimensions and triangle count, material/texture details when relevant, validation status, export path if applicable, known defects, and checks not performed. Use measured values only when actually retrieved; do not assume all assets use meters or triangle budgets. Deliver a good usable result when appropriate, but clearly disclose remaining defects instead of claiming perfection.
 
 ## 9. Asking the user
 
-Ask only when the answer changes the result: target platform or budget, style, reference image, scale. Offer concrete choices. If the user is absent, pick defaults, state them, continue.
+Ask only when an ambiguity materially changes the result or a critical decision needs the user's approval. Otherwise choose reasonable defaults, state consequential assumptions briefly, and continue. Avoid repeated questions for information already provided.
 
 ## 10. Safety
 
