@@ -22,6 +22,17 @@ class RepositoryStaticChecks(unittest.TestCase):
         self.assertIn("# Blender MCP Master", readme)
         self.assertIn("references/quality-checklist.md", readme)
 
+    def test_quality_checklist_is_referenced_and_statuses_match_core_skill(self):
+        readme = (ROOT / "README.md").read_text(encoding="utf-8")
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        checklist = (ROOT / "references" / "quality-checklist.md").read_text(encoding="utf-8")
+        self.assertIn("references/quality-checklist.md", readme)
+        self.assertIn("references/quality-checklist.md", skill)
+        for status in ("PASS", "ISSUE", "N/A", "NOT VERIFIED"):
+            with self.subTest(status=status):
+                self.assertIn(status, skill)
+                self.assertIn(status, checklist)
+
     def test_validator_reports_incomplete_target_selection(self):
         source = (ROOT / "scripts" / "validate_asset.py").read_text(encoding="utf-8")
         self.assertIn("INCOMPLETE - CHECK TARGETS", source)
