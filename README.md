@@ -79,7 +79,8 @@ Exemplo:
 ## Estrutura
 
 - `SKILL.md` — fluxo central, seleção de módulos, segurança e entrega.
-- `references/` — guias especializados de modelagem, materiais, ambientes, exportação, desempenho e diagnóstico.
+- `references/` — guias especializados de modelagem, materiais, ambientes, exportação, desempenho e diagnóstico, incluindo hand-painted, UV/baking, topologia/retopologia, escultura/high-poly, arquitetura/interiores e CAD técnico.
+- Guias principais: [pipeline hand-painted](references/hand-painted-pipeline.md), [UV e baking](references/uv-baking.md), [topologia e retopologia](references/topology-retopology.md), [escultura/high-poly](references/sculpting-highpoly.md), [arquitetura/interiores](references/architecture-interiors.md) e [CAD técnico](references/cad-technical.md).
 - `scripts/` — utilitários e modelos reutilizáveis em Python para Blender.
 - `tests/` — verificações estáticas e testes executados no ambiente Blender.
 - [Checklist universal de qualidade](references/quality-checklist.md) — critérios comuns de aceitação.
