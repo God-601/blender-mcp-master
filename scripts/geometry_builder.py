@@ -38,9 +38,13 @@ def _collection(name):
     col = bpy.data.collections.get(name) if REUSE_COLLECTION else None
     if col is None:
         col = bpy.data.collections.new(name)
+        col[OWNER_KEY] = OWNER_VALUE
         bpy.context.scene.collection.children.link(col)
     else:
-        bpy.context.scene.collection.children.link(col) if col.name not in bpy.context.scene.collection.children else None
+        if col.get(OWNER_KEY) != OWNER_VALUE:
+            raise ValueError("Collection name already exists and is not owned by this builder: " + name)
+        if col.name not in bpy.context.scene.collection.children:
+            bpy.context.scene.collection.children.link(col)
     return col
 
 
