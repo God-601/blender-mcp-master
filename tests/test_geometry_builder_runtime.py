@@ -51,13 +51,39 @@ class GeometryBuilderRuntimeTests(unittest.TestCase):
             {"name": "LatheA", "type": "lathe",
              "profile": [(0.5, 0), (0.5, 1), (0.2, 1.5)], "segments": 12},
             {"name": "IcoA", "type": "ico_sphere", "subdivisions": 1},
+            {"name": "LoftA", "type": "loft", "profiles": [
+                {"z": 0.0, "points": [(-1, -1), (1, -1), (1, 1), (-1, 1)]},
+                {"z": 2.0, "points": [(-0.5, -0.5), (0.5, -0.5), (0.5, 0.5), (-0.5, 0.5)]}
+            ]},
         ]
         out, err = run_builder(specs)
         self.assertIsNone(err, out)
-        for name in ("BoxA", "BeamA", "ProfileA", "LatheA", "IcoA"):
+        for name in ("BoxA", "BeamA", "ProfileA", "LatheA", "IcoA", "LoftA"):
             self.assertIn(name, bpy.data.objects)
             self.assertGreater(len(bpy.data.objects[name].data.polygons), 0)
         self.assertIn("result: SUCCESS", out)
+
+    def test_loft_connects_matching_profiles_and_rejects_bad_order(self):
+        out, err = run_builder([{
+            "name": "Loft", "type": "loft", "profiles": [
+                {"z": 0.0, "points": [(0, 0), (1, 0), (1, 1), (0, 1)]},
+                {"z": 1.0, "points": [(-0.5, -0.5), (1.5, -0.5), (1.5, 1.5), (-0.5, 1.5)]}
+            ]
+        }])
+        self.assertIsNone(err, out)
+        self.assertEqual(len(bpy.data.objects["Loft"].data.vertices), 8)
+        self.assertEqual(len(bpy.data.objects["Loft"].data.polygons), 6)
+
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        out, err = run_builder([{
+            "name": "BadLoft", "type": "loft", "profiles": [
+                {"z": 1.0, "points": [(0, 0), (1, 0), (1, 1)]},
+                {"z": 0.0, "points": [(0, 0), (1, 0), (1, 1)]}
+            ]
+        }])
+        self.assertIsNone(err, out)
+        self.assertNotIn("BadLoft", bpy.data.objects)
+        self.assertIn("strictly increasing", out)
 
     def test_invalid_dimensions_are_reported_without_aborting_other_components(self):
         specs = [
