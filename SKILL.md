@@ -65,9 +65,11 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Slow viewport, heavy scene, crashes | Performance | `references/performance.md` |
 | Something looks wrong | Troubleshooting | `references/troubleshooting.md` |
 | Need triangle / texture / scale numbers | Budgets | `references/budgets.md` |
+| Optimize game assets, mesh topology, draw overhead, LOD or Roblox performance | Game asset optimization | `references/game-asset-optimization.md` |
+| Shared modeling standards, topology and operation selection | Modeling foundations | `references/modeling-foundations.md` |
 | Quality loop, visual review, contextual validation | Modeling QA | `references/modeling-quality-loop.md`; `references/quality-checklist.md` |
 
-Always also follow sections 3 to 6 below. For cross-cutting visual review, contextual diagnostics, and reliable MCP iteration, load `references/modeling-quality-loop.md`.
+Always also follow sections 3 to 6 below. For shared topology and operation standards, load `references/modeling-foundations.md`; for cross-cutting visual review and reliable MCP iteration, load `references/modeling-quality-loop.md`. For game-ready material/UV/LOD/export work, load `references/p1-production-pipeline.md` alongside `references/materials.md` and `references/game-ready-export.md`.
 
 
 
@@ -99,7 +101,8 @@ BLOCK  -> blockout with primitives at correct proportions; look (angles) BEFORE 
 REFINE -> bevels, secondary forms, details; look (solid + wireframe)
 UV     -> only if textured or exported to a game
 MATERIAL -> PBR materials, named, shared where possible
-VALIDATE -> run scripts/validate_asset.py; fix each WARN or state why it is acceptable for this asset; re-run
+OPTIMIZE -> for game assets, load references/game-asset-optimization.md; baseline, dry-run, backup, clean conservatively, inspect, compare
+VALIDATE -> set explicit TARGETS in scripts/validate_asset.py (or select only intended meshes); fix each WARN or justify it; re-run
 DELIVER -> save/export if asked; report facts
 ```
 
@@ -153,7 +156,8 @@ Run them by pasting their contents into `execute_blender_code` (they only use bp
 
 | Script | Use |
 |---|---|
-| `validate_asset.py` | Read-only report with PASS / WARN / INFO per check and a final RESULT line (`INCOMPLETE - CHECK TARGETS` if a target is missing). It does not check face orientation: inspect normals visually. Run before delivering anything |
+| `optimize_mesh.py` | Dry-run-first, backup-first conservative mesh cleanup; optional balanced dissolve and non-destructive Decimate preview |
+| `validate_asset.py` | Read-only report with base/evaluated topology, modifiers, shape keys, UVs, materials, images and target status. Empty TARGETS checks selected meshes only; no scene-wide fallback |\n| `validate_uvs.py` | Read-only UV bounds and zero-area diagnostics for explicit targets or selected meshes; does not claim overlap/stretch validation |
 | `setup_scene.py` | Clean working collection, metric units, sane clip range, optional studio lighting |
 | `cleanup_mesh.py` | Remove doubles, loose geometry, degenerate faces, recalc normals, optional tri/quads conversion |
 | `apply_and_origin.py` | Apply transforms, set origin (bottom center / center / custom), ground the object |

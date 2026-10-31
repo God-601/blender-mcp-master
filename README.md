@@ -45,6 +45,10 @@ Example request:
 - `SKILL.md` — core workflow, module routing, safety, and delivery rules.
 - `references/` — focused guides for hard-surface, organic/characters, stylized/retro, hand-painted textures, UV/baking, topology/retopology, sculpting/high-poly, architecture/interiors, CAD, materials, environments, export, performance, and troubleshooting.
 - `scripts/` — reusable Blender Python utilities and templates.
+- `references/game-asset-optimization.md` — safe mesh cleanup, LOD, draw overhead, and Roblox-focused optimization.
+- `references/modeling-foundations.md` — shared topology, modeling operations, shading, UV, and production handoff standards.
+- `references/p1-production-pipeline.md` — P1 workflow for PBR materials, UV production, LOD generation, and engine handoff.
+- `scripts/validate_uvs.py` — read-only UV bounds and zero-area diagnostics.
 - `tests/` — static checks and Blender-runtime tests.
 - [Universal quality checklist](references/quality-checklist.md) — common acceptance checks for every asset.
 
@@ -110,6 +114,10 @@ Exemplo:
 - `references/` — guias especializados de modelagem, materiais, ambientes, exportação, desempenho e diagnóstico, incluindo hand-painted, UV/baking, topologia/retopologia, escultura/high-poly, arquitetura/interiores e CAD técnico.
 - Guias principais: [pipeline hand-painted](references/hand-painted-pipeline.md), [UV e baking](references/uv-baking.md), [topologia e retopologia](references/topology-retopology.md), [escultura/high-poly](references/sculpting-highpoly.md), [arquitetura/interiores](references/architecture-interiors.md) e [CAD técnico](references/cad-technical.md).
 - `scripts/` — utilitários e modelos reutilizáveis em Python para Blender.
+- `references/game-asset-optimization.md` — limpeza segura de malha, LOD, custo de renderização e otimização para Roblox.
+- `references/modeling-foundations.md` — padrões compartilhados de topologia, operações de modelagem, shading, UVs e entrega.
+- `references/p1-production-pipeline.md` — fluxo P1 para materiais PBR, UVs, LODs e entrega para engines.
+- `scripts/validate_uvs.py` — diagnóstico somente leitura dos limites e áreas UV.
 - `tests/` — verificações estáticas e testes executados no ambiente Blender.
 - [Checklist universal de qualidade](references/quality-checklist.md) — critérios comuns de aceitação.
 
