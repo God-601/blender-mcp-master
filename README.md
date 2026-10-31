@@ -30,7 +30,7 @@ Example request:
 
 - `SKILL.md` — core workflow, module routing, safety, and delivery rules.
 - `references/` — focused modeling, materials, environment, export, performance, and troubleshooting guides.
-- `scripts/` — reusable Blender Python utilities and templates, including the initial declarative geometry builder.
+- `scripts/` — reusable Blender Python utilities and templates, including the declarative geometry builder and deterministic organic rock generator.
 - `references/architecture.md` and `references/module-contracts.md` — system boundaries and cross-module contracts.
 - `references/geometry-engine.md` — current geometry capabilities, usage, and the construction roadmap.
 - `references/modeling-intelligence.md` — task decomposition, technique selection, and adaptive refinement.
