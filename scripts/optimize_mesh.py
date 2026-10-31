@@ -80,7 +80,6 @@ def backup_object(obj, collection):
     collection.objects.link(backup)
     backup.hide_viewport = True
     backup.hide_render = True
-    backup.hide_set(True)
     # Give the working object its own mesh so the backup retains the original.
     obj.data = obj.data.copy()
     return backup
