@@ -70,4 +70,4 @@ Run the same tasks in each supported agent/client. Record:
 - quality checks performed
 - final asset and limitations
 
-A compatibility matrix is only updated after an actual run. `scripts/capability_probe.py` reports Blender-side API availability, but it does not prove that an agent/client can discover or invoke the MCP tools. Do not mark Codex, Claude, Cursor, OpenCode, or Kilo Code as verified until a real session completes the same task.
+A compatibility matrix is only updated after an actual run. See `references/agent-compatibility.md` for the current client matrix and evidence protocol. `scripts/capability_probe.py` reports Blender-side API availability, but it does not prove that an agent/client can discover or invoke the MCP tools. Do not mark Codex, Claude, Cursor, OpenCode, or Kilo Code as verified until a real session completes the same task.
