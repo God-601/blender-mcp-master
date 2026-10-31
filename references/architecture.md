@@ -108,7 +108,7 @@ Still requiring external execution or further implementation:
 - Actual multi-agent runs in Codex, Claude, Cursor, OpenCode, and Kilo Code; the compatibility matrix is deliberately NOT VERIFIED until evidence is collected.
 - MCP visual capture and reference-image comparison (the skill routes to the client's visual tool; scripts cannot fabricate that evidence).
 - Automated defect recognition from images and closed-loop artistic correction.
-- Broader Geometry Nodes systems, advanced topology operations (robust inset/bridge/retopology), and larger parametric kits.
+- Broader Geometry Nodes systems, advanced topology operations (edge-loop bridge, retopology, semantic face selection; basic face inset/extrusion are implemented), and larger parametric kits.
 - Technique retrieval/ranking and feedback-driven learning beyond append-only history.
 
 Do not create empty directories or placeholder modules just to match a diagram. Add a module when it has
