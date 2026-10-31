@@ -6,6 +6,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import { z } from "zod";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const PACKAGE_VERSION = JSON.parse(readFileSync(resolve(ROOT, "package.json"), "utf8")).version;
 const SKILL_PATH = resolve(ROOT, "SKILL.md");
 const REFERENCE_DIR = resolve(ROOT, "references");
 const SCRIPT_DIR = resolve(ROOT, "scripts");
@@ -22,7 +23,7 @@ function readAllowedFile(directory, allowlist, requestedName) {
 
 const server = new McpServer({
   name: "blender-mcp-master",
-  version: "0.1.0"
+  version: PACKAGE_VERSION
 });
 
 server.tool(

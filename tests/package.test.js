@@ -70,3 +70,78 @@ test("MCP server starts over stdio and exposes the expected tools", async () => 
     await client.close();
   }
 });
+
+async function withClient(run) {
+  const transport = new StdioClientTransport({
+    command: process.execPath,
+    args: [resolve(root, "src/server.js")]
+  });
+  const client = new Client({ name: "blender-mcp-master-test", version: "0.0.0" });
+  try {
+    await client.connect(transport);
+    return await run(client);
+  } finally {
+    await client.close();
+  }
+}
+
+test("MCP server reports the package.json version", async () => {
+  await withClient(async (client) => {
+    assert.equal(client.getServerVersion().version, pkg.version);
+  });
+});
+
+test("every listed reference and script can be read through the MCP tools", async () => {
+  await withClient(async (client) => {
+    const listed = await client.callTool({ name: "list_blender_resources", arguments: {} });
+    const { references, scripts } = JSON.parse(listed.content[0].text);
+    assert.ok(references.length > 0 && scripts.length > 0);
+    for (const name of references) {
+      const result = await client.callTool({ name: "get_blender_reference", arguments: { name } });
+      assert.ok(!result.isError, `${name}: ${JSON.stringify(result.content)}`);
+      assert.ok(result.content[0].text.length > 50, name);
+    }
+    for (const name of scripts) {
+      const result = await client.callTool({ name: "get_blender_script", arguments: { name } });
+      assert.ok(!result.isError, `${name}: ${JSON.stringify(result.content)}`);
+      assert.match(result.content[0].text, /import bpy/);
+    }
+  });
+});
+
+test("file tools reject unknown names, path traversal and files from the other directory", async () => {
+  const skillText = readFileSync(resolve(root, "SKILL.md"), "utf8");
+  await withClient(async (client) => {
+    const attempts = [
+      ["get_blender_reference", "../SKILL.md"],
+      ["get_blender_reference", "..\\SKILL.md"],
+      ["get_blender_reference", "/etc/passwd"],
+      ["get_blender_reference", "validate_asset.py"],
+      ["get_blender_reference", "does-not-exist.md"],
+      ["get_blender_reference", ""],
+      ["get_blender_script", "../package.json"],
+      ["get_blender_script", "budgets.md"],
+      ["get_blender_script", "scripts/validate_asset.py"]
+    ];
+    for (const [tool, name] of attempts) {
+      const result = await client.callTool({ name: tool, arguments: { name } });
+      assert.equal(result.isError, true, `${tool}(${JSON.stringify(name)}) should be rejected`);
+      const text = result.content.map((part) => part.text ?? "").join("\n");
+      assert.ok(!text.includes(skillText.slice(0, 80)), "error must not leak file contents");
+    }
+  });
+});
+
+test("npm pack contains the skill content and excludes tests and dependencies", () => {
+  const result = spawnSync("npm", ["pack", "--dry-run", "--json", "--ignore-scripts"], {
+    cwd: root,
+    encoding: "utf8",
+    timeout: 60000
+  });
+  assert.equal(result.status, 0, result.stderr);
+  const files = JSON.parse(result.stdout)[0].files.map((file) => file.path);
+  for (const required of ["SKILL.md", "README.md", "LICENSE", "package.json", "bin/blender-mcp-master.js", "src/server.js", "scripts/validate_asset.py", "references/modeling-quality-loop.md"]) {
+    assert.ok(files.includes(required), `missing from package: ${required}`);
+  }
+  assert.ok(!files.some((path) => path.startsWith("tests/") || path.startsWith("node_modules/") || path.startsWith(".github/")), "package must not ship tests, deps or CI files");
+});
