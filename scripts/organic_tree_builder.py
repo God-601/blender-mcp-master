@@ -72,8 +72,14 @@ def make_foliage(name, location, radius, collection, subdivisions=1):
 
 if TRUNK_HEIGHT <= 0 or TRUNK_RADIUS <= 0 or BRANCH_COUNT < 0 or FOLIAGE_COUNT < 1 or FOLIAGE_RADIUS <= 0:
     raise ValueError("tree parameters are invalid")
-if bpy.data.objects.get(OBJECT_PREFIX + "_Trunk"):
-    raise ValueError("tree object already exists; refusing overwrite")
+planned_names = [OBJECT_PREFIX + "_Trunk"] + [
+    OBJECT_PREFIX + "_Branch_%02d" % (index + 1) for index in range(BRANCH_COUNT)
+] + [
+    OBJECT_PREFIX + "_Canopy_%02d" % (index + 1) for index in range(FOLIAGE_COUNT)
+]
+collisions = [name for name in planned_names if name in bpy.data.objects]
+if collisions:
+    raise ValueError("tree output names already exist; refusing overwrite: " + ", ".join(collisions))
 rng = random.Random(int(SEED))
 collection = get_collection()
 created = []
