@@ -110,6 +110,47 @@ def add_operation(obj, operation, collection, index):
     return mod
 
 
+
+def apply_topology_operation(obj, operation):
+    """Apply a topology edit to the duplicated output mesh, never the source."""
+    kind = operation.get("type")
+    bm = bmesh.new()
+    try:
+        bm.from_mesh(obj.data)
+        bm.faces.ensure_lookup_table()
+        if kind in ("inset_faces", "extrude_faces"):
+            indices = [int(i) for i in operation.get("face_indices", [])]
+            if not indices or any(i < 0 or i >= len(bm.faces) for i in indices):
+                raise ValueError(kind + " requires valid explicit face_indices")
+            faces = [bm.faces[i] for i in indices]
+            if kind == "inset_faces":
+                thickness = float(operation.get("thickness", 0.05))
+                if thickness <= 0:
+                    raise ValueError("inset thickness must be positive")
+                bmesh.ops.inset_region(
+                    bm, faces=faces, thickness=thickness,
+                    depth=float(operation.get("depth", 0.0)),
+                    use_even_offset=bool(operation.get("use_even_offset", True)),
+                    use_interpolate=True, use_relative_offset=False
+                )
+            else:
+                offset = Vector(operation.get("offset", (0.0, 0.0, 0.2)))
+                if offset.length <= 1e-8:
+                    raise ValueError("extrude offset must be non-zero")
+                result = bmesh.ops.extrude_face_region(bm, geom=faces, use_keep_orig=False)
+                verts = [element for element in result["geom"] if isinstance(element, bmesh.types.BMVert)]
+                if not verts:
+                    raise ValueError("face extrusion produced no vertices")
+                bmesh.ops.translate(bm, verts=verts, vec=offset)
+        else:
+            raise ValueError("unsupported topology operation: " + str(kind))
+        bm.normal_update()
+        bm.to_mesh(obj.data)
+        obj.data.update()
+    finally:
+        bm.free()
+
+
 def process_target(spec, collection):
     source_name = str(spec["source"])
     output_name = str(spec["output"])
@@ -127,6 +168,9 @@ def process_target(spec, collection):
     created_cutters = []
     try:
         for index, operation in enumerate(spec.get("operations", []), 1):
+            if operation.get("type") in ("inset_faces", "extrude_faces"):
+                apply_topology_operation(output, operation)
+                continue
             before = set(bpy.data.objects.keys())
             add_operation(output, operation, collection, index)
             created_cutters.extend(
