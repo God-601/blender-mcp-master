@@ -100,7 +100,7 @@ Technique specifications, compatibility notes, verified examples, execution hist
 Implemented vertical slices on the feature branch:
 1. Declarative geometry, organic and modular builders.
 2. Duplicate-first mesh operations and hard-surface construction.
-3. Editable Geometry Nodes panel generator.
+3. Editable Geometry Nodes repeated-post generator.
 4. Read-only technical inspection and localized correction copies.
 5. Blender-side capability probe, in-project technique history, and technical benchmark report.
 
