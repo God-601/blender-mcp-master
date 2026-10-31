@@ -131,7 +131,7 @@ stop and request approval.
 A reusable technique record includes problem/intended use, method/parameters, prerequisites, tested
 Blender versions, test evidence, known failures/limitations, example asset or fixture, and revision.
 
-Separate verified runtime facts from recommendations and hypotheses.
+Separate verified runtime facts from recommendations and hypotheses. The current implementation includes append-only history, text-based retrieval, and explicit human review feedback scripts; it does not train a model or autonomously change technique selection.
 
 ## 10. Benchmark record
 
