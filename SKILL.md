@@ -62,7 +62,7 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Shared modeling standards, topology and operation selection | Modeling foundations | `references/modeling-foundations.md` |
 | Quality loop, visual review, contextual validation | Modeling QA | `references/modeling-quality-loop.md` |
 
-Always also follow sections 3 to 6 below. For shared topology and operation standards, load `references/modeling-foundations.md`; for cross-cutting visual review and reliable MCP iteration, load `references/modeling-quality-loop.md`.
+Always also follow sections 3 to 6 below. For shared topology and operation standards, load `references/modeling-foundations.md`; for cross-cutting visual review and reliable MCP iteration, load `references/modeling-quality-loop.md`. For game-ready material/UV/LOD/export work, load `references/p1-production-pipeline.md` alongside `references/materials.md` and `references/game-ready-export.md`.
 
 
 
@@ -150,7 +150,7 @@ Run them by pasting their contents into `execute_blender_code` (they only use bp
 | Script | Use |
 |---|---|
 | `optimize_mesh.py` | Dry-run-first, backup-first conservative mesh cleanup; optional balanced dissolve and non-destructive Decimate preview |
-| `validate_asset.py` | Read-only report with base/evaluated topology, modifiers, shape keys, UVs, materials, images and target status. Empty TARGETS checks selected meshes only; no scene-wide fallback |
+| `validate_asset.py` | Read-only report with base/evaluated topology, modifiers, shape keys, UVs, materials, images and target status. Empty TARGETS checks selected meshes only; no scene-wide fallback |\n| `validate_uvs.py` | Read-only UV bounds and zero-area diagnostics for explicit targets or selected meshes; does not claim overlap/stretch validation |
 | `setup_scene.py` | Clean working collection, metric units, sane clip range, optional studio lighting |
 | `cleanup_mesh.py` | Remove doubles, loose geometry, degenerate faces, recalc normals, optional tri/quads conversion |
 | `apply_and_origin.py` | Apply transforms, set origin (bottom center / center / custom), ground the object |
