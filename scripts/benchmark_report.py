@@ -38,13 +38,16 @@ def metrics(obj):
 
 missing = [name for name in TARGET_NAMES if bpy.data.objects.get(name) is None]
 objects = [bpy.data.objects[name] for name in TARGET_NAMES if bpy.data.objects[name] is not None]
+mesh_objects = [obj for obj in objects if obj.type == "MESH"]
+non_mesh = [obj.name for obj in objects if obj.type != "MESH"]
 result = {
     "benchmark_id": BENCHMARK_ID,
     "prompt_version": PROMPT_VERSION,
     "blender_version": bpy.app.version_string,
-    "targets": [metrics(obj) for obj in objects if obj.type == "MESH"],
+    "targets": [metrics(obj) for obj in mesh_objects],
+    "non_mesh_targets": non_mesh,
     "missing_targets": missing,
-    "technical_status": "NOT VERIFIED" if missing or not objects else "MEASURED",
+    "technical_status": "NOT VERIFIED" if missing or non_mesh or not mesh_objects else "MEASURED",
     "visual_scores": None,
     "visual_status": "NOT VERIFIED",
 }
