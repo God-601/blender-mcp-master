@@ -91,11 +91,6 @@ created = []
 try:
     panel = create_box(PANEL_NAME, DIMENSIONS, LOCATION, collection)
     created.append(panel)
-    bevel = panel.modifiers.new("Panel_Bevel", "BEVEL")
-    bevel.width = min(BEVEL_WIDTH, min(DIMENSIONS) * 0.2)
-    bevel.segments = 3
-    bevel.harden_normals = True
-
     if POCKET.get("enabled"):
         width = float(POCKET["width"])
         height = float(POCKET["height"])
@@ -120,6 +115,12 @@ try:
         boolean.object = cutter
         if hasattr(boolean, "solver"):
             boolean.solver = "EXACT"
+
+    # Keep bevel after the boolean so the newly-created pocket edges also catch light.
+    bevel = panel.modifiers.new("Panel_Bevel", "BEVEL")
+    bevel.width = min(BEVEL_WIDTH, min(DIMENSIONS) * 0.2)
+    bevel.segments = 3
+    bevel.harden_normals = True
 
     if FASTENERS.get("enabled"):
         radius = float(FASTENERS["radius"])
