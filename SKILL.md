@@ -153,6 +153,7 @@ Run them by pasting their contents into `execute_blender_code` (they only use bp
 | Script | Use |
 |---|---|
 | `geometry_builder.py` | Declarative construction of named primitives, beams, extruded, lathed, and lofted profiles in a dedicated collection. Creates new objects only; inspect and refine the result |
+| `organic_rock_builder.py` | Deterministic stylized rock base mesh from an icosphere with seeded smooth deformation and optional flattened base. Creates a new owned object only |
 | `validate_asset.py` | Read-only report with PASS / WARN / INFO per check and a final RESULT line (`INCOMPLETE - CHECK TARGETS` if a target is missing). It does not check face orientation: inspect normals visually. Run before delivering anything |
 | `setup_scene.py` | Clean working collection, metric units, sane clip range, optional studio lighting |
 | `cleanup_mesh.py` | Remove doubles, loose geometry, degenerate faces, recalc normals, optional tri/quads conversion |
