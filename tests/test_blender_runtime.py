@@ -142,7 +142,15 @@ class BlenderRuntimeTests(unittest.TestCase):
         out, err = run_script("validate_uvs.py", TARGETS=["Card"])
         self.assertIsNone(err, out)
         self.assertIn("WARN: polygons with zero/negligible UV area:", out)
+        self.assertIn("RESULT: REVIEW WARNINGS", out)
         self.assertEqual([tuple(loop.uv) for loop in layer.data], before)
+
+    def test_uv_validator_reports_partial_target_selection(self):
+        obj = add_mesh("Card", grid)
+        obj.data.uv_layers.new(name="UVMap")
+        out, err = run_script("validate_uvs.py", TARGETS=["Card", "Missing"])
+        self.assertIsNone(err, out)
+        self.assertIn("RESULT: INCOMPLETE", out)
 
     def test_validate_reads_rotation_from_quaternion_objects(self):
         import math

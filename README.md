@@ -36,6 +36,14 @@ Other ways:
 
 Then configure a separate Blender-control MCP server and start Blender with its addon enabled. The agent should inspect the scene, plan the workflow, and verify its changes.
 
+### Connection check
+
+1. Confirm that your agent can load `SKILL.md` and its accompanying `references/` and `scripts/`.
+2. If using the optional resource server, list its resources; this checks access to documentation, not the Blender connection.
+3. Start Blender and its control addon, then connect the separate Blender-control MCP server in your client. Discover its actual tools; names and schemas vary.
+4. Use the available status and scene-inspection tools on a disposable or backed-up scene. If either fails, check the addon, server connection and client configuration before making edits.
+5. Record client, server, addon and Blender versions when reporting compatibility. See [the verification protocol](references/agent-compatibility.md).
+
 Example request:
 
 > Create a stylized, game-ready fantasy sword. Plan the modeling and texturing pipeline first, inspect the silhouette before detailing, validate the asset for the target engine, and report any remaining issues.
@@ -119,6 +127,14 @@ Outras formas:
 - **Servidor MCP de recursos (opcional):** entrega a skill, os guias e os modelos de script via MCP. Use o comando `npx` com os argumentos `["-y", "github:God-601/blender-mcp-master"]`. Ele **não** controla o Blender. (O pacote ainda não está publicado no registro npm, então o nome simples `blender-mcp-master` não funciona.)
 
 Depois, configure separadamente um servidor MCP de controle do Blender e inicie o Blender com o addon habilitado. O agente deve inspecionar a cena, planejar o trabalho e verificar as alterações.
+
+### Verificação da conexão
+
+1. Confirme que o agente consegue carregar `SKILL.md` e as pastas `references/` e `scripts/`.
+2. Se usar o servidor de recursos opcional, liste os recursos; isso verifica a documentação, não a conexão com o Blender.
+3. Inicie o Blender e o addon de controle e conecte o servidor MCP de controle no cliente. Descubra as ferramentas disponíveis: nomes e parâmetros podem variar.
+4. Consulte o estado do addon e inspecione uma cena descartável ou com backup. Se falhar, verifique o addon, a conexão do servidor e a configuração do cliente antes de editar.
+5. Registre as versões do cliente, servidor, addon e Blender ao relatar compatibilidade. Consulte o [protocolo de verificação](references/agent-compatibility.md).
 
 Exemplo:
 
