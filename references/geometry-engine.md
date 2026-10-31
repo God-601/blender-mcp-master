@@ -50,7 +50,7 @@ scripts/organic_rock_builder.py creates a deterministic stylized rock from an ic
 
 - `scripts/mesh_operations.py` duplicates explicitly named source meshes and adds non-destructive bevel, weighted-normal, solidify, triangulate, decimate, mirror, subdivision, or boolean-difference modifiers. The source is preserved; output names must be unused.
 - `scripts/hard_surface_builder.py` creates a mechanical panel, a boolean pocket cutter, and four fasteners. The boolean remains a modifier; inspect the evaluated result in Blender.
-- `scripts/geometry_nodes_builder.py` creates a parametric cube/panel node group with an exposed Dimensions vector. This requires a Blender version with the Geometry Nodes API; runtime support must be checked before use.
+- `scripts/geometry_nodes_builder.py` creates a parametric repeated-post node group with exposed Count, Spacing, Height, and Radius inputs. This requires a Blender version with the Geometry Nodes API; runtime support must be checked before use.
 - `scripts/organic_tree_builder.py` builds a deterministic stylized tree from a tapered trunk, branch meshes, and clustered icospheres.
 
 ## Geometry family roadmap
