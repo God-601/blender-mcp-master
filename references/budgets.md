@@ -3,7 +3,7 @@
 Decide these BEFORE modeling and state the chosen numbers in your plan.
 
 There are three kinds of number here, and they are not equally strict:
-- **Platform limits** (for example the Roblox MeshPart cap of 21,844 triangles): hard. Never exceed them.
+- **Platform limits:** hard when verified for the exact destination and asset category. Check current official documentation before modeling to the limit; avatar, accessory, and general mesh categories can have different rules.
 - **Project targets** (what this game, scene or client needs): set by the user or the destination. Ask or state an assumption; once chosen, stay within it.
 - **Reference values in the tables below**: starting points. Adjust them for camera distance, how often the asset repeats, and how important it is. A hero prop may exceed a background default, and a distant plant should sit well under it.
 
@@ -16,9 +16,9 @@ There are three kinds of number here, and they are not equally strict:
 | Playable character (PC/console) | 30,000 to 80,000 | - | - |
 | Playable character (mobile/Roblox) | 3,000 to 10,000 | - | - |
 | Offline render / film | no hard limit; keep subsurf-friendly quads | | |
-| 3D print | watertight, wall >= 1 mm (FDM >= 1.2 mm) | | |
+| 3D print | watertight when required; wall thickness and clearance based on printer, material, process, and slicer | | |
 
-Roblox note: MeshPart limit is 21,844 triangles per mesh; keep far below it. Fewer, larger meshes with shared textures beat many small ones. Prefer 1 material per mesh.
+Roblox note: the current [general mesh specifications](https://create.roblox.com/docs/art/modeling/specifications) state a limit of 20,000 triangles per individual general mesh; avatar items have separate budgets. Recheck the official specification for the exact asset category at task time and leave headroom. Fewer, larger meshes with shared textures can reduce overhead, but do not merge parts that need independent pivots, collision, or materials.
 
 ## Texture budgets
 

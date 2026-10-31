@@ -1,33 +1,66 @@
-# Stylized, low-poly, voxel and "studs" looks
+# Stylized, Fantasy, Low-Poly, Voxel, and Retro Art Direction
 
-## Principles
-- **Silhouette and color carry the design.** Few shapes, strong readability at small size.
-- **Consistency beats detail**: same bevel size, same palette, same texel density, same level of simplification across all assets.
-- **Flat shading or hard-edged smoothing** on faceted styles; **smooth shading** on soft cartoon styles. Pick one per project.
-- **Palette discipline**: 5 to 8 main colors per asset; use a shared palette texture or vertex colors, so many assets share one material.
+Use this guide when intentional simplification, color blocking, facets, exaggeration, or a distinctive visual language matters more than photorealism.
 
-## Low-poly workflow
-1. Blockout with primitives using low segment counts (cylinders 6 to 12 sides, spheres 8x6 to 12x8).
-2. Use non-destructive Mirror/Array, then apply before export.
-3. Keep tris intentional: every edge must define silhouette or a color break.
-4. Color via **palette atlas**: a tiny texture (e.g. 64x8 or 256x256) of swatches; map UV islands onto swatches. Or per-face material slots if the engine handles it, but atlas is cheaper.
-5. Optional: single-color vertex colors (`mesh.color_attributes`) when the engine supports them.
+## 1. Lock the art direction first
 
-## Voxel / "studs" style (blocky, brick-like, Roblox-like)
-- Define a **grid unit** (e.g. 1 stud = 0.28 m or 0.25 m, or just 0.1 m) and make all dimensions integer multiples of it.
-- Build from cubes snapped to the grid; for organic subjects (plants, animals) voxelize: sample a shape (sphere, cone, noise) on the grid and place only the surface cubes.
-- Studs: small cylinders (8 to 12 sides, height about 0.2 of the stud width) on top faces; for performance use ONE stud mesh with instances, or a tileable normal/stud texture on flat surfaces instead of geometry.
-- Merge all voxels into one mesh at the end (`join`), remove interior faces (cubes touching cubes), `remove_doubles`, so a 1000-cube plant is a few hundred visible faces, not 12,000.
-- Use `bmesh` to build: iterate grid cells, create a face only where the neighbor cell is empty (greedy surface extraction). This yields the minimal visible surface instantly. See `scripts/` snippet idea in `performance.md` ("bulk geometry").
-- Colors: one flat color per voxel group via palette atlas or vertex colors; keep Roughness around 0.6 to 0.9, Metallic 0 unless specified.
-- Pot/planter separate from the plant if the game needs to swap them.
+Define:
+- Silhouette language: rounded, angular, chunky, tapered, exaggerated, or deliberately awkward.
+- Proportion rules: head/hand size, thickness, bevel scale, limb shape, and how forms simplify.
+- Palette and value range, material count, outline policy, lighting style, and texture resolution.
+- Camera distance and target platform. Judge details at the real viewing size.
+- Whether the style is low-poly geometry, hand-painted texture, voxel/studs, PS1/retro, toon, or a hybrid.
 
-## Cartoon / toon shading (render)
-- Use Principled with low specular, or Shader to RGB -> ColorRamp (constant interpolation) for cel shading in EEVEE. Add outline via Solidify (flipped normals, black emission material, thickness small) or Freestyle. Game engines will need their own toon shader; say so.
+## 2. Core principles
 
-## Hand-painted look
-- Gradient/AO baked into a 256 to 1024 px texture with soft color; avoid strong specular; keep normal maps off or very subtle.
+- Silhouette and large color groups carry the design.
+- Consistency is more important than local detail: match bevel width, facet density, color contrast, texel density, and roughness across related assets.
+- Every edge should support silhouette, a plane change, shading, or a designed facet.
+- Use flat shading for deliberate faceting and smooth shading only where the chosen style needs rounded forms. A mixed style can work if the transitions are intentional.
+- Exaggerate small features when real dimensions would become unreadable at the target camera distance.
 
-## Checks
-- Wireframe view must look intentional (no tiny faces).
-- Compare at game camera distance: shrink the `look` max_size to 256 to test readability.
+## 3. Low-poly and fantasy workflow
+
+1. Block out major volumes with modest primitive segment counts.
+2. Establish a strong silhouette and a small number of clear secondary shapes.
+3. Choose which bevels and facets define the style, then apply those rules consistently.
+4. Use broad color regions and controlled highlights before adding tiny ornaments.
+5. For fantasy objects, make the focal feature readable: blade shape, crystal, rune, antler, magical core, or distinctive silhouette.
+6. Remove detail that does not affect silhouette, gameplay readability, or close-up presentation.
+
+## 4. Palette atlas and hand-painted assets
+
+- Use a palette atlas for families of props that can share colors and materials.
+- Use vertex colors only when mesh density and target import support the intended gradients.
+- Use hand-painted textures for gradients, plane accents, edge highlights, and unique storytelling details.
+- Read references/hand-painted-pipeline.md for the full painting sequence and references/uv-baking.md when UVs or bakes are needed.
+- Avoid adding procedural noise as a shortcut for painterly detail; it often produces a dirty, uniform surface rather than deliberate brushwork.
+
+## 5. Voxel, studs, and block-based construction
+
+- Define the grid unit and snap all relevant dimensions to it.
+- Use instancing for repeated studs, blocks, foliage, and other identical parts.
+- Merge visible surfaces only when the target needs a combined mesh; remove interior faces carefully and preserve modular parts that must remain swappable.
+- For grid-based mesh generation, emit only exposed faces when possible rather than retaining all interior cube faces.
+- Check silhouette, normals, and material boundaries after merging.
+
+## 6. PS1 and retro low-resolution looks
+
+- Limit geometry according to silhouette and camera framing, not by a fixed universal polygon count.
+- Consider low-resolution textures, nearest/intentional filtering where the engine allows it, vertex lighting, constrained palettes, and simple materials.
+- Affine texture warping and vertex jitter are engine/render-pipeline effects, not guaranteed Blender mesh properties; don't promise them from a model-only workflow.
+- Keep texture seams, mipmapping, and target-engine filtering in mind. A retro-looking viewport is not proof the asset will look the same in the target game.
+- Favor distinctive large shapes and strong value grouping over dense micro-detail.
+
+## 7. Toon and stylized materials
+
+- Toon ramps, outlines, and shader-to-RGB approaches depend on the render engine. Check compatibility before choosing them.
+- Blender-specific node setups may not export to a game engine. For real-time targets, plan the equivalent engine material or bake supported channels when appropriate.
+- Read references/materials.md for PBR, procedural, toon, and shader diagnostics.
+
+## 8. Review
+
+- Does the object read in silhouette and at game distance?
+- Is the visual language consistent with the rest of the project?
+- Are facets, palette regions, texture brushwork, and highlights deliberate?
+- Do the final target engine and texture pipeline preserve the intended look?

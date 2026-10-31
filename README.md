@@ -1,5 +1,9 @@
 # Blender MCP Master
 
+<p align="center"><img src="assets/banner.svg" alt="Blender MCP Master — agent skill for higher-quality 3D workflows" width="100%"></p>
+
+**English** | [Português](#português)
+
 A cross-agent Blender skill for planning, creating, inspecting, refining, and validating 3D assets across hard-surface, organic, stylized, hand-painted, PBR, environment, character, and game-ready workflows.
 
 - **Plan before modeling:** define purpose, style, constraints, deliverables, and acceptance criteria.
@@ -8,6 +12,16 @@ A cross-agent Blender skill for planning, creating, inspecting, refining, and va
 - **Safety first:** protect existing scene content and disclose unverified results.
 
 Works with compatible agents that can read Agent Skills and use a Blender-control MCP integration. MCP tool names vary; the agent must discover the tools actually available. This repository's skill does not replace the MCP server that controls a live Blender session.
+
+<p align="center"><img src="assets/without-vs-with.svg" alt="Comparison of agent workflows without and with Blender MCP Master" width="100%"></p>
+
+## How it works
+
+The skill guides the agent's decisions and verification steps while a separate Blender-control MCP server operates the live scene. The resource server, if configured, only exposes skill documentation and templates; it does not control Blender by itself.
+
+<p align="center"><img src="assets/architecture.svg" alt="Architecture showing the agent, skill resources, Blender-control MCP and live Blender" width="100%"></p>
+
+<p align="center"><img src="assets/workflow.svg" alt="Blender asset workflow from planning and blockout through refinement, validation and delivery" width="100%"></p>
 
 ## Install
 
@@ -29,7 +43,7 @@ Example request:
 ## Repository map
 
 - `SKILL.md` — core workflow, module routing, safety, and delivery rules.
-- `references/` — focused modeling, materials, environment, export, performance, and troubleshooting guides.
+- `references/` — focused guides for hard-surface, organic/characters, stylized/retro, hand-painted textures, UV/baking, topology/retopology, sculpting/high-poly, architecture/interiors, CAD, materials, environments, export, performance, and troubleshooting.
 - `scripts/` — reusable Blender Python utilities and templates.
 - `tests/` — static checks and Blender-runtime tests.
 - [Universal quality checklist](references/quality-checklist.md) — common acceptance checks for every asset.
@@ -54,7 +68,7 @@ Runtime tests may require the matching Blender Python environment and dependenci
 
 ## Documentation
 
-Start with `SKILL.md`, then load only the references relevant to the task. The detailed guides explain discipline-specific techniques and caveats.
+Start with `SKILL.md`, then load only the references relevant to the task. Key specialist guides include [hand-painted workflow](references/hand-painted-pipeline.md), [UV and baking](references/uv-baking.md), [topology and retopology](references/topology-retopology.md), [sculpting and high-poly](references/sculpting-highpoly.md), [architecture/interiors](references/architecture-interiors.md), and [CAD/technical modeling](references/cad-technical.md). Existing guides cover hard-surface, organic forms, characters/rigging, stylized art, materials, environments, rendering, budgets, optimization, export, and troubleshooting.
 
 ## License
 
@@ -93,7 +107,8 @@ Exemplo:
 ## Estrutura
 
 - `SKILL.md` — fluxo central, seleção de módulos, segurança e entrega.
-- `references/` — guias especializados de modelagem, materiais, ambientes, exportação, desempenho e diagnóstico.
+- `references/` — guias especializados de modelagem, materiais, ambientes, exportação, desempenho e diagnóstico, incluindo hand-painted, UV/baking, topologia/retopologia, escultura/high-poly, arquitetura/interiores e CAD técnico.
+- Guias principais: [pipeline hand-painted](references/hand-painted-pipeline.md), [UV e baking](references/uv-baking.md), [topologia e retopologia](references/topology-retopology.md), [escultura/high-poly](references/sculpting-highpoly.md), [arquitetura/interiores](references/architecture-interiors.md) e [CAD técnico](references/cad-technical.md).
 - `scripts/` — utilitários e modelos reutilizáveis em Python para Blender.
 - `tests/` — verificações estáticas e testes executados no ambiente Blender.
 - [Checklist universal de qualidade](references/quality-checklist.md) — critérios comuns de aceitação.
