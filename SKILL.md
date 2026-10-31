@@ -60,7 +60,7 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Need triangle / texture / scale numbers | Budgets | `references/budgets.md` |
 | Quality loop, visual review, contextual validation | Modeling QA | `references/modeling-quality-loop.md` |
 | Geometry construction from components, profiles, or lathed forms | Geometry engine | `references/geometry-engine.md` |
-| Explicit mesh refinement, booleans, bevels, normals, and modifier stacks | Mesh operations | `scripts/mesh_operations.py` |
+| Explicit mesh refinement, face inset/extrusion, booleans, bevels, normals, and modifier stacks | Mesh operations | `references/mesh-operations.md`, `scripts/mesh_operations.py` |
 | Recessed panels, fasteners, and mechanical blockouts | Hard surface | `scripts/hard_surface_builder.py` |
 | Editable dimension-driven Geometry Nodes object | Parametric geometry | `scripts/geometry_nodes_builder.py` |
 | Organic rocks, trees, branches, and clustered foliage | Organic modeling | `scripts/organic_rock_builder.py`, `scripts/organic_tree_builder.py` |
