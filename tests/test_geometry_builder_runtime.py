@@ -87,6 +87,21 @@ class GeometryBuilderRuntimeTests(unittest.TestCase):
         self.assertAlmostEqual(obj.location.z, 4.0, places=4)
         self.assertAlmostEqual(obj.dimensions.z, 2.0, places=3)
 
+    def test_supports_all_declared_primitives_and_optional_bevel(self):
+        specs = [
+            {"name": "UVSphere", "type": "sphere", "segments": 12, "rings": 8},
+            {"name": "Cylinder", "type": "cylinder", "radius": 0.5, "depth": 1.0},
+            {"name": "Cone", "type": "cone", "radius": 0.5, "depth": 1.0},
+            {"name": "Torus", "type": "torus", "major_segments": 12, "minor_segments": 6},
+            {"name": "BeveledBox", "type": "box", "bevel": 0.05, "bevel_segments": 3},
+        ]
+        out, err = run_builder(specs)
+        self.assertIsNone(err, out)
+        for name in ("UVSphere", "Cylinder", "Cone", "Torus", "BeveledBox"):
+            self.assertIn(name, bpy.data.objects)
+            self.assertGreater(len(bpy.data.objects[name].data.polygons), 0)
+        self.assertEqual(bpy.data.objects["BeveledBox"].modifiers[0].type, "BEVEL")
+
     def test_repeated_run_does_not_duplicate_or_replace_owned_objects(self):
         spec = [{"name": "Stable", "type": "box"}]
         out, err = run_builder(spec)
