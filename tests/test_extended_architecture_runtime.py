@@ -121,22 +121,27 @@ class ExtendedArchitectureRuntimeTests(unittest.TestCase):
         cutter = bpy.data.objects["MCP_HS_Panel_Pocket_Cutter"]
         self.assertTrue(cutter.hide_render)
 
-    def test_geometry_nodes_builder_exposes_editable_dimensions(self):
+    def test_geometry_nodes_builder_exposes_editable_post_array(self):
         out, err = execute_script("scripts/geometry_nodes_builder.py")
         self.assertIsNone(err, out)
-        obj = bpy.data.objects["MCP_Parametric_Panel"]
+        obj = bpy.data.objects["MCP_Parametric_Posts"]
         self.assertEqual(obj.modifiers[0].type, "NODES")
         group = obj.modifiers[0].node_group
         self.assertIsNotNone(group)
         if hasattr(group, "interface"):
-            self.assertIsNotNone(group.interface.items_tree.get("Dimensions"))
-        self.assertTrue(any(node.bl_idname == "GeometryNodeMeshCube" for node in group.nodes))
+            names = [item.name for item in group.interface.items_tree]
+            for name in ("Count", "Spacing", "Height", "Radius"):
+                self.assertIn(name, names)
+        node_types = {node.bl_idname for node in group.nodes}
+        self.assertTrue({"GeometryNodeMeshLine", "GeometryNodeMeshCylinder",
+                         "GeometryNodeInstanceOnPoints", "GeometryNodeRealizeInstances"}.issubset(node_types))
         depsgraph = bpy.context.evaluated_depsgraph_get()
         evaluated = obj.evaluated_get(depsgraph)
         mesh = evaluated.to_mesh()
         try:
-            self.assertEqual(len(mesh.vertices), 8)
-            self.assertEqual(len(mesh.polygons), 6)
+            self.assertGreater(len(mesh.vertices), 8)
+            xs = [vertex.co.x for vertex in mesh.vertices]
+            self.assertGreater(max(xs) - min(xs), 5.5)
         finally:
             evaluated.to_mesh_clear()
 
