@@ -46,6 +46,13 @@ proportions, intersections, silhouette, and refine the mesh.
 
 scripts/organic_rock_builder.py creates a deterministic stylized rock from an icosphere base using seeded smooth radial deformation and an optional flattened bottom. It creates a new object in an owned collection and refuses unrelated name collisions. This is a base-form generator; the agent must inspect the silhouette and refine it for the target style.
 
+## Additional executable construction and refinement
+
+- `scripts/mesh_operations.py` duplicates explicitly named source meshes and adds non-destructive bevel, weighted-normal, solidify, triangulate, decimate, mirror, subdivision, or boolean-difference modifiers. The source is preserved; output names must be unused.
+- `scripts/hard_surface_builder.py` creates a mechanical panel, a boolean pocket cutter, and four fasteners. The boolean remains a modifier; inspect the evaluated result in Blender.
+- `scripts/geometry_nodes_builder.py` creates a parametric cube/panel node group with an exposed Dimensions vector. This requires a Blender version with the Geometry Nodes API; runtime support must be checked before use.
+- `scripts/organic_tree_builder.py` builds a deterministic stylized tree from a tapered trunk, branch meshes, and clustered icospheres.
+
 ## Geometry family roadmap
 
 ### Primitive and profile construction
@@ -89,4 +96,6 @@ version-aware node setup with runtime tests.
 - lathe creates side quads and end caps; profile topology and winding should be checked for the intended shape.
 - loft requires the same number of points in each section and strictly increasing Z; it does not currently detect self-intersections or twist between profiles.
 - No automated visual inspection is performed by the script.
-- Geometry Nodes, advanced booleans, lofting, retopology, and sculpt workflows remain future capabilities.
+- The Geometry Nodes generator currently exposes one parametric mesh primitive; it is not yet a general node-group library.
+- Boolean construction is currently a non-destructive modifier workflow with an explicit cutter object; complex boolean cleanup is not automated.
+- Robust inset/bridge operations, retopology, sculpt workflows, and arbitrary profile self-intersection handling remain future capabilities.
