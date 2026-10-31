@@ -1,0 +1,165 @@
+"""mesh_operations.py — non-destructive operations on explicit source meshes.
+
+Each operation duplicates an explicitly named source object and its mesh data. The source
+is never modified. Output objects and boolean cutters live in an owned collection.
+Supported operations: bevel, weighted_normal, solidify, triangulate, decimate,
+mirror, subdivision, boolean_difference.
+"""
+import bpy
+import bmesh
+from mathutils import Vector
+
+# ---- CONFIG ----------------------------------------------------------------
+COLLECTION_NAME = "MCP_Mesh_Operations"
+TARGETS = [
+    {"source": "Asset_Body", "output": "Asset_Body_Refined", "operations": [
+        {"type": "bevel", "width": 0.025, "segments": 3},
+        {"type": "weighted_normal"},
+    ]},
+]
+# ----------------------------------------------------------------------------
+OWNER_KEY = "_blender_mcp_mesh_operations"
+OWNER_VALUE = "mesh_operations_v1"
+
+
+def owned_collection():
+    col = bpy.data.collections.get(COLLECTION_NAME)
+    if col is None:
+        col = bpy.data.collections.new(COLLECTION_NAME)
+        col[OWNER_KEY] = OWNER_VALUE
+        bpy.context.scene.collection.children.link(col)
+    elif col.get(OWNER_KEY) != OWNER_VALUE:
+        raise ValueError("Refusing to reuse an unowned collection: " + COLLECTION_NAME)
+    return col
+
+
+def make_box_cutter(name, dimensions, location, collection):
+    dims = Vector(dimensions)
+    if min(dims) <= 0:
+        raise ValueError("boolean cutter dimensions must be positive")
+    mesh = bpy.data.meshes.new(name + "_Mesh")
+    bm = bmesh.new()
+    try:
+        bmesh.ops.create_cube(bm, size=1.0)
+        bmesh.ops.scale(bm, verts=bm.verts, vec=dims)
+        bm.to_mesh(mesh)
+    finally:
+        bm.free()
+    mesh.update()
+    cutter = bpy.data.objects.new(name, mesh)
+    collection.objects.link(cutter)
+    cutter.location = Vector(location)
+    cutter.display_type = "WIRE"
+    cutter.hide_render = True
+    cutter.hide_set(True)
+    cutter[OWNER_KEY] = OWNER_VALUE
+    return cutter
+
+
+def add_operation(obj, operation, collection, index):
+    kind = operation.get("type")
+    if kind == "bevel":
+        width = float(operation.get("width", 0.02))
+        if width <= 0:
+            raise ValueError("bevel width must be positive")
+        mod = obj.modifiers.new("MCP_Bevel_%02d" % index, "BEVEL")
+        mod.width = width
+        mod.segments = max(1, min(12, int(operation.get("segments", 2))))
+        mod.limit_method = "ANGLE"
+    elif kind == "weighted_normal":
+        mod = obj.modifiers.new("MCP_WeightedNormal_%02d" % index, "WEIGHTED_NORMAL")
+        mod.keep_sharp = True
+    elif kind == "solidify":
+        thickness = float(operation.get("thickness", 0.05))
+        if abs(thickness) <= 1e-8:
+            raise ValueError("solidify thickness cannot be zero")
+        mod = obj.modifiers.new("MCP_Solidify_%02d" % index, "SOLIDIFY")
+        mod.thickness = thickness
+    elif kind == "triangulate":
+        obj.modifiers.new("MCP_Triangulate_%02d" % index, "TRIANGULATE")
+    elif kind == "decimate":
+        ratio = float(operation.get("ratio", 0.5))
+        if not 0.0 < ratio <= 1.0:
+            raise ValueError("decimate ratio must be in (0, 1]")
+        mod = obj.modifiers.new("MCP_Decimate_%02d" % index, "DECIMATE")
+        mod.ratio = ratio
+    elif kind == "mirror":
+        mod = obj.modifiers.new("MCP_Mirror_%02d" % index, "MIRROR")
+        axes = operation.get("axes", (True, False, False))
+        mod.use_axis = tuple(bool(v) for v in axes)
+        mod.use_clip = bool(operation.get("use_clip", True))
+    elif kind == "subdivision":
+        mod = obj.modifiers.new("MCP_Subdivision_%02d" % index, "SUBSURF")
+        mod.levels = max(0, min(4, int(operation.get("levels", 1))))
+        mod.render_levels = max(mod.levels, min(4, int(operation.get("render_levels", mod.levels))))
+    elif kind == "boolean_difference":
+        cutter_name = str(operation.get("cutter_name", obj.name + "_Cutter_%02d" % index))
+        if cutter_name in bpy.data.objects:
+            raise ValueError("boolean cutter name already exists: " + cutter_name)
+        cutter = make_box_cutter(
+            cutter_name, operation.get("dimensions", (0.5, 0.5, 0.5)),
+            operation.get("location", tuple(obj.location)), collection
+        )
+        mod = obj.modifiers.new("MCP_Boolean_%02d" % index, "BOOLEAN")
+        mod.operation = "DIFFERENCE"
+        mod.object = cutter
+        if hasattr(mod, "solver"):
+            mod.solver = "EXACT"
+    else:
+        raise ValueError("unsupported mesh operation: " + str(kind))
+    return mod
+
+
+def process_target(spec, collection):
+    source_name = str(spec["source"])
+    output_name = str(spec["output"])
+    source = bpy.data.objects.get(source_name)
+    if source is None or source.type != "MESH":
+        raise ValueError("source must be an existing mesh object: " + source_name)
+    if output_name in bpy.data.objects:
+        raise ValueError("output already exists; refusing overwrite: " + output_name)
+    output = source.copy()
+    output.data = source.data.copy()
+    output.name = output_name
+    output[OWNER_KEY] = OWNER_VALUE
+    output["mcp_source_object"] = source.name
+    collection.objects.link(output)
+    created_cutters = []
+    try:
+        for index, operation in enumerate(spec.get("operations", []), 1):
+            before = set(bpy.data.objects.keys())
+            add_operation(output, operation, collection, index)
+            created_cutters.extend(
+                bpy.data.objects[name] for name in (set(bpy.data.objects.keys()) - before)
+                if bpy.data.objects[name].get(OWNER_KEY) == OWNER_VALUE
+            )
+    except Exception:
+        for cutter in reversed(created_cutters):
+            mesh = cutter.data if cutter.type == "MESH" else None
+            bpy.data.objects.remove(cutter, do_unlink=True)
+            if mesh and mesh.users == 0:
+                bpy.data.meshes.remove(mesh)
+        mesh = output.data
+        bpy.data.objects.remove(output, do_unlink=True)
+        if mesh.users == 0:
+            bpy.data.meshes.remove(mesh)
+        raise
+    return output
+
+
+collection = owned_collection()
+created = []
+errors = []
+for target in TARGETS:
+    try:
+        obj = process_target(target, collection)
+        created.append(obj)
+        print("CREATED:", obj.name, "source=", target["source"],
+              "modifiers=", [mod.type for mod in obj.modifiers])
+    except Exception as exc:
+        errors.append((target.get("source", "<missing>"), str(exc)))
+        print("ERROR:", target.get("source", "<missing>"), repr(exc))
+print("MESH OPERATION REPORT")
+print("created:", len(created), "errors:", len(errors))
+print("source objects preserved: True")
+print("result:", "SUCCESS" if not errors else "PARTIAL")
