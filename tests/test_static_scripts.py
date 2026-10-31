@@ -66,7 +66,21 @@ class RepositoryStaticChecks(unittest.TestCase):
         self.assertIn("MISSING_TARGETS", source)
         self.assertIn("INVALID_TARGETS", source)
         self.assertIn("target object is not a mesh", source)
-        self.assertIn("falling back to all visible", source)
+        self.assertIn("Scene-wide fallback is disabled", source)
+
+    def test_validator_reports_base_and_evaluated_metrics(self):
+        source = (ROOT / "scripts" / "validate_asset.py").read_text(encoding="utf-8")
+        for phrase in ("base mesh:", "evaluated triangles (modifiers included)",
+                       "unique_materials", "shape keys:", "mesh datablock users:"):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, source)
+
+    def test_modeling_foundations_covers_topology_and_downstream_use(self):
+        guide = (ROOT / "references" / "modeling-foundations.md").read_text(encoding="utf-8")
+        for phrase in ("deforming character", "static real-time prop", "silhouette",
+                       "n-gons", "UV", "weighted normals"):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase.lower(), guide.lower())
 
     def test_lod_script_does_not_delete_existing_lods_automatically(self):
         source = (ROOT / "scripts" / "make_lods.py").read_text(encoding="utf-8")
