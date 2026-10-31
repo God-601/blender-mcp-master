@@ -98,4 +98,4 @@ version-aware node setup with runtime tests.
 - No automated visual inspection is performed by the script.
 - The Geometry Nodes generator currently exposes one parametric mesh primitive; it is not yet a general node-group library.
 - Boolean construction is currently a non-destructive modifier workflow with an explicit cutter object; complex boolean cleanup is not automated.
-- Robust inset/bridge operations, retopology, sculpt workflows, and arbitrary profile self-intersection handling remain future capabilities.
+- Robust edge-loop bridging, retopology, sculpt workflows, semantic face selection, and arbitrary profile self-intersection handling remain future capabilities.
