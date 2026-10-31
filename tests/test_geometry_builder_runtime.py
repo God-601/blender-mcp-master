@@ -24,7 +24,9 @@ def run_builder(components, asset="TestAsset", collection="TestAsset_Geometry"):
     source = SCRIPT.read_text(encoding="utf-8")
     source = re.sub(r"^ASSET_NAME\s*=.*$", f"ASSET_NAME = {asset!r}", source, count=1, flags=re.M)
     source = re.sub(r"^COLLECTION_NAME\s*=.*$", f"COLLECTION_NAME = {collection!r}", source, count=1, flags=re.M)
-    source = re.sub(r"^COMPONENTS\s*=.*$", f"COMPONENTS = {components!r}", source, count=1, flags=re.M)
+    source, count = re.subn(r"^COMPONENTS\s*=\s*\[.*?^\]", lambda _m: f"COMPONENTS = {components!r}", source, count=1, flags=re.M | re.S)
+    if count != 1:
+        raise AssertionError("COMPONENTS configuration block not found")
     output = io.StringIO()
     error = None
     with contextlib.redirect_stdout(output):
