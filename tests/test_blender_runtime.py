@@ -133,6 +133,17 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertIsNot(obj.data, original)
         self.assertTrue(any(o.data == original for o in collection.objects))
 
+    def test_uv_validator_reports_degenerate_uvs_without_changing_them(self):
+        obj = add_mesh("Card", grid)
+        layer = obj.data.uv_layers.new(name="UVMap")
+        for loop in layer.data:
+            loop.uv = (0.0, 0.0)
+        before = [tuple(loop.uv) for loop in layer.data]
+        out, err = run_script("validate_uvs.py", TARGETS=["Card"])
+        self.assertIsNone(err, out)
+        self.assertIn("WARN: polygons with zero/negligible UV area:", out)
+        self.assertEqual([tuple(loop.uv) for loop in layer.data], before)
+
     def test_validate_reads_rotation_from_quaternion_objects(self):
         import math
         obj = add_mesh("Quat", cube)
