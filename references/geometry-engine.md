@@ -42,6 +42,10 @@ replace an existing object. Configure dimensions in Blender units and use explic
 This is a geometry blockout example, not a finished sword recipe. The agent must inspect orientation,
 proportions, intersections, silhouette, and refine the mesh.
 
+## Organic construction example
+
+scripts/organic_rock_builder.py creates a deterministic stylized rock from an icosphere base using seeded smooth radial deformation and an optional flattened bottom. It creates a new object in an owned collection and refuses unrelated name collisions. This is a base-form generator; the agent must inspect the silhouette and refine it for the target style.
+
 ## Geometry family roadmap
 
 ### Primitive and profile construction
