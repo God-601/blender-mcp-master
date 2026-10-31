@@ -129,6 +129,23 @@ class RepositoryStaticChecks(unittest.TestCase):
         self.assertEqual(workflow.count("persist-credentials: false"), 2)
         self.assertEqual(workflow.count("contents: read"), 2)
 
+    def test_optimizer_is_dry_run_and_backup_first(self):
+        source = (ROOT / "scripts" / "optimize_mesh.py").read_text(encoding="utf-8")
+        self.assertIn("APPLY = False", source)
+        self.assertIn("BACKUP_COLLECTION", source)
+        self.assertIn("backup_object(obj, backup_collection)", source)
+        self.assertIn("shared mesh datablock", source)
+        self.assertIn("shape keys present", source)
+        self.assertIn("Faces classified as internal were NOT automatically deleted.", source)
+        self.assertNotIn("orphans_purge", source)
+
+    def test_optimization_guide_covers_visual_and_engine_tradeoffs(self):
+        guide = (ROOT / "references" / "game-asset-optimization.md").read_text(encoding="utf-8")
+        for phrase in ("Hidden and internal faces", "draw calls", "LOD", "Roblox-specific",
+                       "silhouette", "shape keys", "dry-run"):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase.lower(), guide.lower())
+
 
 if __name__ == "__main__":
     unittest.main()
