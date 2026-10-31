@@ -24,6 +24,12 @@ side, back, and deformation-critical regions.
 Use neutral lighting and a plain background before presentation lighting. Frame only the intended asset
 when the MCP supports target framing. Keep camera, scale, and view conventions consistent across runs.
 
+## Executable technical evidence
+
+`scripts/inspection_report.py` reports dimensions, location, mesh counts, triangulated face count, boundary/non-manifold/wire edges, loose vertices, modifiers, and material slots for explicit object names. It is read-only and does not judge silhouette, proportion, or style.
+
+`scripts/localized_correction.py` applies an explicit correction plan to duplicates of named mesh objects. Supported operations are normal recalculation, merge-by-distance, scale baking, bevel modifier, and weighted normals. The source mesh remains unchanged. This is a safe correction executor, not an autonomous visual defect detector: the agent or reviewer must identify the defect and choose the operation.
+
 ## Defect taxonomy
 
 | Class | Examples |
@@ -64,5 +70,5 @@ silhouette, surface, topology, or composition.
 - A mesh report does not prove that the model looks correct.
 - A successful script call does not prove that the intended geometry was created.
 - A render does not prove topology correctness.
-- If visual tools are unavailable, report visual inspection as NOT VERIFIED.
+- If visual tools are unavailable, report visual inspection as NOT VERIFIED. `inspection_report.py` is technical evidence, not a substitute for visual capture.
 - Keep before/after views consistent when comparing iterations.
