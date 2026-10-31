@@ -59,6 +59,8 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Something looks wrong | Troubleshooting | `references/troubleshooting.md` |
 | Need triangle / texture / scale numbers | Budgets | `references/budgets.md` |
 | Quality loop, visual review, contextual validation | Modeling QA | `references/modeling-quality-loop.md` |
+| Geometry construction from components, profiles, or lathed forms | Geometry engine | `references/geometry-engine.md` |
+| Module boundaries, semantic MCP capabilities, and evidence contracts | Architecture | `references/architecture.md`, `references/module-contracts.md` |
 
 Always also follow sections 3 to 6 below. For cross-cutting visual review, contextual diagnostics, and reliable MCP iteration, load `references/modeling-quality-loop.md`.
 
@@ -146,6 +148,7 @@ Run them by pasting their contents into `execute_blender_code` (they only use bp
 
 | Script | Use |
 |---|---|
+| `geometry_builder.py` | Declarative construction of named primitives, beams, extruded profiles, and lathed profiles in a dedicated collection. Creates new objects only; inspect and refine the result |
 | `validate_asset.py` | Read-only report with PASS / WARN / INFO per check and a final RESULT line (`INCOMPLETE - CHECK TARGETS` if a target is missing). It does not check face orientation: inspect normals visually. Run before delivering anything |
 | `setup_scene.py` | Clean working collection, metric units, sane clip range, optional studio lighting |
 | `cleanup_mesh.py` | Remove doubles, loose geometry, degenerate faces, recalc normals, optional tri/quads conversion |
@@ -155,7 +158,7 @@ Run them by pasting their contents into `execute_blender_code` (they only use bp
 | `pbr_material.py` | Create a clean Principled BSDF material from simple parameters |
 | `export_asset.py` | Export FBX / glTF / OBJ with safe settings for game engines |
 
-Edit the config block at the top of each script (clearly marked) instead of rewriting logic.
+Edit the config block at the top of each script (clearly marked) instead of rewriting logic. For geometry construction, load `references/geometry-engine.md`; for module boundaries and capability contracts, load `references/architecture.md` and `references/module-contracts.md`.
 
 ## 8. Delivery format
 
