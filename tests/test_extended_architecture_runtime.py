@@ -128,6 +128,13 @@ class ExtendedArchitectureRuntimeTests(unittest.TestCase):
                             for n in sorted(bpy.data.objects.keys()) if "_Canopy_" in n]
         self.assertEqual(first_positions, second_positions)
 
+    def test_organic_tree_refuses_partial_name_collision(self):
+        protected = add_source_cube("MCP_Tree_Branch_03")
+        out, err = execute_script("scripts/organic_tree_builder.py")
+        self.assertIsInstance(err, ValueError)
+        self.assertIs(bpy.data.objects["MCP_Tree_Branch_03"], protected)
+        self.assertNotIn("MCP_Tree_Trunk", bpy.data.objects)
+
     def test_localized_correction_changes_only_duplicate(self):
         source = add_source_cube()
         source.scale = (2.0, 1.0, 0.5)
