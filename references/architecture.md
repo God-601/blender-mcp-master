@@ -25,6 +25,7 @@ The architecture must improve real modeling outcomes, not merely increase docume
 | Technical inspection | Produce read-only topology and scene metrics | inspection_report.py, validate_asset.py |
 | Knowledge/history | Store execution records in the current project | technique_history.py |
 | Benchmark evidence | Collect reproducible technical metrics and fixed prompts | benchmark_report.py, benchmark-prompts.md |
+| Agent compatibility | Verify actual client/MCP combinations without assumptions | agent-compatibility.md; all client cells remain NOT VERIFIED until real runs |
 | Artistic direction | Silhouette, proportions, style, composition, materials | Specialist references |
 | Scene management | Scope objects, collections, ownership, preserve user scene | setup_scene.py and safety rules |
 | Visual engine | Multi-angle inspection and reference comparison | MCP look guidance |
@@ -104,7 +105,7 @@ Implemented vertical slices on the feature branch:
 5. Blender-side capability probe, in-project technique history, and technical benchmark report.
 
 Still requiring external execution or further implementation:
-- Actual multi-agent runs in Codex, Claude, Cursor, OpenCode, and Kilo Code.
+- Actual multi-agent runs in Codex, Claude, Cursor, OpenCode, and Kilo Code; the compatibility matrix is deliberately NOT VERIFIED until evidence is collected.
 - MCP visual capture and reference-image comparison (the skill routes to the client's visual tool; scripts cannot fabricate that evidence).
 - Automated defect recognition from images and closed-loop artistic correction.
 - Broader Geometry Nodes systems, advanced topology operations (robust inset/bridge/retopology), and larger parametric kits.
