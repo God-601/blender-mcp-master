@@ -79,6 +79,29 @@ def _mesh_object(name, verts, faces, collection, location=(0, 0, 0)):
 
 def _primitive_mesh(name, kind, params, collection):
     location = params.get("location", (0, 0, 0))
+    if kind == "torus":
+        major = float(params.get("major_radius", 1.0))
+        minor = float(params.get("minor_radius", 0.25))
+        major_segments = max(3, int(params.get("major_segments", 48)))
+        minor_segments = max(3, int(params.get("minor_segments", 12)))
+        if major <= 0 or minor <= 0 or minor >= major:
+            raise ValueError("torus radii are invalid")
+        verts = []
+        faces = []
+        for i in range(major_segments):
+            u = 2.0 * math.pi * i / major_segments
+            for j in range(minor_segments):
+                v = 2.0 * math.pi * j / minor_segments
+                ring = major + minor * math.cos(v)
+                verts.append((ring * math.cos(u), ring * math.sin(u), minor * math.sin(v)))
+        for i in range(major_segments):
+            for j in range(minor_segments):
+                a = i * minor_segments + j
+                b = ((i + 1) % major_segments) * minor_segments + j
+                c_idx = ((i + 1) % major_segments) * minor_segments + (j + 1) % minor_segments
+                d = i * minor_segments + (j + 1) % minor_segments
+                faces.append((a, b, c_idx, d))
+        return _mesh_object(name, verts, faces, collection, location)
     mesh = bpy.data.meshes.new(name + "_Mesh")
     bm = bmesh.new()
     try:
@@ -111,16 +134,6 @@ def _primitive_mesh(name, kind, params, collection):
             bmesh.ops.create_cone(
                 bm, cap_ends=True, cap_tris=False, segments=segments,
                 radius1=radius1, radius2=radius2, depth=depth
-            )
-        elif kind == "torus":
-            major = float(params.get("major_radius", 1.0))
-            minor = float(params.get("minor_radius", 0.25))
-            if major <= 0 or minor <= 0 or minor >= major:
-                raise ValueError("torus radii are invalid")
-            bmesh.ops.create_torus(
-                bm, major_segments=max(3, int(params.get("major_segments", 48))),
-                minor_segments=max(3, int(params.get("minor_segments", 12))),
-                major_radius=major, minor_radius=minor
             )
         else:
             raise ValueError("Unsupported primitive type: " + kind)
