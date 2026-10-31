@@ -22,11 +22,24 @@ def execute_script(relative_path, replacements=None):
     path = ROOT / relative_path
     source = path.read_text(encoding="utf-8")
     for name, value in (replacements or {}).items():
-        pattern = rf"^{name}\s*=\s*\[.*?^\]" if isinstance(value, list) else rf"^{name}\s*=.*$"
-        source, count = re.subn(
-            pattern, lambda _m, n=name, v=value: f"{n} = {v!r}",
-            source, count=1, flags=re.M | (re.S if isinstance(value, list) else 0)
-        )
+        if isinstance(value, list):
+            source, count = re.subn(
+                rf"^{name}\s*=\s*\[.*?^\]",
+                lambda _m, n=name, v=value: f"{n} = {v!r}",
+                source, count=1, flags=re.M | re.S
+            )
+            if count == 0:  # Also support compact one-line list configurations.
+                source, count = re.subn(
+                    rf"^{name}\s*=.*$",
+                    lambda _m, n=name, v=value: f"{n} = {v!r}",
+                    source, count=1, flags=re.M
+                )
+        else:
+            source, count = re.subn(
+                rf"^{name}\s*=.*$",
+                lambda _m, n=name, v=value: f"{n} = {v!r}",
+                source, count=1, flags=re.M
+            )
         if count != 1:
             raise AssertionError(f"configuration {name} not found in {relative_path}")
     output = io.StringIO()
