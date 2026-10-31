@@ -85,6 +85,21 @@ class ExtendedArchitectureRuntimeTests(unittest.TestCase):
         self.assertEqual([m.type for m in result.modifiers], ["BEVEL", "WEIGHTED_NORMAL", "BOOLEAN"])
         self.assertTrue(any(obj.name.endswith("_Cutter_03") for obj in bpy.data.objects))
 
+    def test_mesh_operations_inset_and_extrude_only_duplicate_meshes(self):
+        source = add_source_cube()
+        original_faces = len(source.data.polygons)
+        specs = [
+            {"source": "Source", "output": "Source_Inset",
+             "operations": [{"type": "inset_faces", "face_indices": [0], "thickness": 0.15}]},
+            {"source": "Source", "output": "Source_Extruded",
+             "operations": [{"type": "extrude_faces", "face_indices": [0], "offset": (0, 0, 0.5)}]},
+        ]
+        out, err = execute_script("scripts/mesh_operations.py", {"TARGETS": specs})
+        self.assertIsNone(err, out)
+        self.assertEqual(len(source.data.polygons), original_faces)
+        self.assertGreater(len(bpy.data.objects["Source_Inset"].data.polygons), original_faces)
+        self.assertGreater(len(bpy.data.objects["Source_Extruded"].data.vertices), len(source.data.vertices))
+
     def test_mesh_operations_reject_existing_output(self):
         add_source_cube()
         existing = add_source_cube("Output")
