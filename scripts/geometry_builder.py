@@ -231,6 +231,18 @@ def build_component(spec, collection):
     raise ValueError("Unknown component type: " + kind)
 
 
+def _add_optional_bevel(obj, spec):
+    width = float(spec.get("bevel", 0.0))
+    if width <= 0:
+        return
+    segments = max(1, int(spec.get("bevel_segments", 2)))
+    modifier = obj.modifiers.new("MCP_Bevel", "BEVEL")
+    modifier.width = width
+    modifier.segments = segments
+    modifier.limit_method = "ANGLE"
+    modifier.angle_limit = math.radians(float(spec.get("bevel_angle", 30.0)))
+
+
 print("Blender:", bpy.app.version_string)
 print("Asset:", ASSET_NAME)
 collection = _collection(COLLECTION_NAME)
@@ -239,6 +251,7 @@ errors = []
 for component in COMPONENTS:
     try:
         obj = build_component(component, collection)
+        _add_optional_bevel(obj, component)
         created.append(obj)
         print("CREATED:", obj.name, "type=", component["type"],
               "vertices=", len(obj.data.vertices), "faces=", len(obj.data.polygons))
