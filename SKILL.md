@@ -69,6 +69,7 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Mapping different MCP tools to common functions | Capability discovery | `references/capability-mapping.md` |
 | Decomposing complex objects and choosing modeling techniques | Modeling intelligence | `references/modeling-intelligence.md` |
 | Visual inspection and localized corrections | Visual review | `references/visual-inspection.md`, `scripts/inspection_report.py`, `scripts/localized_correction.py` |
+| Cross-agent support evidence | Agent compatibility | `references/agent-compatibility.md` |
 | Store tested technique executions in the current .blend | Technique history | `scripts/technique_history.py` |
 | Collect technical benchmark evidence | Benchmarking | `references/benchmarking.md`, `references/benchmark-prompts.md`, `scripts/benchmark_report.py` |
 | Probe Blender-side API capabilities | Runtime capability probe | `scripts/capability_probe.py` |
@@ -170,6 +171,8 @@ Run them by pasting their contents into `execute_blender_code` (they only use bp
 | `inspection_report.py` | Read-only technical report for explicit mesh targets; reports topology, bounds, modifiers, and materials |
 | `localized_correction.py` | Apply explicit normals, merge-by-distance, scale-bake, bevel, and weighted-normal corrections to duplicates only |
 | `technique_history.py` | Append a review-required execution record to a tagged Text datablock in the current .blend; does not save automatically |
+| `technique_history_query.py` | Search stored technique/task records by text and return the newest matches |
+| `technique_feedback.py` | Attach explicit pass/issue/not-reviewed feedback and a 0–4 score to one history record |
 | `capability_probe.py` | Read-only Blender version/API capability report; visual capture remains an MCP-client capability |
 | `benchmark_report.py` | Machine-readable technical benchmark metrics; visual scores remain NOT VERIFIED until actual review |
 | `validate_asset.py` | Read-only report with PASS / WARN / INFO per check and a final RESULT line (`INCOMPLETE - CHECK TARGETS` if a target is missing). It does not check face orientation: inspect normals visually. Run before delivering anything |
@@ -181,7 +184,7 @@ Run them by pasting their contents into `execute_blender_code` (they only use bp
 | `pbr_material.py` | Create a clean Principled BSDF material from simple parameters |
 | `export_asset.py` | Export FBX / glTF / OBJ with safe settings for game engines |
 
-Edit the config block at the top of each script (clearly marked) instead of rewriting logic. For geometry construction, load `references/geometry-engine.md`; for module boundaries and capability contracts, load `references/architecture.md` and `references/module-contracts.md`.
+Edit the config block at the top of each script (clearly marked) instead of rewriting logic. For geometry construction, load `references/geometry-engine.md`; for module boundaries and capability contracts, load `references/architecture.md` and `references/module-contracts.md`. For cross-agent validation, load `references/agent-compatibility.md`.
 
 ## 8. Delivery format
 
