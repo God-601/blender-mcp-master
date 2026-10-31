@@ -5,6 +5,7 @@ Existing scene objects are never edited or deleted.
 """
 import bpy
 import bmesh
+import math
 from mathutils import Vector
 
 # ---- CONFIG ----------------------------------------------------------------
@@ -72,6 +73,7 @@ def create_fastener(name, radius, depth, location, segments, collection):
     obj = bpy.data.objects.new(name, mesh)
     collection.objects.link(obj)
     obj.location = Vector(location)
+    obj.rotation_euler[0] = math.pi * 0.5
     obj[OWNER_KEY] = OWNER_VALUE
     bevel = obj.modifiers.new("Fastener_Bevel", "BEVEL")
     bevel.width = min(radius * 0.18, depth * 0.2)
