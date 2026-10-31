@@ -5,6 +5,7 @@ Every generated object is new; existing scene objects and collections are protec
 """
 import bpy
 import bmesh
+import math
 from mathutils import Vector
 
 # ---- CONFIG ----------------------------------------------------------------
@@ -107,8 +108,8 @@ def build_arch(spec, collection):
     profile = [(-outer, 0.0), (-outer, leg_height)]
     for i in range(1, segments + 1):
         angle = 3.141592653589793 - 3.141592653589793 * i / segments
-        profile.append((outer * __import__("math").cos(angle),
-                        leg_height + outer * __import__("math").sin(angle)))
+        profile.append((outer * math.cos(angle),
+                        leg_height + outer * math.sin(angle)))
     profile.append((outer, 0.0))
     profile.append((inner, 0.0))
     profile.append((inner, leg_height))
@@ -127,7 +128,7 @@ def build_arch(spec, collection):
     n = len(profile)
     verts = [(x, -depth * 0.5, z) for x, z in profile]
     verts += [(x, depth * 0.5, z) for x, z in profile]
-    faces = [tuple(reversed(range(n))), tuple(range(n, 2 * n))]
+    faces = [tuple(range(n)), tuple(reversed(range(n, 2 * n)))]
     for i in range(n):
         j = (i + 1) % n
         faces.append((i, j, j + n, i + n))
