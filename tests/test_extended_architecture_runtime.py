@@ -112,7 +112,7 @@ class ExtendedArchitectureRuntimeTests(unittest.TestCase):
         self.assertEqual(len([n for n in names if "_Branch_" in n]), 7)
         self.assertEqual(len([n for n in names if "_Canopy_" in n]), 9)
         first_positions = [tuple(round(v, 5) for v in bpy.data.objects[n].location)
-                           for n in names if "_Canopy_" in n]
+                           for n in sorted(names) if "_Canopy_" in n]
         bpy.ops.wm.read_factory_settings(use_empty=True)
         out, err = execute_script("scripts/organic_tree_builder.py")
         self.assertIsNone(err, out)
@@ -134,7 +134,7 @@ class ExtendedArchitectureRuntimeTests(unittest.TestCase):
         corrected = bpy.data.objects["Source_Fixed"]
         self.assertEqual(tuple(round(v, 5) for v in source.scale), tuple(round(v, 5) for v in original_scale))
         self.assertEqual(tuple(round(v, 5) for v in corrected.scale), (1.0, 1.0, 1.0))
-        self.assertEqual(corrected.data.dimensions, source.data.dimensions)
+        self.assertEqual(tuple(round(v, 5) for v in corrected.dimensions), tuple(round(v, 5) for v in source.dimensions))
 
     def test_inspection_report_is_read_only_and_measures_explicit_targets(self):
         source = add_source_cube()
