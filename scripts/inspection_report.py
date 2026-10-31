@@ -40,12 +40,14 @@ def inspect_object(obj):
 
 
 missing = [name for name in TARGET_NAMES if bpy.data.objects.get(name) is None]
-reports = [inspect_object(bpy.data.objects[name]) for name in TARGET_NAMES if bpy.data.objects[name] is not None]
+non_mesh = [name for name in TARGET_NAMES if bpy.data.objects.get(name) is not None and bpy.data.objects[name].type != "MESH"]
+reports = [inspect_object(bpy.data.objects[name]) for name in TARGET_NAMES if bpy.data.objects[name] is not None and bpy.data.objects[name].type == "MESH"]
 payload = {
     "blender_version": bpy.app.version_string,
     "targets": reports,
     "missing_targets": missing,
-    "overall": "NOT VERIFIED" if missing or not reports else (
+    "non_mesh_targets": non_mesh,
+    "overall": "NOT VERIFIED" if missing or non_mesh or not reports else (
         "ISSUE" if any(item["status"] == "ISSUE" for item in reports) else
         "REVIEW" if any(item["status"] == "REVIEW" for item in reports) else "PASS"
     ),
