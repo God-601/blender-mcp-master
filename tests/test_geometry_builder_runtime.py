@@ -42,6 +42,21 @@ class GeometryBuilderRuntimeTests(unittest.TestCase):
     def setUp(self):
         bpy.ops.wm.read_factory_settings(use_empty=True)
 
+    def test_lathe_axis_poles_are_manifold(self):
+        import bmesh
+        out, err = run_builder([{"name": "Pole", "type": "lathe",
+                                "profile": [(0, 0), (1, 1), (0, 2)], "segments": 12}])
+        self.assertIsNone(err, out)
+        mesh = bpy.data.objects["Pole"].data
+        self.assertEqual(len(mesh.vertices), 14)
+        bm = bmesh.new()
+        try:
+            bm.from_mesh(mesh)
+            self.assertTrue(all(edge.is_manifold for edge in bm.edges))
+            self.assertTrue(all(face.calc_area() > 0 for face in bm.faces))
+        finally:
+            bm.free()
+
     def test_builds_multiple_geometry_families(self):
         specs = [
             {"name": "BoxA", "type": "box", "dimensions": (2, 1, 0.5)},

@@ -159,6 +159,13 @@ def process_target(spec, collection):
         raise ValueError("source must be an existing mesh object: " + source_name)
     if output_name in bpy.data.objects:
         raise ValueError("output already exists; refusing overwrite: " + output_name)
+    modifier_seen = bool(source.modifiers)
+    for operation in spec.get("operations", []):
+        if operation.get("type") in ("inset_faces", "extrude_faces"):
+            if modifier_seen:
+                raise ValueError("topology edits must precede modifiers, including source modifiers")
+        else:
+            modifier_seen = True
     output = source.copy()
     output.data = source.data.copy()
     output.name = output_name

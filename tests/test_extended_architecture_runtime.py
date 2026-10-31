@@ -110,6 +110,16 @@ class ExtendedArchitectureRuntimeTests(unittest.TestCase):
         self.assertIs(bpy.data.objects["Output"], existing)
         self.assertIn("output already exists", out)
 
+    def test_mesh_operations_reject_topology_after_modifier(self):
+        source = add_source_cube()
+        specs = [{"source": "Source", "output": "Output", "operations": [
+            {"type": "bevel"}, {"type": "extrude_faces", "face_indices": [0]}]}]
+        out, err = execute_script("scripts/mesh_operations.py", {"TARGETS": specs})
+        self.assertIsNone(err, out)
+        self.assertIn("topology edits must precede modifiers", out)
+        self.assertNotIn("Output", bpy.data.objects)
+        self.assertEqual(len(source.data.vertices), 8)
+
     def test_hard_surface_builder_creates_recess_boolean_and_fasteners(self):
         out, err = execute_script("scripts/hard_surface_builder.py")
         self.assertIsNone(err, out)

@@ -210,23 +210,29 @@ def _lathe(name, params, collection):
     if len(profile) < 2 or any(r < 0 for r, _z in profile):
         raise ValueError("lathe profile needs >=2 points with non-negative radii")
     verts = []
+    rings = []
     for radius, z in profile:
-        for i in range(segments):
+        rings.append(list(range(len(verts), len(verts) + (1 if radius == 0 else segments))))
+        for i in range(1 if radius == 0 else segments):
             angle = (2.0 * math.pi * i) / segments
             verts.append((radius * math.cos(angle), radius * math.sin(angle), z))
     faces = []
     for ring in range(len(profile) - 1):
+        lower, upper = rings[ring:ring + 2]
+        if len(lower) == len(upper) == 1:
+            raise ValueError("lathe cannot connect consecutive points on the axis")
         for i in range(segments):
-            a = ring * segments + i
-            b = ring * segments + (i + 1) % segments
-            c = (ring + 1) * segments + (i + 1) % segments
-            d = (ring + 1) * segments + i
-            faces.append((a, b, c, d))
+            j = (i + 1) % segments
+            if len(lower) == 1:
+                faces.append((lower[0], upper[j], upper[i]))
+            elif len(upper) == 1:
+                faces.append((lower[i], lower[j], upper[0]))
+            else:
+                faces.append((lower[i], lower[j], upper[j], upper[i]))
     if profile[0][0] > 0:
-        faces.append(tuple(reversed(range(segments))))
+        faces.append(tuple(reversed(rings[0])))
     if profile[-1][0] > 0:
-        base = (len(profile) - 1) * segments
-        faces.append(tuple(base + i for i in range(segments)))
+        faces.append(tuple(rings[-1]))
     return _mesh_object(name, verts, faces, collection, params.get("location", (0, 0, 0)))
 
 

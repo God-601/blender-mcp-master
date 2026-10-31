@@ -4,6 +4,8 @@
 
 scripts/mesh_operations.py accepts explicit source object names and output names. It duplicates the source object and mesh data, then adds non-destructive modifiers or applies topology edits to the duplicate. The source object is never modified. Output names and cutter names must be unused.
 
+Topology edits must come before modifiers in the operation list, and require a source without modifiers. The script rejects other orders rather than silently changing their meaning. For a topology edit after a modifier, create and inspect a separate applied intermediate first.
+
 ## Modifier operations
 
 | Operation | Parameters | Behavior |
