@@ -18,6 +18,7 @@ scripts/geometry_builder.py creates named components from a configuration list. 
 - beam between two 3D points
 - extruded 2D profile
 - lathed radius/Z profile
+- lofted matching cross-sections across multiple Z levels
 
 The builder creates new objects in a dedicated collection and tags ownership. It does not silently
 replace an existing object. Configure dimensions in Blender units and use explicit names.
@@ -44,7 +45,7 @@ proportions, intersections, silhouette, and refine the mesh.
 ## Geometry family roadmap
 
 ### Primitive and profile construction
-Configurable primitives, beam/connector construction, extruded profiles, lathed profiles,
+Configurable primitives, beam/connector construction, extruded profiles, lathed profiles, lofted profiles,
 polygon and cross-section validation.
 
 ### Mesh operations
@@ -82,5 +83,6 @@ version-aware node setup with runtime tests.
 - The initial builder is a blockout/construction foundation, not a full CAD or topology toolkit.
 - extruded_profile expects a simple polygon; it does not detect arbitrary self-intersections or holes.
 - lathe creates side quads and end caps; profile topology and winding should be checked for the intended shape.
+- loft requires the same number of points in each section and strictly increasing Z; it does not currently detect self-intersections or twist between profiles.
 - No automated visual inspection is performed by the script.
 - Geometry Nodes, advanced booleans, lofting, retopology, and sculpt workflows remain future capabilities.
