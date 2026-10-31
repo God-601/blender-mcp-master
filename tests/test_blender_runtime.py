@@ -87,14 +87,14 @@ class BlenderRuntimeTests(unittest.TestCase):
         add_mesh("Card", grid)
         out, err = run_script("validate_asset.py", TARGETS=["Card"])
         self.assertIsNone(err)
-        self.assertIn("non-manifold edges (3+ faces): 0", out)
+        self.assertIn("non-manifold edges with 3+ linked faces: 0", out)
         self.assertIn("boundary/open edges: 8", out)
 
     def test_validate_detects_edge_shared_by_three_faces(self):
         add_mesh("Fin", three_face_edge)
         out, err = run_script("validate_asset.py", TARGETS=["Fin"])
         self.assertIsNone(err)
-        self.assertIn("non-manifold edges (3+ faces): 1", out)
+        self.assertIn("non-manifold edges with 3+ linked faces: 1", out)
 
     def test_validate_reports_missing_target_as_incomplete(self):
         add_mesh("Box", cube)
@@ -114,17 +114,24 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertIn("[Box]", out)
         self.assertIn("INCOMPLETE - CHECK TARGETS", out)
 
-    def test_validate_warns_when_empty_targets_fall_back_to_visible_meshes(self):
+    def test_validate_empty_targets_do_not_fall_back_to_scene(self):
         add_mesh("UnselectedBox", cube)
-        self.assertEqual(list(bpy.context.selected_objects), [])
         out, err = run_script("validate_asset.py", TARGETS=[])
         self.assertIsNone(err, out)
-        self.assertIn(
-            "WARN: TARGETS is empty and no mesh is selected; falling back to all visible "
-            "mesh object(s): 'UnselectedBox'",
-            out,
-        )
-        self.assertIn("[UnselectedBox]", out)
+        self.assertIn("scene-wide fallback", out)
+        self.assertIn("INCOMPLETE - CHECK TARGETS", out)
+        self.assertNotIn("[UnselectedBox]", out)
+
+    def test_optimizer_backup_works_with_excluded_collection(self):
+        obj = add_mesh("Box", cube)
+        collection = bpy.data.collections.new("_MCP_OPTIMIZATION_BACKUPS")
+        bpy.context.scene.collection.children.link(collection)
+        bpy.context.view_layer.layer_collection.children[collection.name].exclude = True
+        original = obj.data
+        out, err = run_script("optimize_mesh.py", TARGETS=["Box"], APPLY=True)
+        self.assertIsNone(err, out)
+        self.assertIsNot(obj.data, original)
+        self.assertTrue(any(o.data == original for o in collection.objects))
 
     def test_validate_reads_rotation_from_quaternion_objects(self):
         import math
