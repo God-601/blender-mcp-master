@@ -58,6 +58,7 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Slow viewport, heavy scene, crashes | Performance | `references/performance.md` |
 | Something looks wrong | Troubleshooting | `references/troubleshooting.md` |
 | Need triangle / texture / scale numbers | Budgets | `references/budgets.md` |
+| Optimize game assets, mesh topology, draw overhead, LOD or Roblox performance | Game asset optimization | `references/game-asset-optimization.md` |
 | Quality loop, visual review, contextual validation | Modeling QA | `references/modeling-quality-loop.md` |
 
 Always also follow sections 3 to 6 below. For cross-cutting visual review, contextual diagnostics, and reliable MCP iteration, load `references/modeling-quality-loop.md`.
@@ -92,6 +93,7 @@ BLOCK  -> blockout with primitives at correct proportions; look (angles) BEFORE 
 REFINE -> bevels, secondary forms, details; look (solid + wireframe)
 UV     -> only if textured or exported to a game
 MATERIAL -> PBR materials, named, shared where possible
+OPTIMIZE -> for game assets, load references/game-asset-optimization.md; baseline, dry-run, backup, clean conservatively, inspect, compare
 VALIDATE -> run scripts/validate_asset.py; fix each WARN or state why it is acceptable for this asset; re-run
 DELIVER -> save/export if asked; report facts
 ```
@@ -146,6 +148,7 @@ Run them by pasting their contents into `execute_blender_code` (they only use bp
 
 | Script | Use |
 |---|---|
+| `optimize_mesh.py` | Dry-run-first, backup-first conservative mesh cleanup; optional balanced dissolve and non-destructive Decimate preview |
 | `validate_asset.py` | Read-only report with PASS / WARN / INFO per check and a final RESULT line (`INCOMPLETE - CHECK TARGETS` if a target is missing). It does not check face orientation: inspect normals visually. Run before delivering anything |
 | `setup_scene.py` | Clean working collection, metric units, sane clip range, optional studio lighting |
 | `cleanup_mesh.py` | Remove doubles, loose geometry, degenerate faces, recalc normals, optional tri/quads conversion |
