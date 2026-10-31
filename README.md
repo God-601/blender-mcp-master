@@ -30,7 +30,8 @@ Example request:
 
 - `SKILL.md` — core workflow, module routing, safety, and delivery rules.
 - `references/` — focused modeling, materials, environment, export, performance, and troubleshooting guides.
-- `scripts/` — reusable Blender Python utilities and templates.
+- `scripts/` — reusable Blender Python utilities and templates, including the dry-run-first `optimize_mesh.py`.
+- `references/game-asset-optimization.md` — safe mesh cleanup, LOD, draw overhead, and Roblox-focused optimization.
 - `tests/` — static checks and Blender-runtime tests.
 - [Universal quality checklist](references/quality-checklist.md) — common acceptance checks for every asset.
 
@@ -94,7 +95,8 @@ Exemplo:
 
 - `SKILL.md` — fluxo central, seleção de módulos, segurança e entrega.
 - `references/` — guias especializados de modelagem, materiais, ambientes, exportação, desempenho e diagnóstico.
-- `scripts/` — utilitários e modelos reutilizáveis em Python para Blender.
+- `scripts/` — utilitários e modelos reutilizáveis em Python para Blender, incluindo `optimize_mesh.py` com simulação inicial e backup.
+- `references/game-asset-optimization.md` — limpeza segura de malha, LOD, custo de renderização e otimização para Roblox.
 - `tests/` — verificações estáticas e testes executados no ambiente Blender.
 - [Checklist universal de qualidade](references/quality-checklist.md) — critérios comuns de aceitação.
 
