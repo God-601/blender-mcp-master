@@ -33,6 +33,8 @@ Example request:
 - `scripts/` — reusable Blender Python utilities and templates, including declarative geometry, hard-surface, organic, modular, Geometry Nodes, inspection, correction, and benchmark utilities.
 - `references/architecture.md` and `references/module-contracts.md` — system boundaries and cross-module contracts.
 - `references/geometry-engine.md` — current geometry capabilities, usage, and the construction roadmap.
+- `references/mesh-operations.md` — duplicate-first inset/extrude, boolean, and modifier-based mesh refinement.
+- `references/parametric-geometry-nodes.md` — editable Geometry Nodes post array and compatibility limits.
 - `references/benchmark-prompts.md` — fixed prompts and evidence requirements for cross-agent modeling benchmarks.
 - `references/agent-compatibility.md` — evidence-based client compatibility procedure and current unverified matrix.
 - `scripts/mesh_operations.py`, `hard_surface_builder.py`, and `geometry_nodes_builder.py` — non-destructive mesh refinement, hard-surface construction, and editable parametric geometry.
