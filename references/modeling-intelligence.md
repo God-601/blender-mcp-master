@@ -54,6 +54,9 @@ Example decision rules:
 - irregular rocks: icosphere base plus deterministic deformation
 - modular architecture: reusable dimensioned components and snap rules
 - deforming characters: topology and rigging requirements take precedence over raw speed
+- hard-surface panels with recesses: use the panel builder or duplicate-first boolean workflow, then inspect the evaluated modifier result
+- editable repeated geometry: prefer Geometry Nodes only when the active Blender version and node API are verified
+- known recurring tasks: consult technique history, but prefer records marked REVIEWED_PASS and check their Blender-version evidence before reuse
 
 The agent must state when a selected method is an approximation.
 
@@ -81,7 +84,7 @@ After each meaningful inspection:
 5. execute and inspect again
 6. stop if repeated iterations fail to improve the result
 
-Do not use a numeric score as the only decision signal. Preserve reviewer notes and unverified criteria.
+Do not use a numeric score as the only decision signal. Preserve reviewer notes and unverified criteria. History is a retrieval aid, not autonomous learning; do not treat unreviewed runs as successful examples.
 
 ## Definition of done
 
