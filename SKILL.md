@@ -65,6 +65,21 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Slow viewport, heavy scene, crashes | Performance | `references/performance.md` |
 | Something looks wrong | Troubleshooting | `references/troubleshooting.md` |
 | Need triangle / texture / scale numbers | Budgets | `references/budgets.md` |
+| Geometry construction from components, profiles, or lathed forms | Geometry engine | `references/geometry-engine.md` |
+| Explicit mesh refinement, face inset/extrusion, booleans, bevels, normals, and modifier stacks | Mesh operations | `references/mesh-operations.md`, `scripts/mesh_operations.py` |
+| Recessed panels, fasteners, and mechanical blockouts | Hard surface | `scripts/hard_surface_builder.py` |
+| Editable dimension-driven Geometry Nodes object | Parametric geometry | `scripts/geometry_nodes_builder.py` |
+| Organic rocks, trees, branches, and clustered foliage | Organic modeling | `scripts/organic_rock_builder.py`, `scripts/organic_tree_builder.py` |
+| Parametric architecture, repeated modules, stairs, and arches | Modular modeling | `references/modular-modeling.md` |
+| Module boundaries, semantic MCP capabilities, and evidence contracts | Architecture | `references/architecture.md`, `references/module-contracts.md` |
+| Mapping different MCP tools to common functions | Capability discovery | `references/capability-mapping.md` |
+| Decomposing complex objects and choosing modeling techniques | Modeling intelligence | `references/modeling-intelligence.md` |
+| Visual inspection and localized corrections | Visual review | `references/visual-inspection.md`, `scripts/inspection_report.py`, `scripts/localized_correction.py` |
+| Cross-agent support evidence | Agent compatibility | `references/agent-compatibility.md` |
+| Store tested technique executions in the current .blend | Technique history | `scripts/technique_history.py` |
+| Collect technical benchmark evidence | Benchmarking | `references/benchmarking.md`, `references/benchmark-prompts.md`, `scripts/benchmark_report.py` |
+| Probe Blender-side API capabilities | Runtime capability probe | `scripts/capability_probe.py` |
+| Repeatable asset and cross-agent evaluation | Benchmarking | `references/benchmarking.md` |
 | Optimize game assets, mesh topology, draw overhead, LOD or Roblox performance | Game asset optimization | `references/game-asset-optimization.md` |
 | Shared modeling standards, topology and operation selection | Modeling foundations | `references/modeling-foundations.md` |
 | Quality loop, visual review, contextual validation | Modeling QA | `references/modeling-quality-loop.md`; `references/quality-checklist.md` |
@@ -156,8 +171,23 @@ Run them by pasting their contents into `execute_blender_code` (they only use bp
 
 | Script | Use |
 |---|---|
+| `geometry_builder.py` | Declarative construction of named primitives, beams, extruded, lathed, and lofted profiles in a dedicated collection. Creates new objects only; inspect and refine the result |
+| `organic_rock_builder.py` | Deterministic stylized rock base mesh from an icosphere with seeded smooth deformation and optional flattened base. Creates a new owned object only |
+| `modular_builder.py` | Parametric staircase and masonry arch blockouts with explicit dimensions, named parts, and rollback of partial staircase creation |
+| `mesh_operations.py` | Duplicate-first, non-destructive bevel, normals, solidify, triangulate, decimate, mirror, subdivision, and boolean modifier pipeline |
+| `hard_surface_builder.py` | Recessed mechanical panel with boolean pocket and four oriented fasteners |
+| `geometry_nodes_builder.py` | Editable repeated post array with Count, Spacing, Height, and Radius inputs (requires Geometry Nodes support) |
+| `organic_tree_builder.py` | Seeded stylized tree with tapered trunk, branches, and icosphere canopy clusters |
+| `inspection_report.py` | Read-only technical report for explicit mesh targets; reports topology, bounds, modifiers, and materials |
+| `localized_correction.py` | Apply explicit normals, merge-by-distance, scale-bake, bevel, and weighted-normal corrections to duplicates only |
+| `technique_history.py` | Append a review-required execution record to a tagged Text datablock in the current .blend; does not save automatically |
+| `technique_history_query.py` | Search stored technique/task records by text and return the newest matches |
+| `technique_feedback.py` | Attach explicit pass/issue/not-reviewed feedback and a 0–4 score to one history record |
+| `capability_probe.py` | Read-only Blender version/API capability report; visual capture remains an MCP-client capability |
+| `benchmark_report.py` | Machine-readable technical benchmark metrics; visual scores remain NOT VERIFIED until actual review |
 | `optimize_mesh.py` | Dry-run-first, backup-first conservative mesh cleanup; optional balanced dissolve and non-destructive Decimate preview |
-| `validate_asset.py` | Read-only report with base/evaluated topology, modifiers, shape keys, UVs, materials, images and target status. Empty TARGETS checks selected meshes only; no scene-wide fallback |\n| `validate_uvs.py` | Read-only UV bounds and zero-area diagnostics for explicit targets or selected meshes; does not claim overlap/stretch validation |
+| `validate_asset.py` | Read-only report with base/evaluated topology, modifiers, shape keys, UVs, materials, images and target status. Empty TARGETS checks selected meshes only; no scene-wide fallback |
+| `validate_uvs.py` | Read-only UV bounds and zero-area diagnostics for explicit targets or selected meshes; does not claim overlap/stretch validation |
 | `setup_scene.py` | Clean working collection, metric units, sane clip range, optional studio lighting |
 | `cleanup_mesh.py` | Remove doubles, loose geometry, degenerate faces, recalc normals, optional tri/quads conversion |
 | `apply_and_origin.py` | Apply transforms, set origin (bottom center / center / custom), ground the object |
@@ -166,7 +196,7 @@ Run them by pasting their contents into `execute_blender_code` (they only use bp
 | `pbr_material.py` | Create a clean Principled BSDF material from simple parameters |
 | `export_asset.py` | Export FBX / glTF / OBJ with safe settings for game engines |
 
-Edit the config block at the top of each script (clearly marked) instead of rewriting logic.
+Edit the config block at the top of each script (clearly marked) instead of rewriting logic. For geometry construction, load `references/geometry-engine.md`; for module boundaries and capability contracts, load `references/architecture.md` and `references/module-contracts.md`. For cross-agent validation, load `references/agent-compatibility.md`.
 
 ## 8. Delivery format
 

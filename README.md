@@ -43,6 +43,22 @@ Example request:
 ## Repository map
 
 - `SKILL.md` — core workflow, module routing, safety, and delivery rules.
+- `references/` — focused modeling, materials, environment, export, performance, and troubleshooting guides.
+- `scripts/` — reusable Blender Python utilities and templates, including declarative geometry, hard-surface, organic, modular, Geometry Nodes, inspection, correction, and benchmark utilities.
+- `references/architecture.md` and `references/module-contracts.md` — system boundaries and cross-module contracts.
+- `references/geometry-engine.md` — current geometry capabilities, usage, and the construction roadmap.
+- `references/mesh-operations.md` — duplicate-first inset/extrude, boolean, and modifier-based mesh refinement.
+- `references/parametric-geometry-nodes.md` — editable Geometry Nodes post array and compatibility limits.
+- `references/benchmark-prompts.md` — fixed prompts and evidence requirements for cross-agent modeling benchmarks.
+- `references/agent-compatibility.md` — evidence-based client compatibility procedure and current unverified matrix.
+- `scripts/mesh_operations.py`, `hard_surface_builder.py`, and `geometry_nodes_builder.py` — non-destructive mesh refinement, hard-surface construction, and editable parametric geometry.
+- `scripts/organic_tree_builder.py` and `organic_rock_builder.py` — deterministic organic base forms.
+- `scripts/inspection_report.py`, `localized_correction.py`, and `technique_history*.py` — technical evidence, safe correction copies, searchable in-project history, and explicit reviewer feedback.
+- `scripts/capability_probe.py` and `benchmark_report.py` — Blender capability inventory and technical benchmark records.
+- `references/modeling-intelligence.md` — task decomposition, technique selection, and adaptive refinement.
+- `references/capability-mapping.md` — portable mapping from MCP tools to semantic capabilities.
+- `references/visual-inspection.md` and `references/benchmarking.md` — visual evidence and repeatable evaluation.
+- `references/modular-modeling.md` — parametric stairs and arch construction, plus the modular-kit roadmap.
 - `references/` — focused guides for hard-surface, organic/characters, stylized/retro, hand-painted textures, UV/baking, topology/retopology, sculpting/high-poly, architecture/interiors, CAD, materials, environments, export, performance, and troubleshooting.
 - `scripts/` — reusable Blender Python utilities and templates.
 - `references/game-asset-optimization.md` — safe mesh cleanup, LOD, draw overhead, and Roblox-focused optimization.
