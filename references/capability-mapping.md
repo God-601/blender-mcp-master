@@ -48,6 +48,8 @@ The repository does not implement or replace a Blender-control MCP server.
 - Re-discover after changing MCP server, agent, or session.
 - Report which capabilities were available when delivering the asset.
 
+`scripts/capability_probe.py` can report Blender-side API availability (mesh datablocks, curves, Geometry Nodes, modifiers, and save operator). It cannot discover the agent MCP tool list, prove that a client can invoke a tool, or capture images. The active agent must still enumerate its tools and map their actual schemas to the semantic capabilities above.
+
 ## Compatibility evidence
 
 A compatibility claim must identify:
