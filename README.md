@@ -36,6 +36,7 @@ Example request:
 - `references/modeling-intelligence.md` — task decomposition, technique selection, and adaptive refinement.
 - `references/capability-mapping.md` — portable mapping from MCP tools to semantic capabilities.
 - `references/visual-inspection.md` and `references/benchmarking.md` — visual evidence and repeatable evaluation.
+- `references/modular-modeling.md` — parametric stairs and arch construction, plus the modular-kit roadmap.
 - `tests/` — static checks and Blender-runtime tests.
 - [Universal quality checklist](references/quality-checklist.md) — common acceptance checks for every asset.
 
