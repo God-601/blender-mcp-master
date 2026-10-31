@@ -60,11 +60,18 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Need triangle / texture / scale numbers | Budgets | `references/budgets.md` |
 | Quality loop, visual review, contextual validation | Modeling QA | `references/modeling-quality-loop.md` |
 | Geometry construction from components, profiles, or lathed forms | Geometry engine | `references/geometry-engine.md` |
+| Explicit mesh refinement, booleans, bevels, normals, and modifier stacks | Mesh operations | `scripts/mesh_operations.py` |
+| Recessed panels, fasteners, and mechanical blockouts | Hard surface | `scripts/hard_surface_builder.py` |
+| Editable dimension-driven Geometry Nodes object | Parametric geometry | `scripts/geometry_nodes_builder.py` |
+| Organic rocks, trees, branches, and clustered foliage | Organic modeling | `scripts/organic_rock_builder.py`, `scripts/organic_tree_builder.py` |
 | Parametric architecture, repeated modules, stairs, and arches | Modular modeling | `references/modular-modeling.md` |
 | Module boundaries, semantic MCP capabilities, and evidence contracts | Architecture | `references/architecture.md`, `references/module-contracts.md` |
 | Mapping different MCP tools to common functions | Capability discovery | `references/capability-mapping.md` |
 | Decomposing complex objects and choosing modeling techniques | Modeling intelligence | `references/modeling-intelligence.md` |
-| Visual inspection and localized corrections | Visual review | `references/visual-inspection.md` |
+| Visual inspection and localized corrections | Visual review | `references/visual-inspection.md`, `scripts/inspection_report.py`, `scripts/localized_correction.py` |
+| Store tested technique executions in the current .blend | Technique history | `scripts/technique_history.py` |
+| Collect technical benchmark evidence | Benchmarking | `references/benchmarking.md`, `references/benchmark-prompts.md`, `scripts/benchmark_report.py` |
+| Probe Blender-side API capabilities | Runtime capability probe | `scripts/capability_probe.py` |
 | Repeatable asset and cross-agent evaluation | Benchmarking | `references/benchmarking.md` |
 
 Always also follow sections 3 to 6 below. For cross-cutting visual review, contextual diagnostics, and reliable MCP iteration, load `references/modeling-quality-loop.md`.
@@ -156,6 +163,15 @@ Run them by pasting their contents into `execute_blender_code` (they only use bp
 | `geometry_builder.py` | Declarative construction of named primitives, beams, extruded, lathed, and lofted profiles in a dedicated collection. Creates new objects only; inspect and refine the result |
 | `organic_rock_builder.py` | Deterministic stylized rock base mesh from an icosphere with seeded smooth deformation and optional flattened base. Creates a new owned object only |
 | `modular_builder.py` | Parametric staircase and masonry arch blockouts with explicit dimensions, named parts, and rollback of partial staircase creation |
+| `mesh_operations.py` | Duplicate-first, non-destructive bevel, normals, solidify, triangulate, decimate, mirror, subdivision, and boolean modifier pipeline |
+| `hard_surface_builder.py` | Recessed mechanical panel with boolean pocket and four oriented fasteners |
+| `geometry_nodes_builder.py` | Editable Geometry Nodes cube/panel with exposed Dimensions vector input (requires Geometry Nodes support) |
+| `organic_tree_builder.py` | Seeded stylized tree with tapered trunk, branches, and icosphere canopy clusters |
+| `inspection_report.py` | Read-only technical report for explicit mesh targets; reports topology, bounds, modifiers, and materials |
+| `localized_correction.py` | Apply explicit normals, merge-by-distance, scale-bake, bevel, and weighted-normal corrections to duplicates only |
+| `technique_history.py` | Append a review-required execution record to a tagged Text datablock in the current .blend; does not save automatically |
+| `capability_probe.py` | Read-only Blender version/API capability report; visual capture remains an MCP-client capability |
+| `benchmark_report.py` | Machine-readable technical benchmark metrics; visual scores remain NOT VERIFIED until actual review |
 | `validate_asset.py` | Read-only report with PASS / WARN / INFO per check and a final RESULT line (`INCOMPLETE - CHECK TARGETS` if a target is missing). It does not check face orientation: inspect normals visually. Run before delivering anything |
 | `setup_scene.py` | Clean working collection, metric units, sane clip range, optional studio lighting |
 | `cleanup_mesh.py` | Remove doubles, loose geometry, degenerate faces, recalc normals, optional tri/quads conversion |
