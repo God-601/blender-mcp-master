@@ -33,6 +33,9 @@ Example request:
 - `scripts/` — reusable Blender Python utilities and templates, including the initial declarative geometry builder.
 - `references/architecture.md` and `references/module-contracts.md` — system boundaries and cross-module contracts.
 - `references/geometry-engine.md` — current geometry capabilities, usage, and the construction roadmap.
+- `references/modeling-intelligence.md` — task decomposition, technique selection, and adaptive refinement.
+- `references/capability-mapping.md` — portable mapping from MCP tools to semantic capabilities.
+- `references/visual-inspection.md` and `references/benchmarking.md` — visual evidence and repeatable evaluation.
 - `tests/` — static checks and Blender-runtime tests.
 - [Universal quality checklist](references/quality-checklist.md) — common acceptance checks for every asset.
 
