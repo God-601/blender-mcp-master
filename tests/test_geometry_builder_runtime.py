@@ -78,6 +78,14 @@ class GeometryBuilderRuntimeTests(unittest.TestCase):
         self.assertEqual(existing.data, mesh)
         self.assertIn("not owned by this builder", out)
 
+    def test_unowned_collection_name_is_not_reused(self):
+        existing = bpy.data.collections.new("TestAsset_Geometry")
+        bpy.context.scene.collection.children.link(existing)
+        out, err = run_builder([{"name": "ShouldNotExist", "type": "box"}])
+        self.assertIsInstance(err, ValueError)
+        self.assertIn("not owned by this builder", str(err))
+        self.assertNotIn("ShouldNotExist", bpy.data.objects)
+
     def test_beam_endpoints_determine_length_and_midpoint(self):
         out, err = run_builder([
             {"name": "Beam", "type": "beam", "start": (1, 2, 3), "end": (1, 2, 5), "radius": 0.1}
