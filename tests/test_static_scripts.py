@@ -1,6 +1,7 @@
 """Static checks for repository scripts; these do not replace Blender runtime tests."""
 from pathlib import Path
 import ast
+import re
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -59,6 +60,26 @@ class RepositoryStaticChecks(unittest.TestCase):
         materials = (ROOT / "references" / "materials.md").read_text(encoding="utf-8").lower()
         self.assertIn("never run global orphan purges", materials)
         self.assertNotIn("purge orphan materials at end", materials)
+    def test_skill_frontmatter_follows_agent_skills_limits(self):
+        text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        match = re.match(r"---\n(.*?)\n---\n", text, re.S)
+        self.assertIsNotNone(match, "SKILL.md must start with YAML frontmatter")
+        name = re.search(r"^name:\s*(.+)$", match.group(1), re.M).group(1).strip()
+        description = re.search(r"^description:\s*(.+)$", match.group(1), re.M).group(1).strip()
+        self.assertRegex(name, r"^[a-z0-9]+(-[a-z0-9]+)*$")
+        self.assertLessEqual(len(name), 64)
+        self.assertEqual(name, "blender-mcp-master")
+        self.assertTrue(0 < len(description) <= 1024, f"description is {len(description)} chars")
+        self.assertNotIn("<", description)
+        self.assertNotIn(">", description)
+
+    def test_documented_references_and_scripts_exist(self):
+        documents = [ROOT / "SKILL.md", ROOT / "README.md", *sorted((ROOT / "references").glob("*.md"))]
+        pattern = re.compile(r"(?<![\w/.-])((?:references|scripts)/[A-Za-z0-9_.-]+\.(?:md|py))")
+        for document in documents:
+            for target in sorted(set(pattern.findall(document.read_text(encoding="utf-8")))):
+                with self.subTest(document=document.name, target=target):
+                    self.assertTrue((ROOT / target).is_file(), f"{document.name} mentions missing file {target}")
 
     def test_validator_reports_incomplete_target_selection(self):
         source = (ROOT / "scripts" / "validate_asset.py").read_text(encoding="utf-8")
