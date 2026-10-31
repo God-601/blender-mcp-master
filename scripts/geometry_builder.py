@@ -4,7 +4,7 @@ Paste this script into the active Blender-control MCP code executor.
 It creates new objects only; it never edits or deletes pre-existing objects.
 
 Supported component types:
-  box, sphere, ico_sphere, cylinder, cone, torus, beam, extruded_profile, lathe
+  box, sphere, ico_sphere, cylinder, cone, torus, beam, extruded_profile, lathe, loft
 
 Set ASSET_NAME and COMPONENTS below. Coordinates and dimensions use Blender units.
 The script is intentionally compatible with Blender 3.1+ and avoids context-sensitive
@@ -230,6 +230,48 @@ def _lathe(name, params, collection):
     return _mesh_object(name, verts, faces, collection, params.get("location", (0, 0, 0)))
 
 
+
+def _loft(name, params, collection):
+    """Connect matching 2D profiles placed at different Z levels."""
+    sections = params["profiles"]
+    if len(sections) < 2:
+        raise ValueError("loft needs at least two profiles")
+    normalized = []
+    point_count = None
+    for section in sections:
+        points = [Vector((float(p[0]), float(p[1]))) for p in section["points"]]
+        if point_count is None:
+            point_count = len(points)
+        if len(points) < 3 or len(points) != point_count:
+            raise ValueError("loft profiles must have the same number of >=3 points")
+        if any((points[i] - points[(i + 1) % len(points)]).length <= 1e-8
+               for i in range(len(points))):
+            raise ValueError("loft profile contains repeated consecutive points")
+        area2 = sum(points[i].x * points[(i + 1) % len(points)].y -
+                    points[(i + 1) % len(points)].x * points[i].y
+                    for i in range(len(points)))
+        if abs(area2) <= 1e-8:
+            raise ValueError("loft profile has zero area")
+        normalized.append((float(section["z"]), points, area2))
+    if any(normalized[i + 1][0] <= normalized[i][0] for i in range(len(normalized) - 1)):
+        raise ValueError("loft profile Z values must be strictly increasing")
+    if normalized[0][2] < 0:
+        normalized = [(z, list(reversed(points)), -area) for z, points, area in normalized]
+    verts = []
+    for z, points, _area in normalized:
+        verts.extend((p.x, p.y, z) for p in points)
+    faces = [tuple(reversed(range(point_count)))]
+    for section_index in range(len(normalized) - 1):
+        lower = section_index * point_count
+        upper = (section_index + 1) * point_count
+        for i in range(point_count):
+            j = (i + 1) % point_count
+            faces.append((lower + i, lower + j, upper + j, upper + i))
+    last = (len(normalized) - 1) * point_count
+    faces.append(tuple(last + i for i in range(point_count)))
+    return _mesh_object(name, verts, faces, collection, params.get("location", (0, 0, 0)))
+
+
 def build_component(spec, collection):
     name = str(spec["name"])
     kind = str(spec["type"])
@@ -245,6 +287,8 @@ def build_component(spec, collection):
         return _extruded_profile(name, spec, collection)
     if kind == "lathe":
         return _lathe(name, spec, collection)
+    if kind == "loft":
+        return _loft(name, spec, collection)
     raise ValueError("Unknown component type: " + kind)
 
 
