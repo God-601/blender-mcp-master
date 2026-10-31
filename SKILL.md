@@ -47,18 +47,24 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 
 | Request | Pipeline | Read |
 |---|---|---|
-| Furniture, tools, weapons, vehicles, machines, any rigid object | Hard-surface | `references/hard-surface.md` |
-| Creatures, plants, rocks, terrain, food, humans, anything organic | Organic / sculpt-lite | `references/organic.md` |
-| Characters meant to move | Character + rig | `references/character-rig.md` |
-| Rooms, buildings, streets, levels | Environment | `references/environment.md` |
-| Low-poly, stylized, voxel, "studs" look, blocky | Stylized | `references/stylized-lowpoly.md` |
-| Any material or texture work | PBR materials | `references/materials.md` |
+| Furniture, tools, weapons, vehicles, machines, rigid props | Hard-surface modeling | `references/hard-surface.md` |
+| Creatures, plants, rocks, terrain, food, organic forms | Organic modeling; add sculpt/high-poly when needed | `references/organic.md`; `references/sculpting-highpoly.md` when relevant |
+| Characters, anatomy, deformation, rigging, animation | Character + deformation topology | `references/character-rig.md`; `references/topology-retopology.md` |
+| Rooms, buildings, streets, levels, modular scenery | Environment | `references/environment.md` |
+| Architecture, interiors, walkthroughs, spatial blockouts | Architecture/interiors | `references/architecture-interiors.md` |
+| Dimension-driven parts, CAD-like meshes, 3D printing | Technical modeling | `references/cad-technical.md` |
+| Low-poly, stylized, fantasy, voxel, retro/PS1, Roblox-like blockiness | Stylized art direction | `references/stylized-lowpoly.md` |
+| Hand-painted textures, painterly highlights, color atlases | Hand-painted pipeline | `references/hand-painted-pipeline.md`; add `references/uv-baking.md` when texturing/baking is involved; runnable snippets in `references/handpaint-recipes.md` |
+| UV layout, texture painting setup, baking maps, high-to-low projection | UV and baking | `references/uv-baking.md` |
+| Edge flow, mesh density, cleanup strategy, retopology | Topology and retopology | `references/topology-retopology.md` |
+| Sculpting, high-poly detail, remesh, high-to-low production | Sculpt/high-poly | `references/sculpting-highpoly.md` |
+| PBR, procedural nodes, toon shading, material diagnostics | Shading and materials | `references/materials.md` |
+| Smooth/sharp normals, bevel highlights, toon ramp, outline | Shading recipes | `references/shading-recipes.md` |
 | Render, lighting, camera, turntable | Lighting/render | `references/lighting-render.md` |
-| Game engine target (Roblox, Unity, Unreal, Godot) | Game-ready + export | `references/game-ready-export.md` |
+| Game engine target (Roblox, Unity, Unreal, Godot) | Game-ready + export | `references/game-ready-export.md`; add `references/uv-baking.md` for texture workflows |
 | Slow viewport, heavy scene, crashes | Performance | `references/performance.md` |
 | Something looks wrong | Troubleshooting | `references/troubleshooting.md` |
 | Need triangle / texture / scale numbers | Budgets | `references/budgets.md` |
-| Quality loop, visual review, contextual validation | Modeling QA | `references/modeling-quality-loop.md` |
 | Geometry construction from components, profiles, or lathed forms | Geometry engine | `references/geometry-engine.md` |
 | Explicit mesh refinement, face inset/extrusion, booleans, bevels, normals, and modifier stacks | Mesh operations | `references/mesh-operations.md`, `scripts/mesh_operations.py` |
 | Recessed panels, fasteners, and mechanical blockouts | Hard surface | `scripts/hard_surface_builder.py` |
@@ -74,8 +80,11 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Collect technical benchmark evidence | Benchmarking | `references/benchmarking.md`, `references/benchmark-prompts.md`, `scripts/benchmark_report.py` |
 | Probe Blender-side API capabilities | Runtime capability probe | `scripts/capability_probe.py` |
 | Repeatable asset and cross-agent evaluation | Benchmarking | `references/benchmarking.md` |
+| Optimize game assets, mesh topology, draw overhead, LOD or Roblox performance | Game asset optimization | `references/game-asset-optimization.md` |
+| Shared modeling standards, topology and operation selection | Modeling foundations | `references/modeling-foundations.md` |
+| Quality loop, visual review, contextual validation | Modeling QA | `references/modeling-quality-loop.md`; `references/quality-checklist.md` |
 
-Always also follow sections 3 to 6 below. For cross-cutting visual review, contextual diagnostics, and reliable MCP iteration, load `references/modeling-quality-loop.md`.
+Always also follow sections 3 to 6 below. For shared topology and operation standards, load `references/modeling-foundations.md`; for cross-cutting visual review and reliable MCP iteration, load `references/modeling-quality-loop.md`. For game-ready material/UV/LOD/export work, load `references/p1-production-pipeline.md` alongside `references/materials.md` and `references/game-ready-export.md`.
 
 
 
@@ -107,7 +116,8 @@ BLOCK  -> blockout with primitives at correct proportions; look (angles) BEFORE 
 REFINE -> bevels, secondary forms, details; look (solid + wireframe)
 UV     -> only if textured or exported to a game
 MATERIAL -> PBR materials, named, shared where possible
-VALIDATE -> run scripts/validate_asset.py; fix each WARN or state why it is acceptable for this asset; re-run
+OPTIMIZE -> for game assets, load references/game-asset-optimization.md; baseline, dry-run, backup, clean conservatively, inspect, compare
+VALIDATE -> set explicit TARGETS in scripts/validate_asset.py (or select only intended meshes); fix each WARN or justify it; re-run
 DELIVER -> save/export if asked; report facts
 ```
 
@@ -118,7 +128,7 @@ DELIVER -> save/export if asked; report facts
 - `execute_blender_code`
   - Always `import bpy, bmesh, math` and `from mathutils import Vector, Matrix` as needed. State does not persist between calls except in the .blend itself, so re-fetch objects by name: `obj = bpy.data.objects["Name"]`.
   - Pass `user_prompt` = the user's own words, verbatim, on every call of the task.
-  - Prefer `bpy.data` API and `bmesh` over `bpy.ops`. Operators depend on context (active object, mode, area) and fail silently or raise `poll()` errors. If you must use an operator, wrap it in `bpy.context.temp_override(...)` or set active/selected explicitly and make sure you are in Object Mode.
+  - Prefer `bpy.data` API and `bmesh` over `bpy.ops`. Operators depend on context (active object, mode, area) and may fail a `poll()` check. Use `bpy.context.temp_override(...)` only when the installed Blender version supports it; older versions require version-appropriate operator handling. If the version-specific override is uncertain, avoid the operator or test it in a small isolated step. Always check the result.
   - Wrap risky steps in `try/except` and print the exception, never let one failure hide the others.
   - Name everything meaningfully (`Chair_Leg_FL`, `MAT_Wood_Oak`). Never leave `Cube.001`.
   - Keep scripts idempotent: running twice must not duplicate objects. Check `bpy.data.objects.get(name)` first or clear your own collection first.
@@ -175,7 +185,9 @@ Run them by pasting their contents into `execute_blender_code` (they only use bp
 | `technique_feedback.py` | Attach explicit pass/issue/not-reviewed feedback and a 0–4 score to one history record |
 | `capability_probe.py` | Read-only Blender version/API capability report; visual capture remains an MCP-client capability |
 | `benchmark_report.py` | Machine-readable technical benchmark metrics; visual scores remain NOT VERIFIED until actual review |
-| `validate_asset.py` | Read-only report with PASS / WARN / INFO per check and a final RESULT line (`INCOMPLETE - CHECK TARGETS` if a target is missing). It does not check face orientation: inspect normals visually. Run before delivering anything |
+| `optimize_mesh.py` | Dry-run-first, backup-first conservative mesh cleanup; optional balanced dissolve and non-destructive Decimate preview |
+| `validate_asset.py` | Read-only report with base/evaluated topology, modifiers, shape keys, UVs, materials, images and target status. Empty TARGETS checks selected meshes only; no scene-wide fallback |
+| `validate_uvs.py` | Read-only UV bounds and zero-area diagnostics for explicit targets or selected meshes; does not claim overlap/stretch validation |
 | `setup_scene.py` | Clean working collection, metric units, sane clip range, optional studio lighting |
 | `cleanup_mesh.py` | Remove doubles, loose geometry, degenerate faces, recalc normals, optional tri/quads conversion |
 | `apply_and_origin.py` | Apply transforms, set origin (bottom center / center / custom), ground the object |

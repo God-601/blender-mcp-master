@@ -39,6 +39,29 @@ class RepositoryStaticChecks(unittest.TestCase):
                 self.assertIn(status, skill)
                 self.assertIn(status, checklist)
 
+    def test_specialist_guides_exist_and_are_routed(self):
+        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        guides = (
+            "hand-painted-pipeline.md",
+            "uv-baking.md",
+            "topology-retopology.md",
+            "sculpting-highpoly.md",
+            "architecture-interiors.md",
+            "cad-technical.md",
+            "handpaint-recipes.md",
+            "shading-recipes.md",
+        )
+        for guide in guides:
+            with self.subTest(guide=guide):
+                path = ROOT / "references" / guide
+                self.assertTrue(path.is_file(), f"Missing guide: {guide}")
+                self.assertGreater(len(path.read_text(encoding="utf-8")), 1500)
+                self.assertIn(f"references/{guide}", skill)
+
+    def test_materials_reference_does_not_recommend_global_orphan_cleanup(self):
+        materials = (ROOT / "references" / "materials.md").read_text(encoding="utf-8").lower()
+        self.assertIn("never run global orphan purges", materials)
+        self.assertNotIn("purge orphan materials at end", materials)
     def test_skill_frontmatter_follows_agent_skills_limits(self):
         text = (ROOT / "SKILL.md").read_text(encoding="utf-8")
         match = re.match(r"---\n(.*?)\n---\n", text, re.S)
@@ -66,7 +89,21 @@ class RepositoryStaticChecks(unittest.TestCase):
         self.assertIn("MISSING_TARGETS", source)
         self.assertIn("INVALID_TARGETS", source)
         self.assertIn("target object is not a mesh", source)
-        self.assertIn("falling back to all visible", source)
+        self.assertIn("Scene-wide fallback is disabled", source)
+
+    def test_validator_reports_base_and_evaluated_metrics(self):
+        source = (ROOT / "scripts" / "validate_asset.py").read_text(encoding="utf-8")
+        for phrase in ("base mesh:", "evaluated triangles (modifiers included)",
+                       "unique_materials", "shape keys:", "mesh datablock users:"):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, source)
+
+    def test_modeling_foundations_covers_topology_and_downstream_use(self):
+        guide = (ROOT / "references" / "modeling-foundations.md").read_text(encoding="utf-8")
+        for phrase in ("deforming character", "static real-time prop", "silhouette",
+                       "n-gons", "UV", "weighted normals"):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase.lower(), guide.lower())
 
     def test_lod_script_does_not_delete_existing_lods_automatically(self):
         source = (ROOT / "scripts" / "make_lods.py").read_text(encoding="utf-8")
@@ -86,6 +123,21 @@ class RepositoryStaticChecks(unittest.TestCase):
         self.assertIn('n["_blender_mcp_generated"] = True', source)
         self.assertIn("replace_input_link", source)
 
+
+
+    def test_uv_validator_is_read_only_and_explicit_target_only(self):
+        source = (ROOT / "scripts" / "validate_uvs.py").read_text(encoding="utf-8")
+        self.assertIn("TARGETS = []", source)
+        self.assertIn("scene-wide fallback is disabled", source)
+        self.assertIn("UV overlap and texel density are not measured", source)
+        self.assertIn("Read-only: no UVs, objects, or materials were changed.", source)
+
+    def test_p1_pipeline_documents_material_uv_lod_and_engine_limits(self):
+        guide = (ROOT / "references" / "p1-production-pipeline.md").read_text(encoding="utf-8")
+        for phrase in ("Non-Color", "texel density", "LOD0", "Roblox", "Unity", "Unreal",
+                       "NOT VERIFIED", "does not prove"):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase.lower(), guide.lower())
 
     def test_scripts_never_use_systemexit(self):
         # SystemExit is a BaseException: MCP executors that catch Exception would not handle it.
@@ -119,6 +171,12 @@ class RepositoryStaticChecks(unittest.TestCase):
             with self.subTest(script=path.name):
                 self.assertNotIn("orphans_purge", path.read_text(encoding="utf-8"))
 
+    def test_budgets_cite_current_official_roblox_mesh_specification(self):
+        budgets = (ROOT / "references" / "budgets.md").read_text(encoding="utf-8")
+        self.assertNotIn("21,844", budgets)
+        self.assertIn("create.roblox.com/docs/art/modeling/specifications", budgets)
+        self.assertIn("current official documentation", budgets)
+
     def test_skill_does_not_recommend_global_orphan_purge(self):
         skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
         self.assertNotIn("bpy.data.orphans_purge", skill)
@@ -128,6 +186,23 @@ class RepositoryStaticChecks(unittest.TestCase):
         workflow = (ROOT / ".github" / "workflows" / "static-checks.yml").read_text(encoding="utf-8")
         self.assertEqual(workflow.count("persist-credentials: false"), 2)
         self.assertEqual(workflow.count("contents: read"), 2)
+
+    def test_optimizer_is_dry_run_and_backup_first(self):
+        source = (ROOT / "scripts" / "optimize_mesh.py").read_text(encoding="utf-8")
+        self.assertIn("APPLY = False", source)
+        self.assertIn("BACKUP_COLLECTION", source)
+        self.assertIn("backup_object(obj, backup_collection)", source)
+        self.assertIn("shared mesh datablock", source)
+        self.assertIn("shape keys present", source)
+        self.assertIn("Faces classified as internal were NOT automatically deleted.", source)
+        self.assertNotIn("orphans_purge", source)
+
+    def test_optimization_guide_covers_visual_and_engine_tradeoffs(self):
+        guide = (ROOT / "references" / "game-asset-optimization.md").read_text(encoding="utf-8")
+        for phrase in ("Hidden and internal faces", "draw calls", "LOD", "Roblox-specific",
+                       "silhouette", "shape keys", "dry-run"):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase.lower(), guide.lower())
 
 
 if __name__ == "__main__":

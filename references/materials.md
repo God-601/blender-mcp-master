@@ -1,47 +1,72 @@
-# Materials and textures (PBR)
+# Shading, Materials, and Texture Diagnostics
 
-## Principled BSDF values that look right
-| Surface | Base Color | Metallic | Roughness | Notes |
-|---|---|---|---|---|
-| Plastic | any | 0 | 0.3 to 0.5 | |
-| Rubber | dark | 0 | 0.8 to 0.95 | |
-| Wood (raw) | warm brown | 0 | 0.6 to 0.8 | add grain variation |
-| Painted metal | color | 0 | 0.35 to 0.6 | metal under paint is not "metallic" |
-| Bare steel | 0.55 to 0.65 gray | 1 | 0.2 to 0.5 | |
-| Gold | (1.0, 0.77, 0.34) | 1 | 0.2 to 0.4 | |
-| Copper | (0.95, 0.64, 0.54) | 1 | 0.25 to 0.45 | |
-| Concrete | mid gray | 0 | 0.8 to 0.95 | |
-| Glass | white | 0 | 0 to 0.05 | Transmission 1, IOR 1.45 to 1.5 |
-| Skin | warm tone | 0 | 0.4 to 0.6 | Subsurface weight 0.1 to 0.3 |
-| Fabric | any | 0 | 0.7 to 0.95 | sheen 0.3 to 0.6 |
-| Leaves | green variation | 0 | 0.5 to 0.7 | subsurface subtle, alpha clip |
+Use this guide for PBR, procedural materials, stylized/toon shading, material creation, texture assignment, and troubleshooting visual surface problems.
 
-Rules:
-- **Metallic is almost always 0 or 1**, avoid in-between except transitions (rust, dirt edges).
-- **Base color is not lighting**: avoid pure black (use about 0.02 to 0.04) and pure white (use up to about 0.9).
-- **Roughness variation sells realism**: add noise/scratches to roughness before touching color.
-- Non-color data (roughness, metallic, normal, height, AO) textures must use `Non-Color` color space; color textures use `sRGB`.
-- Normal maps: Normal Map node, OpenGL (Y+) for Blender/Unity-ish; DirectX (Y-) for Unreal; flip green when exporting if needed.
+## 1. Choose the shading model
 
-## Blender 4.x socket names (API differences)
-Principled BSDF names changed in 4.0: `Specular IOR Level` (was `Specular`), `Emission Color` (was `Emission`), `Subsurface Weight` (was `Subsurface`), `Coat Weight` (was `Clearcoat`), `Sheen Weight`, `Transmission Weight`. In scripts, set inputs via a helper that tries both names and ignores missing ones (see `scripts/pbr_material.py`).
+- **PBR:** best when surfaces must respond plausibly to changing lights in a physically based renderer or game engine.
+- **Procedural:** useful for repeatable surface variation and authoring inside Blender. It may need baking before export to engines that do not support Blender's node graph.
+- **Toon/stylized:** useful when the project needs controlled bands, outlines, or a simplified light response. The approach depends on the render engine and may not be exportable as-is.
+- **Hand-painted:** uses deliberate color, gradients, highlights, and material cues in texture maps. Read references/hand-painted-pipeline.md.
+- **Vertex color/palette:** useful for low-poly assets when mesh density and target import support are sufficient.
 
-## Workflow
-1. Reuse before creating: `bpy.data.materials.get(name)`.
-2. Name: `MAT_<Surface>_<Variant>`.
-3. For realism from nothing: use `search_assets(source="polyhaven", asset_type="textures")` and `import_asset(..., apply_to=[...], resolution="2k")` (1k for background, 4k only for hero close-ups; set `min_size_m` when searching for large surfaces).
-4. For stylized: flat Base Color, Roughness 0.7 to 0.9, no normal map.
-5. For procedural -> game: bake to image textures (Diffuse color only, normal, roughness, AO) at budget size, then rewire the material to the baked images. Engines do not read Blender node graphs.
-6. Assign materials by slot; remove unused slots (`bpy.ops.object.material_slot_remove_unused()`), purge orphan materials at the end.
+Do not choose complexity first. Choose the simplest shading model that achieves the intended look and works at the destination.
 
-## UV unwrapping
-- Hard-surface: mark seams on hidden or sharp edges, then `uv.unwrap(method='ANGLE_BASED', margin=0.02)` or Smart UV Project (`angle_limit` about 66 degrees, `island_margin` 0.02).
-- Pack: `uv.pack_islands(margin=0.01)`. Keep margin >= 4 px at the target texture size (margin = 4 / size).
-- Check stretching: a checker texture on `look(shading="material")`. Fix visible stretch before painting/baking.
-- Mirror-symmetric assets can overlap UV halves to save space (not if baking unique details).
-- Keep texel density consistent across the asset family.
-- UV operators need Edit Mode + selected faces; use `bmesh` + `bpy.ops.uv.*` inside a `temp_override` or switch modes carefully and always return to Object Mode.
+## 2. PBR starting points
 
-## Vertex colors / palette atlas (cheap and effective)
-- Palette atlas: small swatch texture; assign UV islands to swatches. One material for an entire asset family.
-- Vertex colors: `mesh.color_attributes.new("Col", 'BYTE_COLOR', 'CORNER')`; check the target engine imports them.
+These values are starting ranges, not universal physical measurements:
+- Plastic: metallic 0, roughness about 0.3–0.5.
+- Rubber: metallic 0, roughness about 0.8–0.95.
+- Raw wood: metallic 0, roughness about 0.6–0.8.
+- Painted metal: usually metallic 0 for the paint layer; roughness depends on finish.
+- Bare steel: metallic 1, roughness about 0.2–0.5.
+- Concrete: metallic 0, roughness about 0.8–0.95.
+- Fabric: metallic 0, roughness about 0.7–0.95; sheen is renderer-dependent.
+- Glass: use transmission and IOR appropriate to the renderer and decide whether the target supports the expected transparency workflow.
+
+Metallic is generally reserved for actual metal regions; values between 0 and 1 need a reason such as mixed coverage, oxidation, or an intentionally blended workflow.
+
+## 3. Material construction and naming
+
+- Reuse a suitable material before creating another copy.
+- Use consistent names such as MAT_Wood_Oak or MAT_Metal_Painted.
+- Keep node graphs organized around the essential inputs and label generated nodes when scripts create them.
+- Reuse shared materials across related assets when it does not compromise the intended visual differences.
+- Keep unused slots and datablocks under control, but never run global orphan purges during routine asset creation. Remove only datablocks created by the current task after verifying they have no users.
+- Before replacing or bulk-assigning materials, identify the exact target objects and preserve existing user assignments unless they are part of the requested edit.
+
+## 4. Texture maps and color space
+
+- Base color/albedo is color data and normally uses sRGB interpretation.
+- Normal, roughness, metallic, masks, AO, and height are numerical data and generally use Non-Color interpretation.
+- Use a Normal Map node for normal textures; do not connect a normal image directly to the shader normal socket.
+- Verify tangent-space convention and green-channel orientation with the target pipeline instead of flipping channels blindly.
+- Keep image filenames and map roles explicit; save or pack images according to the deliverable format.
+- UVs and baking are a separate pipeline with its own failure modes; use references/uv-baking.md.
+
+## 5. Procedural realism
+
+- Build variation around the material's real scale and use. Large cloudy noise across a tiny surface often looks artificial.
+- Separate base color, roughness, bump/normal, and geometry effects. Roughness variation often communicates material better than adding strong color noise.
+- Use object coordinates or UV coordinates deliberately; changes to scale and transforms can affect procedural appearance.
+- Add detail through a hierarchy: large material regions, medium variation, then subtle surface breakup.
+- Inspect at close range and at the intended viewing distance; remove noise that disappears into aliasing.
+
+## 6. Stylized and toon materials
+
+- Use a limited, deliberate palette and consistent roughness rather than applying one generic glossy finish.
+- Toon ramps, outlines, and Shader-to-RGB techniques are render-engine dependent. Confirm availability in the active renderer; do not assume a Blender material graph can be exported to Unity, Unreal, Godot, or Roblox unchanged.
+- Hand-painted highlights and shadows may deliberately override physical light response. Keep that choice consistent with the project style.
+- If a target engine cannot reproduce the material, translate the look to its shader system or bake supported channels, then state what was tested.
+
+## 7. Blender version compatibility
+
+Principled BSDF socket names and shading features can change between Blender versions. Detect available sockets or capabilities before assigning values rather than assuming a single name. Older versions may expose different color-attribute APIs; check capability/version before using them in scripts.
+
+## 8. Validation
+
+- Inspect material names, slot assignments, node links, image references, color-space settings, and missing textures.
+- Use neutral lighting to diagnose color, normals, roughness, and shading separately from final presentation lighting.
+- Verify that each required image exists on disk or is packed as expected.
+- If exporting, confirm which nodes, textures, and shader features are supported by the target format and destination renderer.
+- Report unsupported features or checks that were not performed.

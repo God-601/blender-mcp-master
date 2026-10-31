@@ -1,31 +1,62 @@
-# Hard-surface modeling (furniture, tools, weapons, vehicles, machines)
+# Hard-Surface Modeling
 
-## Workflow
-1. **Blockout** with primitives (cubes, cylinders) at real dimensions. Name each part. `look(mode="angles")`.
-2. **Primary forms**: refine each part so the silhouette is right. Use Mirror modifiers (axis X, `use_clip=True`, small merge threshold) for symmetric objects: model one half only.
-3. **Secondary forms**: panel lines, inset details, holes. Prefer Boolean (non-destructive, `solver='EXACT'` for quality, `'FAST'` for speed) with cutter objects hidden from render (`display_type='WIRE'`, `hide_render=True`).
-4. **Bevel**: Bevel modifier, `limit_method='ANGLE'`, `angle_limit=radians(30)`, `segments=2` or 3, `harden_normals=True`.
-5. **Shading**: smooth shading + Weighted Normal modifier (keep_sharp, mode 'FACE_AREA') or Smooth by Angle. Placed AFTER Bevel in the stack.
-6. **Cleanup / apply** only at the end (or per export needs).
+Use this guide for furniture, tools, weapons, vehicles, machinery, armor, props, and other objects defined by controlled edges, planes, joints, and mechanical forms.
 
-## Modifier stack order (typical)
-Mirror -> Array -> Boolean -> Solidify -> Bevel -> Weighted Normal (or Smooth by Angle) -> Triangulate (export only).
-Subdivision Surface goes before Bevel only for deliberate rounded forms; for hard-surface prefer bevel + support loops.
+## 1. Plan the object
 
-## Rules
-- Parts that move (doors, wheels, drawers, lids): separate objects with the **origin at the pivot**.
-- Fasteners (screws, rivets, bolts): model one, instance (linked duplicates), unless close-up hero.
-- Never boolean dense meshes against dense meshes; keep cutters simple (8 to 16 sides for circles when low-poly).
-- Keep circles at sensible side counts: 8 to 12 (game bg), 16 to 24 (mid), 32 to 64 (hero/render).
-- Avoid thin slivers and sub-millimeter gaps that vanish at game scale; exaggerate small details slightly.
-- Wear: add subtle edge wear via bevels + material (edge/curvature mask), not extra geometry.
-- Interior of closed objects (inside a drawer, hidden faces behind panels) should be deleted for games.
+- Identify the primary silhouette, functional parts, moving parts, major material regions, and intended viewing distance.
+- Choose a geometry budget from the target use, not from habit. A close-up render may justify more segments than a distant game prop.
+- Decide which parts should be separate objects for pivots, materials, collisions, modularity, or animation.
+- Set scale, coordinate axes, origin conventions, and export target before detailed modeling.
 
-## Typical proportion checks
-- Chair: seat 0.45 high, back top 0.9 to 1.0, legs inset slightly from seat edge.
-- Table: top thickness 0.03 to 0.05, leg width 0.05 to 0.08.
-- Sword: blade length about 3 to 4x handle; cross-guard about 0.2 wide; pommel gives balance.
-- Car: wheel diameter about 0.65 to 0.75 m; wheelbase about 2.7 m.
+## 2. Build in layers
 
-## Verification
-`look(shading="wireframe")`, `get_scene_info(fields=["topology"])`, run `validate_asset.py`. Check z-fighting (coplanar faces), shading pinches, and inverted normals (`shading="material"` from inside/behind).
+1. **Blockout:** use simple primitives for the main volumes. Inspect front, side, top, and three-quarter views before adding details.
+2. **Primary forms:** establish proportions, thickness, openings, major bevels, and negative spaces.
+3. **Secondary forms:** add panel breaks, recesses, rails, handles, seams, and mechanical details that support function or silhouette.
+4. **Tertiary detail:** use screws, labels, scratches, and micro-details only when the camera can read them.
+5. **Surface pass:** inspect highlights, material breaks, roughness, and shading on a neutral background.
+6. **Delivery pass:** validate topology, transforms, pivots, materials, budgets, and exports for the actual target.
+
+If the silhouette is wrong, return to the blockout rather than compensating with detail.
+
+## 3. Modifiers and Booleans
+
+A common editable stack is Mirror/Array → Boolean → Solidify where needed → Bevel → normals/shading correction → export triangulation when required. This is a starting point, not a universal stack.
+
+- Keep cutters simple, clearly named, and isolated from deliverable geometry.
+- Use non-destructive modifiers while iterating. Apply them only when required for export or final validation.
+- Boolean quality depends on source topology, intersections, scale, and solver; do not assume a Boolean automatically produces clean topology.
+- Inspect thin slivers, coplanar faces, internal geometry, and small gaps after Boolean operations.
+- Bevel width must fit local geometry. A bevel wider than a nearby gap can collapse or distort the shape.
+- Use weighted normals or angle-based smoothing only when the mesh and Blender version support the chosen method.
+
+## 4. Edge treatment and materials
+
+- Bevel edges that should catch light, but do not bevel every edge uniformly.
+- Use consistent bevel logic across related assets. Small stylized objects may require exaggerated bevels for readability.
+- Place supporting loops based on the curvature and subdivision needs, not as decoration.
+- Keep material regions intentional. Painted metal, raw metal, rubber, glass, cloth, and plastic should not share identical roughness by default.
+- Make wear and scratches support edges, contact, and use; avoid generic noise over every surface.
+
+## 5. Moving and repeated parts
+
+- Separate doors, lids, wheels, drawers, hinges, and rotating components when they need independent pivots or animation.
+- Put each origin at the meaningful pivot for the intended action.
+- Use linked duplicates or instances for bolts and repeated components.
+- For assemblies, verify clearances and intersections at all expected positions, not just the default pose.
+
+## 6. Game and CAD differences
+
+For game assets, prioritize silhouette, target triangle/material budgets, UVs, texture baking, LODs, and export safety. Read references/game-ready-export.md and references/uv-baking.md when relevant.
+
+For dimension-driven or mating parts, prefer explicit parameters, datums, and tolerance checks. A clean-looking Blender mesh does not prove engineering fit; read references/cad-technical.md when dimensions or manufacturing matter.
+
+## 7. Review checklist
+
+- Does the silhouette read without small details?
+- Are bevels consistent and free of shading pinches?
+- Are Boolean results and hidden surfaces inspected?
+- Are parts, pivots, names, and material boundaries intentional?
+- Are triangle count, scale, UVs, and exports checked for the target?
+- Are user-owned objects and source geometry preserved?
