@@ -94,6 +94,8 @@ Recommended result envelope:
 
 This is a target reporting shape, not a claim that every existing script already returns JSON.
 
+Implemented scripts currently provide separate concrete contracts: `mesh_operations.py` and `localized_correction.py` are duplicate-first; `inspection_report.py` is read-only; `hard_surface_builder.py`, `geometry_nodes_builder.py`, `organic_tree_builder.py`, and `geometry_builder.py` create new owned outputs; `technique_history.py` appends a review-required record to a tagged Text datablock; `benchmark_report.py` reports technical metrics but never invents visual scores.
+
 ## 6. Visual inspection contract
 
 Input: explicit target objects, required views and shading modes, acceptance criteria, and optional reference.
