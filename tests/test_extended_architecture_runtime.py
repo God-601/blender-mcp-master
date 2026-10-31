@@ -155,6 +155,14 @@ class ExtendedArchitectureRuntimeTests(unittest.TestCase):
         records = json.loads(text.as_string())
         self.assertEqual(len(records), 1)
         self.assertEqual(records[0]["status"], "USER_REVIEW_REQUIRED")
+        out, err = execute_script("scripts/technique_history_query.py")
+        self.assertIsNone(err, out)
+        self.assertIn("parametric_panel_boolean", out)
+        out, err = execute_script("scripts/technique_feedback.py")
+        self.assertIsNone(err, out)
+        records = json.loads(text.as_string())
+        self.assertEqual(records[0]["status"], "REVIEWED_PASS")
+        self.assertEqual(records[0]["review"]["score"], 3)
 
     def test_capability_probe_and_benchmark_report_are_machine_readable(self):
         out, err = execute_script("scripts/capability_probe.py")
