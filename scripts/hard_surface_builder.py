@@ -128,6 +128,8 @@ try:
             raise ValueError("fastener dimensions must be positive")
         ox = float(FASTENERS["offset_x"])
         oz = float(FASTENERS["offset_z"])
+        if abs(ox) + radius > DIMENSIONS[0] * 0.5 or abs(oz) + radius > DIMENSIONS[2] * 0.5:
+            raise ValueError("fastener offsets place a fastener outside the panel")
         y = LOCATION[1] - DIMENSIONS[1] * 0.5 - depth * 0.5
         for index, (sx, sz) in enumerate(((-1, -1), (-1, 1), (1, -1), (1, 1)), 1):
             fastener = create_fastener(
