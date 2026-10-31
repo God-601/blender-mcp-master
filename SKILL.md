@@ -60,6 +60,7 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Need triangle / texture / scale numbers | Budgets | `references/budgets.md` |
 | Quality loop, visual review, contextual validation | Modeling QA | `references/modeling-quality-loop.md` |
 | Geometry construction from components, profiles, or lathed forms | Geometry engine | `references/geometry-engine.md` |
+| Parametric architecture, repeated modules, stairs, and arches | Modular modeling | `references/modular-modeling.md` |
 | Module boundaries, semantic MCP capabilities, and evidence contracts | Architecture | `references/architecture.md`, `references/module-contracts.md` |
 | Mapping different MCP tools to common functions | Capability discovery | `references/capability-mapping.md` |
 | Decomposing complex objects and choosing modeling techniques | Modeling intelligence | `references/modeling-intelligence.md` |
@@ -154,6 +155,7 @@ Run them by pasting their contents into `execute_blender_code` (they only use bp
 |---|---|
 | `geometry_builder.py` | Declarative construction of named primitives, beams, extruded, lathed, and lofted profiles in a dedicated collection. Creates new objects only; inspect and refine the result |
 | `organic_rock_builder.py` | Deterministic stylized rock base mesh from an icosphere with seeded smooth deformation and optional flattened base. Creates a new owned object only |
+| `modular_builder.py` | Parametric staircase and masonry arch blockouts with explicit dimensions, named parts, and rollback of partial staircase creation |
 | `validate_asset.py` | Read-only report with PASS / WARN / INFO per check and a final RESULT line (`INCOMPLETE - CHECK TARGETS` if a target is missing). It does not check face orientation: inspect normals visually. Run before delivering anything |
 | `setup_scene.py` | Clean working collection, metric units, sane clip range, optional studio lighting |
 | `cleanup_mesh.py` | Remove doubles, loose geometry, degenerate faces, recalc normals, optional tri/quads conversion |
