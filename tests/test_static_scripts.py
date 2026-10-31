@@ -101,6 +101,21 @@ class RepositoryStaticChecks(unittest.TestCase):
         self.assertIn("replace_input_link", source)
 
 
+
+    def test_uv_validator_is_read_only_and_explicit_target_only(self):
+        source = (ROOT / "scripts" / "validate_uvs.py").read_text(encoding="utf-8")
+        self.assertIn("TARGETS = []", source)
+        self.assertIn("scene-wide fallback is disabled", source)
+        self.assertIn("UV overlap and texel density are not measured", source)
+        self.assertIn("Read-only: no UVs, objects, or materials were changed.", source)
+
+    def test_p1_pipeline_documents_material_uv_lod_and_engine_limits(self):
+        guide = (ROOT / "references" / "p1-production-pipeline.md").read_text(encoding="utf-8")
+        for phrase in ("Non-Color", "texel density", "LOD0", "Roblox", "Unity", "Unreal",
+                       "NOT VERIFIED", "does not prove"):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase.lower(), guide.lower())
+
     def test_scripts_never_use_systemexit(self):
         # SystemExit is a BaseException: MCP executors that catch Exception would not handle it.
         for path in sorted((ROOT / "scripts").glob("*.py")):
