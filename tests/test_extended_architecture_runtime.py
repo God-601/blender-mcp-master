@@ -86,7 +86,7 @@ class ExtendedArchitectureRuntimeTests(unittest.TestCase):
         out, err = execute_script("scripts/hard_surface_builder.py")
         self.assertIsNone(err, out)
         panel = bpy.data.objects["MCP_HS_Panel"]
-        self.assertEqual(panel.modifiers[-1].type, "BOOLEAN")
+        self.assertEqual([m.type for m in panel.modifiers], ["BOOLEAN", "BEVEL"])
         self.assertEqual(len([o for o in bpy.data.objects if "_Fastener_" in o.name]), 4)
         for obj in [o for o in bpy.data.objects if "_Fastener_" in o.name]:
             self.assertAlmostEqual(obj.rotation_euler.x, 1.57079632679, places=5)
@@ -103,6 +103,14 @@ class ExtendedArchitectureRuntimeTests(unittest.TestCase):
         if hasattr(group, "interface"):
             self.assertIsNotNone(group.interface.items_tree.get("Dimensions"))
         self.assertTrue(any(node.bl_idname == "GeometryNodeMeshCube" for node in group.nodes))
+        depsgraph = bpy.context.evaluated_depsgraph_get()
+        evaluated = obj.evaluated_get(depsgraph)
+        mesh = evaluated.to_mesh()
+        try:
+            self.assertEqual(len(mesh.vertices), 8)
+            self.assertEqual(len(mesh.polygons), 6)
+        finally:
+            evaluated.to_mesh_clear()
 
     def test_organic_tree_is_seeded_and_creates_branches_and_canopy(self):
         out, err = execute_script("scripts/organic_tree_builder.py")
