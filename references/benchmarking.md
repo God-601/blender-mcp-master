@@ -29,6 +29,8 @@ Record model/agent identifiers only when the environment exposes them. Do not in
 | B04 | Low-poly house | modular construction, roof/wall composition |
 | B05 | Stylized creature | decomposition, organic forms, proportion |
 
+`scripts/benchmark_report.py` collects technical metrics for explicit target names and emits a machine-readable JSON report. It intentionally sets `visual_scores` to null and `visual_status` to `NOT VERIFIED`; use the fixed task prompts in `references/benchmark-prompts.md` and attach actual front, side, and three-quarter captures before scoring.
+
 ## Evaluation rubric
 
 Score each category from 0 to 4 and attach reviewer notes:
@@ -68,4 +70,4 @@ Run the same tasks in each supported agent/client. Record:
 - quality checks performed
 - final asset and limitations
 
-A compatibility matrix is only updated after an actual run.
+A compatibility matrix is only updated after an actual run. `scripts/capability_probe.py` reports Blender-side API availability, but it does not prove that an agent/client can discover or invoke the MCP tools. Do not mark Codex, Claude, Cursor, OpenCode, or Kilo Code as verified until a real session completes the same task.
