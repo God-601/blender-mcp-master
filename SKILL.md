@@ -47,20 +47,27 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 
 | Request | Pipeline | Read |
 |---|---|---|
-| Furniture, tools, weapons, vehicles, machines, any rigid object | Hard-surface | `references/hard-surface.md` |
-| Creatures, plants, rocks, terrain, food, humans, anything organic | Organic / sculpt-lite | `references/organic.md` |
-| Characters meant to move | Character + rig | `references/character-rig.md` |
-| Rooms, buildings, streets, levels | Environment | `references/environment.md` |
-| Low-poly, stylized, voxel, "studs" look, blocky | Stylized | `references/stylized-lowpoly.md` |
-| Any material or texture work | PBR materials | `references/materials.md` |
+| Furniture, tools, weapons, vehicles, machines, rigid props | Hard-surface modeling | `references/hard-surface.md` |
+| Creatures, plants, rocks, terrain, food, organic forms | Organic modeling; add sculpt/high-poly when needed | `references/organic.md`; `references/sculpting-highpoly.md` when relevant |
+| Characters, anatomy, deformation, rigging, animation | Character + deformation topology | `references/character-rig.md`; `references/topology-retopology.md` |
+| Rooms, buildings, streets, levels, modular scenery | Environment | `references/environment.md` |
+| Architecture, interiors, walkthroughs, spatial blockouts | Architecture/interiors | `references/architecture-interiors.md` |
+| Dimension-driven parts, CAD-like meshes, 3D printing | Technical modeling | `references/cad-technical.md` |
+| Low-poly, stylized, fantasy, voxel, retro/PS1, Roblox-like blockiness | Stylized art direction | `references/stylized-lowpoly.md` |
+| Hand-painted textures, painterly highlights, color atlases | Hand-painted pipeline | `references/hand-painted-pipeline.md`; add `references/uv-baking.md` when texturing/baking is involved; runnable snippets in `references/handpaint-recipes.md` |
+| UV layout, texture painting setup, baking maps, high-to-low projection | UV and baking | `references/uv-baking.md` |
+| Edge flow, mesh density, cleanup strategy, retopology | Topology and retopology | `references/topology-retopology.md` |
+| Sculpting, high-poly detail, remesh, high-to-low production | Sculpt/high-poly | `references/sculpting-highpoly.md` |
+| PBR, procedural nodes, toon shading, material diagnostics | Shading and materials | `references/materials.md` |
+| Smooth/sharp normals, bevel highlights, toon ramp, outline | Shading recipes | `references/shading-recipes.md` |
 | Render, lighting, camera, turntable | Lighting/render | `references/lighting-render.md` |
-| Game engine target (Roblox, Unity, Unreal, Godot) | Game-ready + export | `references/game-ready-export.md` |
+| Game engine target (Roblox, Unity, Unreal, Godot) | Game-ready + export | `references/game-ready-export.md`; add `references/uv-baking.md` for texture workflows |
 | Slow viewport, heavy scene, crashes | Performance | `references/performance.md` |
 | Something looks wrong | Troubleshooting | `references/troubleshooting.md` |
 | Need triangle / texture / scale numbers | Budgets | `references/budgets.md` |
 | Optimize game assets, mesh topology, draw overhead, LOD or Roblox performance | Game asset optimization | `references/game-asset-optimization.md` |
 | Shared modeling standards, topology and operation selection | Modeling foundations | `references/modeling-foundations.md` |
-| Quality loop, visual review, contextual validation | Modeling QA | `references/modeling-quality-loop.md` |
+| Quality loop, visual review, contextual validation | Modeling QA | `references/modeling-quality-loop.md`; `references/quality-checklist.md` |
 
 Always also follow sections 3 to 6 below. For shared topology and operation standards, load `references/modeling-foundations.md`; for cross-cutting visual review and reliable MCP iteration, load `references/modeling-quality-loop.md`. For game-ready material/UV/LOD/export work, load `references/p1-production-pipeline.md` alongside `references/materials.md` and `references/game-ready-export.md`.
 
@@ -106,7 +113,7 @@ DELIVER -> save/export if asked; report facts
 - `execute_blender_code`
   - Always `import bpy, bmesh, math` and `from mathutils import Vector, Matrix` as needed. State does not persist between calls except in the .blend itself, so re-fetch objects by name: `obj = bpy.data.objects["Name"]`.
   - Pass `user_prompt` = the user's own words, verbatim, on every call of the task.
-  - Prefer `bpy.data` API and `bmesh` over `bpy.ops`. Operators depend on context (active object, mode, area) and fail silently or raise `poll()` errors. If you must use an operator, wrap it in `bpy.context.temp_override(...)` or set active/selected explicitly and make sure you are in Object Mode.
+  - Prefer `bpy.data` API and `bmesh` over `bpy.ops`. Operators depend on context (active object, mode, area) and may fail a `poll()` check. Use `bpy.context.temp_override(...)` only when the installed Blender version supports it; older versions require version-appropriate operator handling. If the version-specific override is uncertain, avoid the operator or test it in a small isolated step. Always check the result.
   - Wrap risky steps in `try/except` and print the exception, never let one failure hide the others.
   - Name everything meaningfully (`Chair_Leg_FL`, `MAT_Wood_Oak`). Never leave `Cube.001`.
   - Keep scripts idempotent: running twice must not duplicate objects. Check `bpy.data.objects.get(name)` first or clear your own collection first.
