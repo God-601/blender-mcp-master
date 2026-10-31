@@ -166,7 +166,7 @@ Run them by pasting their contents into `execute_blender_code` (they only use bp
 | `modular_builder.py` | Parametric staircase and masonry arch blockouts with explicit dimensions, named parts, and rollback of partial staircase creation |
 | `mesh_operations.py` | Duplicate-first, non-destructive bevel, normals, solidify, triangulate, decimate, mirror, subdivision, and boolean modifier pipeline |
 | `hard_surface_builder.py` | Recessed mechanical panel with boolean pocket and four oriented fasteners |
-| `geometry_nodes_builder.py` | Editable Geometry Nodes cube/panel with exposed Dimensions vector input (requires Geometry Nodes support) |
+| `geometry_nodes_builder.py` | Editable repeated post array with Count, Spacing, Height, and Radius inputs (requires Geometry Nodes support) |
 | `organic_tree_builder.py` | Seeded stylized tree with tapered trunk, branches, and icosphere canopy clusters |
 | `inspection_report.py` | Read-only technical report for explicit mesh targets; reports topology, bounds, modifiers, and materials |
 | `localized_correction.py` | Apply explicit normals, merge-by-distance, scale-bake, bevel, and weighted-normal corrections to duplicates only |
