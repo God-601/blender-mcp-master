@@ -10,6 +10,7 @@ import math
 # ---- CONFIG ----------------------------------------------------------------
 TARGETS = []                  # explicit object names; empty means no operation
 EDIT_IN_PLACE = False         # default: create independent owned copies
+ALLOW_UNOWNED_INPLACE = False # second opt-in needed for user-owned objects
 OUTPUT_SUFFIX = "_Shaded"
 COLLECTION_NAME = "MCP_Bevel_Shading"
 BEVEL_FRACTION = 0.01
@@ -66,6 +67,10 @@ def check_target(ob):
         return "shape keys (review deformation/mesh before shading)"
     if EDIT_IN_PLACE and ob.data.users > 1:
         return "shared mesh datablock (edit would affect other objects)"
+    if EDIT_IN_PLACE and APPLY_MODIFIERS:
+        return "in-place modifier application is unsafe; use a copy"
+    if EDIT_IN_PLACE and ob.get(OWNER_KEY) != OWNER_VALUE and not ALLOW_UNOWNED_INPLACE:
+        return "in-place modification requires ALLOW_UNOWNED_INPLACE"
     return None
 
 
@@ -153,14 +158,26 @@ else:
             print("SKIP:", name, reason)
             continue
         obj = None
+        backup = None
+        original_modifiers = None
         try:
             obj = create_output(source, working_collection)
+            if obj is source:
+                backup = source.data.copy()
+                original_modifiers = {mod.name for mod in source.modifiers}
             add_shading(obj)
             if obj is not source:
                 created.append(obj)
+            if backup is not None and backup.users == 0:
+                bpy.data.meshes.remove(backup)
         except Exception as exc:
             errors.append((name, str(exc)))
             print("ERROR:", name, repr(exc))
+            if obj is source and backup is not None:
+                source.data = backup
+                for mod in list(source.modifiers):
+                    if mod.name not in original_modifiers:
+                        source.modifiers.remove(mod)
             if obj is not None and obj is not source:
                 mesh = obj.data
                 bpy.data.objects.remove(obj, do_unlink=True)

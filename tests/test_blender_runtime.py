@@ -176,8 +176,9 @@ class BlenderRuntimeTests(unittest.TestCase):
         obj = add_mesh("Dup", doubled)
         before = len(obj.data.vertices)
         out, err = run_script("cleanup_mesh.py", TARGETS=["Dup"])
-        self.assertIsNone(err)
-        self.assertLess(len(obj.data.vertices), before)
+        self.assertIsNone(err, out)
+        self.assertEqual(len(obj.data.vertices), before)
+        self.assertLess(len(bpy.data.objects["Dup_Cleaned"].data.vertices), before)
 
     def test_cleanup_skips_truly_shared_mesh(self):
         first = add_mesh("A", cube)
@@ -185,7 +186,9 @@ class BlenderRuntimeTests(unittest.TestCase):
         bpy.context.scene.collection.objects.link(second)
         out, err = run_script("cleanup_mesh.py", TARGETS=["A"])
         self.assertIsNone(err)
-        self.assertIn("SKIP: mesh data is shared", out)
+        self.assertIn("A_Cleaned", bpy.data.objects)
+        self.assertIsNot(first.data, bpy.data.objects["A_Cleaned"].data)
+        self.assertIs(first.data, second.data)
 
     def test_cleanup_treats_fake_user_as_not_shared(self):
         obj = add_mesh("Solo", cube)
@@ -325,6 +328,7 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertEqual(len(bsdf.inputs["Alpha"].links), 1)
         out, err = run_script("pbr_material.py", NAME="ClipAlpha", ALPHA=0.8, ALPHA_MODE="CLIP")
         self.assertIsNone(err, out)
+        mat = bpy.data.materials["ClipAlpha"]
         clip_nodes = [n for n in mat.node_tree.nodes if n.get("_blender_mcp_generated") and n.type == "MATH" and n.operation == "GREATER_THAN"]
         self.assertEqual(len(clip_nodes), 1)
         self.assertAlmostEqual(clip_nodes[0].inputs[0].default_value, 0.8)
@@ -335,6 +339,7 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertAlmostEqual(mat.node_tree.nodes["Principled BSDF"].inputs["Alpha"].default_value, 0.5)
         out, err = run_script("pbr_material.py", NAME="M", ALPHA=1.0)
         self.assertIsNone(err, out)
+        mat = bpy.data.materials["M"]
         self.assertAlmostEqual(mat.node_tree.nodes["Principled BSDF"].inputs["Alpha"].default_value, 1.0)
 
     def test_pbr_rerun_disables_previous_emission(self):
@@ -346,6 +351,7 @@ class BlenderRuntimeTests(unittest.TestCase):
             self.assertAlmostEqual(strength.default_value, 4.0)
         out, err = run_script("pbr_material.py", NAME="Glow", EMISSION_COLOR=None)
         self.assertIsNone(err, out)
+        bsdf = bpy.data.materials["Glow"].node_tree.nodes["Principled BSDF"]
         strength = bsdf.inputs.get("Emission Strength")
         if strength is not None:
             self.assertAlmostEqual(strength.default_value, 0.0)
@@ -407,7 +413,7 @@ class BlenderRuntimeTests(unittest.TestCase):
         textures = {"color": self._png("c.png")}
         run_script("pbr_material.py", NAME="User", TEXTURES=textures)
         run_script("pbr_material.py", NAME="User", TEXTURES=textures)
-        self.assertIn("UserValue", mat.node_tree.nodes)
+        self.assertIn("UserValue", bpy.data.materials["User"].node_tree.nodes)
 
     # --- export_asset.py ---------------------------------------------------
     def _export(self, filename="out.fbx", **config):
@@ -540,10 +546,12 @@ class BlenderRuntimeTests(unittest.TestCase):
         obj.rotation_euler = (0, 0, 0.5)
         out, err = run_script("apply_and_origin.py", TARGETS=["Box"], GROUND_TO_Z0=True)
         self.assertIsNone(err, out)
-        self.assertEqual(tuple(round(v, 4) for v in obj.scale), (1.0, 1.0, 1.0))
-        self.assertAlmostEqual(obj.location.x, 2.0, places=4)
-        self.assertAlmostEqual(obj.location.y, 3.0, places=4)
-        lowest = min((obj.matrix_world @ v.co).z for v in obj.data.vertices)
+        stage = bpy.data.objects["Box_Prepared"]
+        self.assertEqual(tuple(round(v, 4) for v in obj.scale), (0.8, 0.5, 1.2))
+        self.assertEqual(tuple(round(v, 4) for v in stage.scale), (1.0, 1.0, 1.0))
+        self.assertAlmostEqual(stage.location.x, 2.0, places=4)
+        self.assertAlmostEqual(stage.location.y, 3.0, places=4)
+        lowest = min((stage.matrix_world @ v.co).z for v in stage.data.vertices)
         self.assertAlmostEqual(lowest, 0.0, places=4)
 
     def test_apply_and_origin_skips_shared_mesh(self):
@@ -553,7 +561,8 @@ class BlenderRuntimeTests(unittest.TestCase):
         first.scale = (2, 2, 2)
         out, err = run_script("apply_and_origin.py", TARGETS=["A"])
         self.assertIsNone(err)
-        self.assertIn("SKIP: shared mesh data", out)
+        self.assertIn("A_Prepared", bpy.data.objects)
+        self.assertIsNot(first.data, bpy.data.objects["A_Prepared"].data)
         self.assertEqual(tuple(first.scale), (2.0, 2.0, 2.0))
 
     def test_apply_and_origin_keeps_children_in_place(self):
@@ -570,7 +579,8 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertIsNone(err, out)
         bpy.context.view_layer.update()
         self.assertAlmostEqual((child.matrix_world.translation - before).length, 0.0, places=4)
-        self.assertAlmostEqual(parent.location.x, 5.0, places=4)
+        self.assertAlmostEqual(parent.location.x, 0.0, places=4)
+        self.assertAlmostEqual(bpy.data.objects["Parent_Prepared"].location.x, 5.0, places=4)
 
     def test_apply_and_origin_skips_objects_in_edit_mode(self):
         obj = add_mesh("Box", cube)
@@ -628,10 +638,13 @@ class BlenderRuntimeTests(unittest.TestCase):
 
     def test_bevel_and_shade_applies_modifiers_cleanly(self):
         obj = add_mesh("Box", cube)
-        out, err = run_script("bevel_and_shade.py", TARGETS=["Box"], EDIT_IN_PLACE=True, APPLY_MODIFIERS=True)
+        out, err = run_script("bevel_and_shade.py", TARGETS=["Box"], APPLY_MODIFIERS=True)
         self.assertIsNone(err, out)
         self.assertEqual(len(obj.modifiers), 0)
-        self.assertGreater(len(obj.data.polygons), 6)   # bevel added geometry
+        self.assertEqual(len(obj.data.polygons), 6)
+        copy = bpy.data.objects["Box_Shaded"]
+        self.assertEqual(len(copy.modifiers), 0)
+        self.assertGreater(len(copy.data.polygons), 6)
 
     def test_setup_scene_creates_collection_lights_and_camera(self):
         out, err = run_script("setup_scene.py", ASSET_NAME="Probe", ADD_STUDIO_LIGHTS=True, ADD_CAMERA=True, SET_UNITS=True)

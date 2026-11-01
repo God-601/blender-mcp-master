@@ -1,103 +1,148 @@
-"""cleanup_mesh.py - fix common mesh problems with bmesh (no operators, no mode switching).
-Paste into execute_blender_code. Prints before/after counts.
+"""P0 safe cleanup: work on independent mesh copies; commit in place only by opt-in.
 
-Safety: objects in Edit Mode are skipped, and meshes shared by several objects are skipped
-unless ALLOW_SHARED_MESH_DATA is True.
+Default never edits source meshes or arbitrary selections. Mutating operators run
+on disposable mesh copies. A failed target leaves the source and sibling targets intact.
 """
 import bpy
 import bmesh
 import math
 
 # ---- CONFIG ----------------------------------------------------------------
-TARGETS = []                 # object names; empty = selected mesh objects
-MERGE_DISTANCE = 0.0001      # remove doubles threshold (Blender units)
-REMOVE_LOOSE = True          # delete loose verts / wire edges
-REMOVE_DEGENERATE = True     # dissolve zero-area faces / zero-length edges
-RECALC_NORMALS = True        # make normals consistent (outward)
-TRIANGULATE = False          # triangulate faces (game export); prefer doing it last
-TRIS_TO_QUADS = False        # join triangles into quads (cleaner topology for subsurf)
-DISSOLVE_ANGLE_DEG = 0.0     # >0 = limited dissolve of near-flat edges (e.g. 1.0) to cut useless geometry
-ALLOW_SHARED_MESH_DATA = False  # set True only if editing every linked instance is intentional
+TARGETS = []                 # explicit existing object names; never use selected fallback
+EDIT_IN_PLACE = False       # default: produce a new named object and independent mesh
+OUTPUT_SUFFIX = "_Cleaned"
+COLLECTION_NAME = "MCP_Cleanup"
+MERGE_DISTANCE = 0.0001
+REMOVE_LOOSE = True
+REMOVE_DEGENERATE = True
+RECALC_NORMALS = True
+TRIANGULATE = False
+TRIS_TO_QUADS = False
+DISSOLVE_ANGLE_DEG = 0.0
+ALLOW_SHARED_MESH_DATA = False  # deprecated: shared in-place data is NEVER modified
 # ----------------------------------------------------------------------------
 
-
-def real_users(mesh):
-    """Object users of the mesh data; a fake user does not make the mesh shared."""
-    return mesh.users - (1 if mesh.use_fake_user else 0)
+OWNER_KEY = "_blender_mcp_cleanup"
+OWNER_VALUE = "cleanup_v2"
 
 
-def clean(me, bm):
-    bm.from_mesh(me)
-    before = (len(bm.verts), len(bm.edges), len(bm.faces))
-
-    bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=MERGE_DISTANCE)
-
-    if REMOVE_DEGENERATE:
-        bmesh.ops.dissolve_degenerate(bm, dist=1e-6, edges=bm.edges[:])
-        bad = [f for f in bm.faces if f.calc_area() < 1e-10]
-        if bad:
-            bmesh.ops.delete(bm, geom=bad, context='FACES')
-
-    if REMOVE_LOOSE:
-        loose_e = [e for e in bm.edges if not e.link_faces]
-        if loose_e:
-            bmesh.ops.delete(bm, geom=loose_e, context='EDGES')
-        loose_v = [v for v in bm.verts if not v.link_edges]
-        if loose_v:
-            bmesh.ops.delete(bm, geom=loose_v, context='VERTS')
-
-    if DISSOLVE_ANGLE_DEG > 0:
-        bmesh.ops.dissolve_limit(bm, angle_limit=math.radians(DISSOLVE_ANGLE_DEG),
-                                 verts=bm.verts[:], edges=bm.edges[:])
-
-    if RECALC_NORMALS:
-        bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
-
-    if TRIS_TO_QUADS:
-        bmesh.ops.join_triangles(bm, faces=[f for f in bm.faces if len(f.verts) == 3],
-                                 angle_face_threshold=math.radians(40),
-                                 angle_shape_threshold=math.radians(40))
-
-    if TRIANGULATE:
-        bmesh.ops.triangulate(bm, faces=bm.faces[:], quad_method='BEAUTY', ngon_method='BEAUTY')
-
-    after = (len(bm.verts), len(bm.edges), len(bm.faces))
-    bm.to_mesh(me)
-    me.update()
-    return before, after
+def get_collection():
+    col = bpy.data.collections.get(COLLECTION_NAME)
+    if col is None:
+        col = bpy.data.collections.new(COLLECTION_NAME)
+        col[OWNER_KEY] = OWNER_VALUE
+        bpy.context.scene.collection.children.link(col)
+    elif col.get(OWNER_KEY) != OWNER_VALUE:
+        raise ValueError("Refusing to reuse an unowned cleanup collection: " + COLLECTION_NAME)
+    return col
 
 
-for name in TARGETS:
-    if name not in bpy.data.objects:
-        print(f"WARNING: target object not found: {name!r}")
-
-objs = [bpy.data.objects[n] for n in TARGETS if n in bpy.data.objects] if TARGETS else \
-       [o for o in bpy.context.selected_objects if o.type == 'MESH']
-
-if not objs:
-    print("No target mesh objects. Select objects or set TARGETS.")
-
-for ob in objs:
-    if ob.type != 'MESH':
-        continue
-    if ob.mode != 'OBJECT':
-        print(f"[{ob.name}] SKIP: object is in {ob.mode} mode; switch to Object Mode so edits are not lost.")
-        continue
-    if ob.data.shape_keys and ob.data.shape_keys.key_blocks:
-        print(f"[{ob.name}] SKIP: mesh has Shape Keys; topology cleanup can invalidate shape-key data.")
-        continue
-    users = real_users(ob.data)
-    if users > 1 and not ALLOW_SHARED_MESH_DATA:
-        print(f"[{ob.name}] SKIP: mesh data is shared by {users} users. "
-              "Make the mesh single-user or set ALLOW_SHARED_MESH_DATA=True intentionally.")
-        continue
-    if users > 1:
-        print(f"[{ob.name}] WARNING: editing shared mesh data used by {users} objects")
+def clean(mesh):
     bm = bmesh.new()
     try:
-        before, after = clean(ob.data, bm)
+        bm.from_mesh(mesh)
+        before = (len(bm.verts), len(bm.edges), len(bm.faces))
+        bmesh.ops.remove_doubles(bm, verts=bm.verts[:], dist=MERGE_DISTANCE)
+        if REMOVE_DEGENERATE:
+            bmesh.ops.dissolve_degenerate(bm, dist=1e-6, edges=bm.edges[:])
+            bad = [f for f in bm.faces if f.calc_area() < 1e-10]
+            if bad:
+                bmesh.ops.delete(bm, geom=bad, context='FACES')
+        if REMOVE_LOOSE:
+            loose_e = [e for e in bm.edges if not e.link_faces]
+            if loose_e:
+                bmesh.ops.delete(bm, geom=loose_e, context='EDGES')
+            loose_v = [v for v in bm.verts if not v.link_edges]
+            if loose_v:
+                bmesh.ops.delete(bm, geom=loose_v, context='VERTS')
+        if DISSOLVE_ANGLE_DEG > 0:
+            bmesh.ops.dissolve_limit(
+                bm, angle_limit=math.radians(DISSOLVE_ANGLE_DEG),
+                verts=bm.verts[:], edges=bm.edges[:])
+        if RECALC_NORMALS:
+            bmesh.ops.recalc_face_normals(bm, faces=bm.faces[:])
+        if TRIS_TO_QUADS:
+            bmesh.ops.join_triangles(
+                bm, faces=[f for f in bm.faces if len(f.verts) == 3],
+                angle_face_threshold=math.radians(40),
+                angle_shape_threshold=math.radians(40))
+        if TRIANGULATE:
+            bmesh.ops.triangulate(
+                bm, faces=bm.faces[:], quad_method='BEAUTY', ngon_method='BEAUTY')
+        after = (len(bm.verts), len(bm.edges), len(bm.faces))
+        bm.to_mesh(mesh)
+        mesh.update()
+        return before, after
     finally:
         bm.free()
-    print(f"[{ob.name}] verts {before[0]}->{after[0]}, edges {before[1]}->{after[1]}, faces {before[2]}->{after[2]}")
 
-print("Done. Run validate_asset.py to confirm.")
+
+if not math.isfinite(float(MERGE_DISTANCE)) or MERGE_DISTANCE <= 0:
+    raise ValueError("MERGE_DISTANCE must be positive and finite")
+if not math.isfinite(float(DISSOLVE_ANGLE_DEG)) or not 0 <= DISSOLVE_ANGLE_DEG < 180:
+    raise ValueError("DISSOLVE_ANGLE_DEG must be in [0, 180)")
+if not TARGETS:
+    print("RESULT: NO TARGETS; set explicit TARGETS, no selected-object fallback.")
+else:
+    col = None if EDIT_IN_PLACE else get_collection()
+    results, errors = [], []
+    for name in dict.fromkeys(TARGETS):
+        source = bpy.data.objects.get(name)
+        if source is None:
+            print("WARNING: target object not found:", name)
+            errors.append((name, "missing"))
+            continue
+        if source.type != "MESH":
+            print("SKIP: non-mesh target", name)
+            errors.append((name, "non-mesh"))
+            continue
+        if source.mode != "OBJECT":
+            print(f"[{name}] SKIP: object is in {source.mode} mode")
+            errors.append((name, "edit mode"))
+            continue
+        if source.data.shape_keys and source.data.shape_keys.key_blocks:
+            print(f"[{name}] SKIP: mesh has Shape Keys")
+            errors.append((name, "shape keys"))
+            continue
+        if source.library or source.data.library:
+            print(f"[{name}] SKIP: linked/library data")
+            errors.append((name, "library"))
+            continue
+        if EDIT_IN_PLACE and source.data.users > 1:
+            print(f"[{name}] SKIP: mesh data is shared; in-place edits are forbidden")
+            errors.append((name, "shared"))
+            continue
+        output_name = source.name + OUTPUT_SUFFIX
+        if not EDIT_IN_PLACE and output_name in bpy.data.objects:
+            print("ERROR: refusing output name collision", output_name)
+            errors.append((name, "name collision"))
+            continue
+        working_mesh = source.data.copy()
+        working_obj = None
+        try:
+            before, after = clean(working_mesh)
+            if EDIT_IN_PLACE:
+                old = source.data
+                source.data = working_mesh
+                old.name = old.name + "_BeforeCleanup"
+                old.use_fake_user = True  # recovery backup; user can delete manually
+                results.append(source.name)
+            else:
+                working_obj = source.copy()
+                working_obj.data = working_mesh
+                working_obj.name = output_name
+                working_obj[OWNER_KEY] = OWNER_VALUE
+                working_obj["mcp_source"] = source.name
+                col.objects.link(working_obj)
+                results.append(working_obj.name)
+            print(f"[{name}] verts {before[0]}->{after[0]}, edges {before[1]}->{after[1]}, faces {before[2]}->{after[2]}")
+        except Exception as exc:
+            errors.append((name, str(exc)))
+            print("ERROR:", name, repr(exc))
+            if working_obj is not None:
+                bpy.data.objects.remove(working_obj, do_unlink=True)
+            if working_mesh.users == 0:
+                bpy.data.meshes.remove(working_mesh)
+    print("CLEANUP RESULT:", "SUCCESS" if not errors else "PARTIAL",
+          "outputs=", results, "errors=", errors)
+    print("NOTE: run validate_asset.py and visually inspect results before export.")

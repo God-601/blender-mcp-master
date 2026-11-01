@@ -26,6 +26,8 @@ OVERWRITE = False                      # refuse to replace an existing file unle
 
 if FORMAT not in ("FBX", "GLB", "OBJ"):
     raise ValueError(f"Unknown FORMAT {FORMAT!r}; use FBX, GLB or OBJ")
+if ENGINE not in ("UNITY", "UNREAL", "ROBLOX", "GODOT", "GENERIC"):
+    raise ValueError("Unknown ENGINE policy: " + str(ENGINE))
 if not PATH or not str(PATH).strip():
     raise ValueError("Export PATH must be explicitly configured.")
 if not OBJECTS:
@@ -141,6 +143,9 @@ try:
         raise RuntimeError(f"Export operator did not finish successfully for {out_path}.")
     if not os.path.isfile(temp_path) or os.path.getsize(temp_path) == 0:
         raise RuntimeError(f"Export failed: no non-empty output was written for {out_path}.")
+    # Commit OBJ and its MTL together. If either replacement fails, put both
+    # previous user files back. Never publish a half-updated pair.
+    pending = []
     if FORMAT == "OBJ":
         temp_mtl = os.path.splitext(temp_path)[0] + ".mtl"
         out_mtl = os.path.splitext(out_path)[0] + ".mtl"
@@ -150,8 +155,36 @@ try:
             obj_text = obj_text.replace(os.path.basename(temp_mtl), os.path.basename(out_mtl))
             with open(temp_path, "w", encoding="utf-8", newline="\n") as stream:
                 stream.write(obj_text)
-            os.replace(temp_mtl, out_mtl)
-    os.replace(temp_path, out_path)
+            pending.append((temp_mtl, out_mtl))
+    pending.append((temp_path, out_path))
+    backups = {}
+    installed = []
+    committed = False
+    try:
+        for _src, _dest in pending:
+            if os.path.lexists(_dest):
+                fd, _backup = tempfile.mkstemp(
+                    prefix="._blender_mcp_original_", dir=os.path.dirname(_dest))
+                os.close(fd)
+                os.remove(_backup)
+                os.replace(_dest, _backup)
+                backups[_dest] = _backup
+        for _src, _dest in pending:
+            os.replace(_src, _dest)
+            installed.append(_dest)
+        committed = True
+    except Exception:
+        for _dest in reversed(installed):
+            if os.path.isfile(_dest) or os.path.islink(_dest):
+                os.remove(_dest)
+        for _dest, _backup in reversed(list(backups.items())):
+            os.replace(_backup, _dest)
+        raise
+    finally:
+        if committed:
+            for _backup in backups.values():
+                if os.path.isfile(_backup):
+                    os.remove(_backup)
     print(f"Exported {len(temps)} object(s), {total_tris} tris -> {out_path} "
           f"({os.path.getsize(out_path) / 1024:.1f} KB), engine={ENGINE}")
 finally:

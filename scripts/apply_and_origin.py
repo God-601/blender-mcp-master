@@ -1,109 +1,161 @@
-"""apply_and_origin.py - apply transforms, set origin, ground the object.
-Uses the data API (no operators) so it works regardless of UI context.
-Paste into execute_blender_code.
+"""Stage transform/origin operations on independent meshes; commit only after success.
+
+Default behavior creates an owned copy; original source, selection and hierarchy
+are never touched. In-place edits require TWO explicit opt-ins and a recoverable
+mesh backup. Every target is processed independently and failures are reported.
 """
 import bpy
-from mathutils import Vector, Matrix
+from mathutils import Matrix, Vector
 
 # ---- CONFIG ----------------------------------------------------------------
-TARGETS = []                  # object names; empty = selected mesh objects
+TARGETS = []                  # explicit names, never selected fallback
+EDIT_IN_PLACE = False         # off by default
+ALLOW_UNOWNED_EDIT = False    # second opt-in, only after user authorizes
+OUTPUT_SUFFIX = "_Prepared"
+COLLECTION_NAME = "MCP_Transform_Prepared"
 APPLY_SCALE = True
 APPLY_ROTATION = True
-APPLY_LOCATION = False        # usually keep location; set True to bake world position into mesh
-ORIGIN = "BOTTOM_CENTER"      # "BOTTOM_CENTER", "CENTER", "BOTTOM_CORNER", "WORLD_ORIGIN", or "CUSTOM"
-CUSTOM_ORIGIN_WORLD = (0.0, 0.0, 0.0)   # used if ORIGIN == "CUSTOM" (world coordinates)
-GROUND_TO_Z0 = False          # move object so its lowest point sits on Z=0
+APPLY_LOCATION = False
+ORIGIN = "BOTTOM_CENTER"       # BOTTOM_CENTER, CENTER, BOTTOM_CORNER, WORLD_ORIGIN, CUSTOM
+CUSTOM_ORIGIN_WORLD = (0.0, 0.0, 0.0)
+GROUND_TO_Z0 = False
 # ----------------------------------------------------------------------------
-
-objs = [bpy.data.objects[n] for n in TARGETS if n in bpy.data.objects] if TARGETS else \
-       [o for o in bpy.context.selected_objects if o.type == 'MESH']
-
-
-def bake_matrix(ob, mat):
-    """Bake a matrix into mesh data and compensate on the object matrix."""
-    ob.data.transform(mat)
-    ob.data.update()
+OWNER_KEY = "_blender_mcp_transform"
+OWNER_VALUE = "origin_v2"
 
 
-for ob in objs:
-    if ob.type != 'MESH':
-        continue
-    if ob.data.users > 1:
-        print(f"[{ob.name}] SKIP: shared mesh data ({ob.data.users} users). Make single-user first (ob.data = ob.data.copy()).")
-        continue
-    if ob.data.shape_keys and ob.data.shape_keys.key_blocks:
-        print(f"[{ob.name}] SKIP: mesh has Shape Keys; applying transforms/origin directly can desynchronize key data.")
-        continue
-    if ob.mode != 'OBJECT':
-        print(f"[{ob.name}] SKIP: object is in {ob.mode} mode; switch to Object Mode so the change is not lost.")
-        continue
-    if ob.parent:
-        print(f"[{ob.name}] SKIP: parented object; preserving the parent hierarchy.")
-        continue
-    # Children must keep their world position when this object's origin moves.
-    bpy.context.view_layer.update()
-    child_worlds = [(child, child.matrix_world.copy()) for child in ob.children]
+def owned_collection():
+    col = bpy.data.collections.get(COLLECTION_NAME)
+    if col is None:
+        col = bpy.data.collections.new(COLLECTION_NAME)
+        col[OWNER_KEY] = OWNER_VALUE
+        bpy.context.scene.collection.children.link(col)
+    elif col.get(OWNER_KEY) != OWNER_VALUE:
+        raise ValueError("Refusing to reuse unowned collection " + COLLECTION_NAME)
+    return col
 
+
+def transform_staging_object(ob):
     loc, rot, scale = ob.matrix_basis.decompose()
-    m = Matrix.Identity(4)
+    if min(abs(float(v)) for v in scale) < 1e-8:
+        raise ValueError("Cannot apply transforms to a zero-scale object")
+    bake = Matrix.Identity(4)
     if APPLY_SCALE:
-        m = Matrix.Diagonal(scale).to_4x4() @ m
+        bake = Matrix.Diagonal(scale).to_4x4() @ bake
     if APPLY_ROTATION:
-        m = rot.to_matrix().to_4x4() @ m
+        bake = rot.to_matrix().to_4x4() @ bake
     if APPLY_LOCATION:
-        m = Matrix.Translation(loc) @ m
-
-    # Compute the new basis after baking
-    new_loc = Vector((0, 0, 0)) if APPLY_LOCATION else loc.copy()
-    new_rot = rot if not APPLY_ROTATION else type(rot)((1, 0, 0, 0))
-    new_scale = scale.copy() if not APPLY_SCALE else Vector((1, 1, 1))
-
-    bake_matrix(ob, m)
-    ob.location = new_loc
-    ob.rotation_mode = 'QUATERNION'
-    ob.rotation_quaternion = new_rot
-    ob.rotation_mode = 'XYZ'
-    ob.scale = new_scale
+        bake = Matrix.Translation(loc) @ bake
+    ob.data.transform(bake)
+    ob.data.update()
+    ob.location = Vector((0, 0, 0)) if APPLY_LOCATION else loc.copy()
+    if APPLY_ROTATION:
+        ob.rotation_mode = "QUATERNION"
+        ob.rotation_quaternion = (1.0, 0.0, 0.0, 0.0)
+        ob.rotation_mode = "XYZ"
+    ob.scale = Vector((1, 1, 1)) if APPLY_SCALE else scale.copy()
     bpy.context.view_layer.update()
-
-    # Set origin: compute desired origin in world space, shift mesh to compensate
-    mw = ob.matrix_world
-    ws = [mw @ v.co for v in ob.data.vertices]
-    if not ws:
-        continue
-    mn = Vector((min(v.x for v in ws), min(v.y for v in ws), min(v.z for v in ws)))
-    mx = Vector((max(v.x for v in ws), max(v.y for v in ws), max(v.z for v in ws)))
-    ctr = (mn + mx) / 2
+    world = ob.matrix_world
+    verts = [world @ vert.co for vert in ob.data.vertices]
+    if not verts:
+        raise ValueError("Cannot set origin on empty mesh")
+    minimum = Vector([min(v[i] for v in verts) for i in range(3)])
+    maximum = Vector([max(v[i] for v in verts) for i in range(3)])
+    center = (minimum + maximum) / 2.0
     if ORIGIN == "BOTTOM_CENTER":
-        target = Vector((ctr.x, ctr.y, mn.z))
+        desired = Vector((center.x, center.y, minimum.z))
     elif ORIGIN == "CENTER":
-        target = ctr
+        desired = center
     elif ORIGIN == "BOTTOM_CORNER":
-        target = mn
+        desired = minimum
     elif ORIGIN == "WORLD_ORIGIN":
-        target = Vector((0, 0, 0))
-    elif ORIGIN == "CUSTOM":
-        target = Vector(CUSTOM_ORIGIN_WORLD)
+        desired = Vector((0, 0, 0))
     else:
-        target = mw.translation.copy()
-
-    offset_local = mw.inverted() @ target       # target in local space
+        desired = Vector(CUSTOM_ORIGIN_WORLD)
+    offset_local = world.inverted() @ desired
     ob.data.transform(Matrix.Translation(-offset_local))
-    ob.matrix_world.translation = target
+    ob.matrix_world.translation = desired
     ob.data.update()
     bpy.context.view_layer.update()
-
     if GROUND_TO_Z0:
-        ws = [ob.matrix_world @ v.co for v in ob.data.vertices]
-        ob.location.z -= min(v.z for v in ws)
+        bottom = min((ob.matrix_world @ v.co).z for v in ob.data.vertices)
+        ob.location.z -= bottom
         bpy.context.view_layer.update()
 
-    for child, world in child_worlds:
-        child.matrix_world = world
-    bpy.context.view_layer.update()
 
-    d = ob.dimensions
-    print(f"[{ob.name}] scale={tuple(round(x,4) for x in ob.scale)} origin={tuple(round(x,4) for x in ob.location)} "
-          f"dims=({d.x:.3f}, {d.y:.3f}, {d.z:.3f}) m")
+if ORIGIN not in {"BOTTOM_CENTER", "CENTER", "BOTTOM_CORNER", "WORLD_ORIGIN", "CUSTOM"}:
+    raise ValueError("Unsupported ORIGIN: " + str(ORIGIN))
+if not TARGETS:
+    print("RESULT: NO TARGETS; set explicit TARGETS, no selected fallback.")
+else:
+    col = owned_collection()
+    outputs, errors = [], []
+    for name in dict.fromkeys(TARGETS):
+        source = bpy.data.objects.get(name)
+        reason = None
+        if source is None or source.type != "MESH":
+            reason = "missing or non-mesh object"
+        elif source.library or source.data.library:
+            reason = "linked/library data"
+        elif source.mode != "OBJECT":
+            reason = "object is in %s mode" % source.mode
+        elif source.parent:
+            reason = "parented object; preserving hierarchy"
+        elif source.data.shape_keys and source.data.shape_keys.key_blocks:
+            reason = "mesh has Shape Keys"
+        elif EDIT_IN_PLACE and source.data.users > 1:
+            reason = "shared mesh; cannot edit in place"
+        elif EDIT_IN_PLACE and not ALLOW_UNOWNED_EDIT and source.get(OWNER_KEY) != OWNER_VALUE:
+            reason = "unowned source; requires explicit ALLOW_UNOWNED_EDIT"
+        if reason:
+            print(f"[{name}] SKIP:", reason)
+            errors.append((name, reason))
+            continue
+        output_name = source.name + OUTPUT_SUFFIX
+        if not EDIT_IN_PLACE and output_name in bpy.data.objects:
+            print("SKIP: output already exists:", output_name)
+            errors.append((name, "output exists"))
+            continue
 
-print("Done.")
+        stage = None
+        old_mesh = source.data
+        old_matrix = source.matrix_world.copy()
+        children = [(child, child.matrix_world.copy()) for child in source.children]
+        try:
+            stage = source.copy()
+            stage.data = source.data.copy()
+            stage.name = output_name if not EDIT_IN_PLACE else source.name + "_Origin_Staging"
+            stage[OWNER_KEY] = OWNER_VALUE
+            stage["mcp_source"] = source.name
+            col.objects.link(stage)
+            transform_staging_object(stage)
+            if EDIT_IN_PLACE:
+                source.data = stage.data
+                source.matrix_world = stage.matrix_world.copy()
+                for child, matrix in children:
+                    child.matrix_world = matrix
+                bpy.context.view_layer.update()
+                old_mesh.name = old_mesh.name + "_BeforeOrigin"
+                old_mesh.use_fake_user = True  # recovery, no deletion
+                bpy.data.objects.remove(stage, do_unlink=True)
+                stage = None
+                outputs.append(source.name)
+            else:
+                outputs.append(stage.name)
+            print("PREPARED:", outputs[-1], "source=", source.name)
+        except Exception as exc:
+            errors.append((name, str(exc)))
+            print("ERROR:", name, repr(exc))
+            if EDIT_IN_PLACE and source.data != old_mesh:
+                source.data = old_mesh
+                source.matrix_world = old_matrix
+                for child, matrix in children:
+                    child.matrix_world = matrix
+                bpy.context.view_layer.update()
+            if stage is not None:
+                mesh = stage.data
+                bpy.data.objects.remove(stage, do_unlink=True)
+                if mesh.users == 0:
+                    bpy.data.meshes.remove(mesh)
+    print("TRANSFORM RESULT:", "SUCCESS" if not errors else "PARTIAL",
+          "outputs=", outputs, "errors=", errors)
