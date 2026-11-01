@@ -6,7 +6,10 @@ import bpy
 from mathutils import Vector, Matrix
 
 # ---- CONFIG ----------------------------------------------------------------
-TARGETS = []                  # object names; empty = selected mesh objects
+TARGETS = []                  # explicit object names; empty means no action
+EDIT_IN_PLACE = False          # default: write independent transformed copies
+OUTPUT_SUFFIX = "_Prepared"
+COLLECTION_NAME = "MCP_Transform_Prepared"
 APPLY_SCALE = True
 APPLY_ROTATION = True
 APPLY_LOCATION = False        # usually keep location; set True to bake world position into mesh
@@ -15,8 +18,19 @@ CUSTOM_ORIGIN_WORLD = (0.0, 0.0, 0.0)   # used if ORIGIN == "CUSTOM" (world coor
 GROUND_TO_Z0 = False          # move object so its lowest point sits on Z=0
 # ----------------------------------------------------------------------------
 
-objs = [bpy.data.objects[n] for n in TARGETS if n in bpy.data.objects] if TARGETS else \
-       [o for o in bpy.context.selected_objects if o.type == 'MESH']
+OWNER_KEY = "_blender_mcp_transform"
+OWNER_VALUE = "origin_v2"
+def get_collection():
+    col = bpy.data.collections.get(COLLECTION_NAME)
+    if col is None:
+        col = bpy.data.collections.new(COLLECTION_NAME)
+        col[OWNER_KEY] = OWNER_VALUE
+        bpy.context.scene.collection.children.link(col)
+    elif col.get(OWNER_KEY) != OWNER_VALUE:
+        raise ValueError("Refusing unowned collection: " + COLLECTION_NAME)
+    return col
+
+objs = [bpy.data.objects[n] for n in TARGETS if n in bpy.data.objects]
 
 
 def bake_matrix(ob, mat):
@@ -25,7 +39,33 @@ def bake_matrix(ob, mat):
     ob.data.update()
 
 
-for ob in objs:
+if not TARGETS:
+    print("RESULT: NO TARGETS; set TARGETS explicitly. No selected-object fallback.")
+if ORIGIN not in ("BOTTOM_CENTER", "CENTER", "BOTTOM_CORNER", "WORLD_ORIGIN", "CUSTOM"):
+    raise ValueError("Unknown origin policy: " + str(ORIGIN))
+working_collection = get_collection() if TARGETS and not EDIT_IN_PLACE else None
+
+for source in objs:
+    if source.type != 'MESH':
+        continue
+    ob = source
+    if not EDIT_IN_PLACE:
+        output_name = source.name + OUTPUT_SUFFIX
+        if output_name in bpy.data.objects:
+            print("SKIP: output already exists:", output_name)
+            continue
+        if source.library or source.data.library:
+            print("SKIP: linked/library data", source.name)
+            continue
+        if source.mode != 'OBJECT' or source.parent or source.data.shape_keys:
+            print("SKIP: unsupported source state", source.name)
+            continue
+        ob = source.copy()
+        ob.data = source.data.copy()
+        ob.name = output_name
+        ob[OWNER_KEY] = OWNER_VALUE
+        ob["mcp_source"] = source.name
+        working_collection.objects.link(ob)
     if ob.type != 'MESH':
         continue
     if ob.data.users > 1:
@@ -40,6 +80,16 @@ for ob in objs:
     if ob.parent:
         print(f"[{ob.name}] SKIP: parented object; preserving the parent hierarchy.")
         continue
+    if EDIT_IN_PLACE and source.get(OWNER_KEY) != OWNER_VALUE:
+        print(f"[{source.name}] SKIP: edit-in-place requires tool-owned object.")
+        continue
+    # In-place operations keep a named, fake-user mesh recovery backup.
+    backup = None
+    if EDIT_IN_PLACE:
+        backup = ob.data.copy()
+        backup.name = ob.data.name + "_BeforeOrigin"
+        backup.use_fake_user = True
+
     # Children must keep their world position when this object's origin moves.
     bpy.context.view_layer.update()
     child_worlds = [(child, child.matrix_world.copy()) for child in ob.children]
