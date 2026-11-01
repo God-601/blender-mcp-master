@@ -176,8 +176,9 @@ class BlenderRuntimeTests(unittest.TestCase):
         obj = add_mesh("Dup", doubled)
         before = len(obj.data.vertices)
         out, err = run_script("cleanup_mesh.py", TARGETS=["Dup"])
-        self.assertIsNone(err)
-        self.assertLess(len(obj.data.vertices), before)
+        self.assertIsNone(err, out)
+        self.assertEqual(len(obj.data.vertices), before)
+        self.assertLess(len(bpy.data.objects["Dup_Cleaned"].data.vertices), before)
 
     def test_cleanup_skips_truly_shared_mesh(self):
         first = add_mesh("A", cube)
@@ -185,7 +186,9 @@ class BlenderRuntimeTests(unittest.TestCase):
         bpy.context.scene.collection.objects.link(second)
         out, err = run_script("cleanup_mesh.py", TARGETS=["A"])
         self.assertIsNone(err)
-        self.assertIn("SKIP: mesh data is shared", out)
+        self.assertIn("A_Cleaned", bpy.data.objects)
+        self.assertIsNot(first.data, bpy.data.objects["A_Cleaned"].data)
+        self.assertIs(first.data, second.data)
 
     def test_cleanup_treats_fake_user_as_not_shared(self):
         obj = add_mesh("Solo", cube)
@@ -540,10 +543,12 @@ class BlenderRuntimeTests(unittest.TestCase):
         obj.rotation_euler = (0, 0, 0.5)
         out, err = run_script("apply_and_origin.py", TARGETS=["Box"], GROUND_TO_Z0=True)
         self.assertIsNone(err, out)
-        self.assertEqual(tuple(round(v, 4) for v in obj.scale), (1.0, 1.0, 1.0))
-        self.assertAlmostEqual(obj.location.x, 2.0, places=4)
-        self.assertAlmostEqual(obj.location.y, 3.0, places=4)
-        lowest = min((obj.matrix_world @ v.co).z for v in obj.data.vertices)
+        stage = bpy.data.objects["Box_Prepared"]
+        self.assertEqual(tuple(round(v, 4) for v in obj.scale), (0.8, 0.5, 1.2))
+        self.assertEqual(tuple(round(v, 4) for v in stage.scale), (1.0, 1.0, 1.0))
+        self.assertAlmostEqual(stage.location.x, 2.0, places=4)
+        self.assertAlmostEqual(stage.location.y, 3.0, places=4)
+        lowest = min((stage.matrix_world @ v.co).z for v in stage.data.vertices)
         self.assertAlmostEqual(lowest, 0.0, places=4)
 
     def test_apply_and_origin_skips_shared_mesh(self):
@@ -553,7 +558,8 @@ class BlenderRuntimeTests(unittest.TestCase):
         first.scale = (2, 2, 2)
         out, err = run_script("apply_and_origin.py", TARGETS=["A"])
         self.assertIsNone(err)
-        self.assertIn("SKIP: shared mesh data", out)
+        self.assertIn("A_Prepared", bpy.data.objects)
+        self.assertIsNot(first.data, bpy.data.objects["A_Prepared"].data)
         self.assertEqual(tuple(first.scale), (2.0, 2.0, 2.0))
 
     def test_apply_and_origin_keeps_children_in_place(self):
@@ -570,7 +576,8 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertIsNone(err, out)
         bpy.context.view_layer.update()
         self.assertAlmostEqual((child.matrix_world.translation - before).length, 0.0, places=4)
-        self.assertAlmostEqual(parent.location.x, 5.0, places=4)
+        self.assertAlmostEqual(parent.location.x, 0.0, places=4)
+        self.assertAlmostEqual(bpy.data.objects["Parent_Prepared"].location.x, 5.0, places=4)
 
     def test_apply_and_origin_skips_objects_in_edit_mode(self):
         obj = add_mesh("Box", cube)
