@@ -63,6 +63,7 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Voxel grids, visible-face culling, palette texture atlases | Voxel palette recipe | `references/voxel-atlas-recipe.md`, `scripts/voxel_atlas_example.py` |
 | Hand-painted textures, painterly highlights, color atlases | Hand-painted pipeline | `references/hand-painted-pipeline.md`; add `references/uv-baking.md` when texturing/baking is involved; runnable snippets in `references/handpaint-recipes.md` |
 | UV layout, texture painting setup, baking maps, high-to-low projection | UV and baking | `references/uv-baking.md` |
+| UV overlap and texel-density analysis on named meshes | Read-only UV diagnostics | `scripts/uv_diagnostics.py`; `references/p1-production-pipeline.md` |
 | Edge flow, mesh density, cleanup strategy, retopology | Topology and retopology | `references/topology-retopology.md` |
 | Sculpting, high-poly detail, remesh, high-to-low production | Sculpt/high-poly | `references/sculpting-highpoly.md` |
 | PBR, procedural nodes, toon shading, material diagnostics | Shading and materials | `references/materials.md` |
