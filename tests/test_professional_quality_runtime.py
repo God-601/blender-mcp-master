@@ -139,7 +139,9 @@ class ProfessionalGeometryRuntimeTests(unittest.TestCase):
         self.assertEqual(report["checks"]["triangle_budget"]["status"], "ISSUE")
         self.assertEqual(report["triangles"], 12)
         self.assertEqual(len(source.data.polygons), before)
-        self.assertIs(source.modifiers[0], mod)
+        self.assertEqual(len(source.modifiers), 1)
+        self.assertEqual(source.modifiers[0].name, mod.name)
+        self.assertEqual(source.modifiers[0].type, "TRIANGULATE")
 
 
 if __name__ == "__main__":

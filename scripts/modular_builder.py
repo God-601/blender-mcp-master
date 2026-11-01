@@ -131,7 +131,8 @@ def build_arch(spec, collection):
     faces = [tuple(range(n)), tuple(reversed(range(n, 2 * n)))]
     for i in range(n):
         j = (i + 1) % n
-        faces.append((i, j, j + n, i + n))
+        # With a CCW XZ profile, outward wall winding must go toward -Y first.
+        faces.append((i, i + n, j + n, j))
     mesh = bpy.data.meshes.new(name + "_Mesh")
     mesh.from_pydata(verts, [], faces)
     mesh.validate(verbose=False, clean_customdata=False)
