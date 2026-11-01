@@ -90,7 +90,7 @@ if existing:
         "then rerun; existing scene objects are never deleted automatically."
     )
 if any(m.type == 'ARMATURE' for m in src.modifiers) or (src.data.shape_keys and src.data.shape_keys.key_blocks):
-    print("WARNING: source has an Armature modifier or shape keys; LODs will not keep them.")
+    raise ValueError("Rigged/shape-keyed source requires an explicit animation LOD workflow; refusing silent data loss.")
 
 base = tris_of(src)
 print(f"{SOURCE}: {base} tris (LOD0)")
