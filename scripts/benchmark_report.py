@@ -1,7 +1,7 @@
-"""benchmark_report.py — technical metrics for explicit benchmark targets.
+"""Read-only benchmark metrics for named targets, using evaluated Blender geometry.
 
-This script does not assign artistic scores. It reports measurable scene evidence that can
-be paired with fixed-angle MCP captures and a human/agent visual rubric.
+Counts include mesh-producing modifiers. They do not automatically include
+separately instanced scene objects or prove visual quality.
 """
 import bpy
 import bmesh
@@ -14,40 +14,60 @@ TARGET_NAMES = ["Chair_Seat", "Chair_Back", "Chair_Leg_FL", "Chair_Leg_FR"]
 # ----------------------------------------------------------------------------
 
 
-def metrics(obj):
+def metrics(obj, depsgraph):
+    evaluated = obj.evaluated_get(depsgraph)
+    mesh = evaluated.to_mesh()
+    if mesh is None:
+        return {"name": obj.name, "status": "NOT VERIFIED",
+                "reason": "No evaluated mesh"}
     bm = bmesh.new()
     try:
-        bm.from_mesh(obj.data)
-        non_manifold = sum(1 for edge in bm.edges if not edge.is_manifold and not edge.is_boundary and not edge.is_wire)
+        bm.from_mesh(mesh)
+        non_manifold = sum(1 for edge in bm.edges
+                           if not edge.is_manifold and not edge.is_boundary and not edge.is_wire)
         boundary = sum(1 for edge in bm.edges if edge.is_boundary)
+        points = [obj.matrix_world @ vert.co for vert in bm.verts]
+        world_dimensions = (
+            [round(max(p[i] for p in points) - min(p[i] for p in points), 5)
+             for i in range(3)] if points else None
+        )
+        return {
+            "name": obj.name,
+            "status": "MEASURED",
+            "evaluated": True,
+            "dimensions": [round(float(v), 5) for v in obj.dimensions],
+            "evaluated_world_dimensions": world_dimensions,
+            "base_faces": len(obj.data.polygons),
+            "base_triangles": sum(max(0, len(poly.vertices) - 2) for poly in obj.data.polygons),
+            "vertices": len(bm.verts),
+            "edges": len(bm.edges),
+            "faces": len(bm.faces),
+            "triangles": sum(max(0, len(face.verts) - 2) for face in bm.faces),
+            "non_manifold_edges": non_manifold,
+            "boundary_edges": boundary,
+            "modifier_types": [mod.type for mod in obj.modifiers],
+            "material_count": len(obj.data.materials),
+        }
     finally:
         bm.free()
-    return {
-        "name": obj.name,
-        "dimensions": [round(float(v), 5) for v in obj.dimensions],
-        "vertices": len(obj.data.vertices),
-        "edges": len(obj.data.edges),
-        "faces": len(obj.data.polygons),
-        "triangles": sum(max(0, len(poly.vertices) - 2) for poly in obj.data.polygons),
-        "non_manifold_edges": non_manifold,
-        "boundary_edges": boundary,
-        "modifier_types": [mod.type for mod in obj.modifiers],
-        "material_count": len(obj.data.materials),
-    }
+        evaluated.to_mesh_clear()
 
 
 missing = [name for name in TARGET_NAMES if bpy.data.objects.get(name) is None]
-objects = [bpy.data.objects[name] for name in TARGET_NAMES if bpy.data.objects[name] is not None]
+objects = [bpy.data.objects[name] for name in TARGET_NAMES if bpy.data.objects.get(name) is not None]
 mesh_objects = [obj for obj in objects if obj.type == "MESH"]
 non_mesh = [obj.name for obj in objects if obj.type != "MESH"]
+depsgraph = bpy.context.evaluated_depsgraph_get()
+reports = [metrics(obj, depsgraph) for obj in mesh_objects]
 result = {
     "benchmark_id": BENCHMARK_ID,
     "prompt_version": PROMPT_VERSION,
     "blender_version": bpy.app.version_string,
-    "targets": [metrics(obj) for obj in mesh_objects],
+    "targets": reports,
     "non_mesh_targets": non_mesh,
     "missing_targets": missing,
-    "technical_status": "NOT VERIFIED" if missing or non_mesh or not mesh_objects else "MEASURED",
+    "technical_status": "NOT VERIFIED" if missing or non_mesh or not reports
+                        or any(r["status"] != "MEASURED" for r in reports) else "MEASURED",
     "visual_scores": None,
     "visual_status": "NOT VERIFIED",
 }
