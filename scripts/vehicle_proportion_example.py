@@ -145,6 +145,7 @@ try:
         wheel["axle_role"] = suffix
         created.append(wheel)
 
+    bpy.context.view_layer.update()  # make measured world-space bounds current
     print("VEHICLE EXAMPLE: SUCCESS",
           "length=", LENGTH, "width=", WIDTH, "wheelbase=", WHEELBASE,
           "wheel_diameter=", WHEEL_DIAMETER, "objects=", [o.name for o in created])
