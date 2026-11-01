@@ -1,7 +1,7 @@
 # Blender MCP Master
 
 <p align="center">
-  <img src="assets/banner.svg" width="100%" alt="Blender MCP Master — illustrated isometric modeling workspace and wireframe geometry">
+  <img src="assets/banner.svg" width="100%" alt="Concept illustration: Blender MCP Master, with a precisely aligned isometric mesh; not a generated Blender asset">
 </p>
 
 <p align="center">
