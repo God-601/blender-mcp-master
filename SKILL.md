@@ -208,7 +208,7 @@ Run them by pasting their contents into `execute_blender_code` (they only use bp
 | `pbr_material.py` | Create a clean Principled BSDF material from simple parameters |
 | `export_asset.py` | Export FBX / glTF / OBJ with safe settings for game engines |
 
-Edit the config block at the top of each script (clearly marked) instead of rewriting logic. For geometry construction, load `references/geometry-engine.md`; for module boundaries and capability contracts, load `references/architecture.md` and `references/module-contracts.md`. For cross-agent validation, load `references/agent-compatibility.md`.
+Edit the config block at the top of each script (clearly marked) instead of rewriting logic. For geometry construction, load `references/geometry-engine.md`; for module boundaries and capability contracts, load `references/architecture.md` and `references/module-contracts.md`. For cross-agent validation, load `references/agent-compatibility.md`. For developer regression testing, see `references/mutation-testing.md` and the 15 isolated source-mutation fixtures.
 
 ## 8. Delivery format
 
@@ -222,7 +222,8 @@ Ask only when an ambiguity materially changes the result or a critical decision 
 
 - Don't overwrite or delete the user's data. If you must change something that existed before you started, say so.
 - Before bulk deletes, apply operations or file overwrites, confirm the list of affected objects in the output.
-- **P0 transactional editing:** `cleanup_mesh.py` and `apply_and_origin.py` require explicit targets and produce separate copies by default; in-place edits require opt-ins and preserve recovery mesh data. `pbr_material.py` builds an isolated replacement before updating material slots; `setup_scene.py` restores prior state if setup fails. Treat a PARTIAL report as failure for quality gates, not success. Read `references/p0-integrity.md` before making changes in an existing scene.\n- **P0 code safeguards:** `pbr_material.py` edits only its tagged materials, preserves existing material slots by default and blocks shared datablock assignments; `bevel_and_shade.py` requires explicit names and edits independent copies by default; `setup_scene.py` preserves units unless opted in; `export_asset.py` refuses static exports that would silently drop rigs/shape keys. Do not bypass these guards automatically; ask permission before opt-ins.
+- **P0 transactional editing:** `cleanup_mesh.py` and `apply_and_origin.py` require explicit targets and produce separate copies by default; in-place edits require opt-ins and preserve recovery mesh data. `pbr_material.py` builds an isolated replacement before updating material slots; `setup_scene.py` restores prior state if setup fails. Treat a PARTIAL report as failure for quality gates, not success. Read `references/p0-integrity.md` before making changes in an existing scene.
+- **P0 code safeguards:** `pbr_material.py` edits only its tagged materials, preserves existing material slots by default and blocks shared datablock assignments; `bevel_and_shade.py` requires explicit names and edits independent copies by default; `setup_scene.py` preserves units unless opted in; `export_asset.py` refuses static exports that would silently drop rigs/shape keys. Do not bypass these guards automatically; ask permission before opt-ins.
 - **Policy for every destructive or bulk operation** (cleanup, apply transforms, origin changes, material assignment, decimate, export, purge):
   1. Identify the exact target objects and print their names.
   2. Detect dependencies first: shape keys, child objects, shared mesh data (several users), existing materials and slots, modifiers, armatures, objects in Edit Mode.

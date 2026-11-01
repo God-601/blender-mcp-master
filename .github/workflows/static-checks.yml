@@ -53,3 +53,8 @@ jobs:
         env:
           REQUIRE_BPY: "1"
         run: python tests/run_all.py -v
+      - name: Run targeted mutation campaign on Blender 5.2.3
+        if: matrix.bpy == '5.2.3'
+        env:
+          REQUIRE_BPY: "1"
+        run: python tests/run_mutation_campaign.py --strict --report mutation-results.json
