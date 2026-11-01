@@ -1,7 +1,7 @@
 {
   "name": "blender-mcp-master",
-  "version": "0.1.0",
-  "description": "Blender modeling agent skill and MCP resource server",
+  "version": "0.2.0-beta.1",
+  "description": "Blender Agent Skill and read-only MCP resource server for modeling, evidence and safety",
   "type": "module",
   "license": "MIT",
   "author": "God-601",
@@ -45,5 +45,8 @@
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.32.2",
     "zod": "4.6.7"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
