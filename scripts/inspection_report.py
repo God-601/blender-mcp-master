@@ -55,11 +55,9 @@ missing = [name for name in TARGET_NAMES if bpy.data.objects.get(name) is None]
 non_mesh = [name for name in TARGET_NAMES
             if bpy.data.objects.get(name) is not None and bpy.data.objects[name].type != "MESH"]
 depsgraph = bpy.context.evaluated_depsgraph_get()
-reports = [
-    inspect_object(bpy.data.objects[name], depsgraph)
-    for name in TARGET_NAMES
-    if bpy.data.objects.get(name) is not None and bpy.data.objects[name].type == "MESH"
-]
+reports = [inspect_object(bpy.data.objects[name], depsgraph)
+           for name in TARGET_NAMES
+           if bpy.data.objects.get(name) is not None and bpy.data.objects[name].type == "MESH"]
 payload = {
     "blender_version": bpy.app.version_string,
     "targets": reports,
