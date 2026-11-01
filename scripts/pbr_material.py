@@ -199,7 +199,7 @@ for name in ASSIGN_TO:
         ob.data.materials.clear()
     if not any(slot == mat for slot in ob.data.materials):
         ob.data.materials.append(mat)
-    print(f"assigned {NAME} -> {name} (replace_slots={REPLACE_MATERIAL_SLOTS})
+    print(f"assigned {NAME} -> {name} (replace_slots={REPLACE_MATERIAL_SLOTS})")
 
 print(f"Material '{NAME}' ready: color={tuple(round(c,3) for c in BASE_COLOR)} metallic={METALLIC} roughness={ROUGHNESS} users={mat.users}")
 if mat.users == 0:
