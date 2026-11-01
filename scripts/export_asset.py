@@ -153,7 +153,7 @@ try:
             with open(temp_path, "r", encoding="utf-8", errors="replace") as stream:
                 obj_text = stream.read()
             obj_text = obj_text.replace(os.path.basename(temp_mtl), os.path.basename(out_mtl))
-            with open(temp_path, "w", encoding="utf-8", newline="\\n") as stream:
+            with open(temp_path, "w", encoding="utf-8", newline="\n") as stream:
                 stream.write(obj_text)
             pending.append((temp_mtl, out_mtl))
     pending.append((temp_path, out_path))
