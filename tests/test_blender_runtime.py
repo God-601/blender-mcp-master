@@ -328,6 +328,7 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertEqual(len(bsdf.inputs["Alpha"].links), 1)
         out, err = run_script("pbr_material.py", NAME="ClipAlpha", ALPHA=0.8, ALPHA_MODE="CLIP")
         self.assertIsNone(err, out)
+        mat = bpy.data.materials["ClipAlpha"]
         clip_nodes = [n for n in mat.node_tree.nodes if n.get("_blender_mcp_generated") and n.type == "MATH" and n.operation == "GREATER_THAN"]
         self.assertEqual(len(clip_nodes), 1)
         self.assertAlmostEqual(clip_nodes[0].inputs[0].default_value, 0.8)
@@ -338,6 +339,7 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertAlmostEqual(mat.node_tree.nodes["Principled BSDF"].inputs["Alpha"].default_value, 0.5)
         out, err = run_script("pbr_material.py", NAME="M", ALPHA=1.0)
         self.assertIsNone(err, out)
+        mat = bpy.data.materials["M"]
         self.assertAlmostEqual(mat.node_tree.nodes["Principled BSDF"].inputs["Alpha"].default_value, 1.0)
 
     def test_pbr_rerun_disables_previous_emission(self):
@@ -349,6 +351,7 @@ class BlenderRuntimeTests(unittest.TestCase):
             self.assertAlmostEqual(strength.default_value, 4.0)
         out, err = run_script("pbr_material.py", NAME="Glow", EMISSION_COLOR=None)
         self.assertIsNone(err, out)
+        bsdf = bpy.data.materials["Glow"].node_tree.nodes["Principled BSDF"]
         strength = bsdf.inputs.get("Emission Strength")
         if strength is not None:
             self.assertAlmostEqual(strength.default_value, 0.0)
@@ -410,7 +413,7 @@ class BlenderRuntimeTests(unittest.TestCase):
         textures = {"color": self._png("c.png")}
         run_script("pbr_material.py", NAME="User", TEXTURES=textures)
         run_script("pbr_material.py", NAME="User", TEXTURES=textures)
-        self.assertIn("UserValue", mat.node_tree.nodes)
+        self.assertIn("UserValue", bpy.data.materials["User"].node_tree.nodes)
 
     # --- export_asset.py ---------------------------------------------------
     def _export(self, filename="out.fbx", **config):
