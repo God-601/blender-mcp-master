@@ -182,8 +182,8 @@ MUTANTS = [
     "label": "cleanup falls back to selected objects implicitly",
     "kind": "additional-safety-check",
     "file": "scripts/cleanup_mesh.py",
-    "old": "TARGETS = []                 # explicit existing object names; never use selected fallback",
-    "new": "TARGETS = [obj.name for obj in bpy.context.selected_objects if obj.type == \"MESH\"]  # MUTANT",
+    "old": "if not TARGETS:\n    print(\"RESULT: NO TARGETS; set explicit TARGETS, no selected-object fallback.\")\nelse:\n    col = None if EDIT_IN_PLACE else get_collection()",
+    "new": "if not TARGETS:\n    TARGETS.extend(obj.name for obj in bpy.context.selected_objects if obj.type == \"MESH\")  # MUTANT\nif TARGETS:\n    col = None if EDIT_IN_PLACE else get_collection()",
     "tests": [
       "test_p0_transactional_runtime.P0TransactionalTests.test_cleanup_default_source_is_unchanged_and_no_selected_fallback"
     ]
