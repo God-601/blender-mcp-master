@@ -77,6 +77,7 @@ def inspect_mesh(obj, policy, depsgraph):
         wire = sum(edge.is_wire for edge in bm.edges)
         non_manifold = sum(not edge.is_manifold and not edge.is_boundary and not edge.is_wire
                            for edge in bm.edges)
+        inconsistent_winding = sum(edge.is_manifold and not edge.is_contiguous for edge in bm.edges)
         loose = sum(not vertex.link_edges for vertex in bm.verts)
         bounds = world_bounds(obj, bm)
         side = max(bounds["dimensions"]) if bounds else 0.0
@@ -105,6 +106,12 @@ def inspect_mesh(obj, policy, depsgraph):
         if non_manifold:
             checks["non_manifold_excluding_boundary"] = result("REVIEW", non_manifold, 0,
                 "Investigate by target use; open boundaries are counted separately")
+        if inconsistent_winding:
+            checks["face_winding_continuity"] = result(
+                "ISSUE", inconsistent_winding, 0,
+                "Adjacent faces disagree on edge direction; signed volume alone can miss this")
+        else:
+            checks["face_winding_continuity"] = result("PASS", 0, 0)
         if policy.get("solid"):
             checks["closed_solid"] = result(
                 "PASS" if all_closed else "ISSUE",
@@ -119,7 +126,8 @@ def inspect_mesh(obj, policy, depsgraph):
                 checks["outward_volume"] = result("NOT VERIFIED", None, "positive signed volume",
                                                   "Volume sign requires closed mesh geometry")
             else:
-                good = inverted == 0 and zero_volume == 0 and all(v > volume_epsilon for v in volumes)
+                good = inverted == 0 and zero_volume == 0 and inconsistent_winding == 0 and all(
+                    v > volume_epsilon for v in volumes)
                 checks["outward_volume"] = result(
                     "PASS" if good else "ISSUE",
                     {"signed_volumes": volumes, "inverted_shells": inverted,
@@ -158,6 +166,7 @@ def inspect_mesh(obj, policy, depsgraph):
             "evaluated": True, "triangles": tris, "faces": len(bm.faces),
             "boundary_edges": boundary, "non_manifold_excluding_boundary": non_manifold,
             "wire_edges": wire, "loose_vertices": loose, "degenerate_faces": degenerate,
+            "inconsistent_winding_edges": inconsistent_winding,
             "face_islands": len(parts), "closed": all_closed,
             "signed_shell_volumes_if_closed": volumes,
             "world_transform_mirrored": matrix_sign < 0,

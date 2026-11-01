@@ -7,18 +7,24 @@ from mathutils import Vector
 
 # ---- CONFIG ----------------------------------------------------------------
 ASSET_NAME = "Asset"        # collection name for the asset being built
-SET_UNITS = True            # metric, 1 unit = 1 m
+SET_UNITS = False           # opt-in: preserve the existing scene's unit settings
 ADD_STUDIO_LIGHTS = False   # 3-point lights in a separate collection "Studio"
 ADD_CAMERA = False          # camera in collection "Studio" framing the origin
 RENDER_ENGINE = None        # None keeps current; or 'BLENDER_EEVEE_NEXT' / 'BLENDER_EEVEE' / 'CYCLES' / 'BLENDER_WORKBENCH'
 # ----------------------------------------------------------------------------
 
 
+OWNER_KEY = "_blender_mcp_setup_scene"
+OWNER_VALUE = "setup_scene_v2"
+
 def get_or_make_collection(name, parent=None):
     col = bpy.data.collections.get(name)
     if col is None:
         col = bpy.data.collections.new(name)
+        col[OWNER_KEY] = OWNER_VALUE
         (parent or bpy.context.scene.collection).children.link(col)
+    elif col.get(OWNER_KEY) != OWNER_VALUE:
+        raise ValueError("Refusing to reuse unowned collection: " + name)
     elif col.name not in (parent or bpy.context.scene.collection).children:
         try:
             (parent or bpy.context.scene.collection).children.link(col)
@@ -29,6 +35,12 @@ def get_or_make_collection(name, parent=None):
 
 scene = bpy.context.scene
 print("Blender", bpy.app.version_string)
+
+# Preflight all collection names before touching global units/view settings.
+for required_name in ([ASSET_NAME] + (["Studio"] if ADD_STUDIO_LIGHTS or ADD_CAMERA else [])):
+    existing = bpy.data.collections.get(required_name)
+    if existing is not None and existing.get(OWNER_KEY) != OWNER_VALUE:
+        raise ValueError("Refusing to reuse unowned collection: " + required_name)
 
 if SET_UNITS:
     scene.unit_settings.system = 'METRIC'

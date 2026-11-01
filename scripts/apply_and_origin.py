@@ -38,7 +38,8 @@ for ob in objs:
         print(f"[{ob.name}] SKIP: object is in {ob.mode} mode; switch to Object Mode so the change is not lost.")
         continue
     if ob.parent:
-        print(f"[{ob.name}] note: object has a parent; origin changes for parented objects are not verified.")
+        print(f"[{ob.name}] SKIP: parented object; preserving the parent hierarchy.")
+        continue
     # Children must keep their world position when this object's origin moves.
     bpy.context.view_layer.update()
     child_worlds = [(child, child.matrix_world.copy()) for child in ob.children]
