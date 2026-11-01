@@ -5,8 +5,8 @@ Read `SKILL.md` first, then `professional-modeling-standards.md` and task-specif
 ## Operating protocol
 
 1. **Clarify (P0)** using `references/clarification-gate.md`: resolve essential missing or conflicting decisions with a focused question before modeling; don't ask about optional details or answers already supplied. Read-only scene inspection may help resolve uncertainty.
-3. **Discover** the active client tool list/schema; inspect addon status and scene. Check Blender version, unit settings and saved state. Do not assume examples in this repo match the installed MCP server.
-2. **Translate** the request into a compact production brief with the reference hierarchy, exact/estimated dimensions, silhouette landmarks, downstream use, target budgets and deliverable.
+2. **Discover** the active client tool list/schema; inspect addon status and scene. Check Blender version, unit settings and saved state. Do not assume examples in this repo match the installed MCP server.
+3. **Translate** the request into a compact production brief with the reference hierarchy, exact/estimated dimensions, silhouette landmarks, downstream use, target budgets and deliverable.
 4. **Design** a component dependency graph: semantic parts, attachments, pivots, repeated modules, construction methods, and preflight ownership checks.
 5. **Build blockout** within a uniquely owned collection. Establish overall bounds and relation of primary masses; take front/side/three-quarter views if possible. Match *mass and negative space* before detail.
 6. **Review against reference:** for every major feature note observed/correct/incorrect/unknown. If a reference is unavailable, label checks based on it NOT VERIFIED instead of claiming correspondence.
