@@ -110,7 +110,7 @@ class P0MaterialSetupTests(unittest.TestCase):
         before = bpy.context.view_layer.active_layer_collection
         out, err = run_script("setup_scene.py", ASSET_NAME="NewAsset")
         self.assertIsNone(err, out)
-        self.assertIs(bpy.context.view_layer.active_layer_collection, before)
+        self.assertEqual(bpy.context.view_layer.active_layer_collection.name, before.name)
 
 
 if __name__ == "__main__":
