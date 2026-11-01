@@ -16,7 +16,7 @@ import bmesh
 
 # ---- CONFIG ----------------------------------------------------------------
 OBJECTS = ["MyAsset"]                  # mesh objects to export (children are NOT auto-included)
-PATH = "C:/Users/Public/Documents/MyAsset.fbx"   # output path; relative paths resolve against the .blend folder / cwd
+PATH = ""                              # required explicit destination; no platform-specific default
 FORMAT = "FBX"                         # "FBX", "GLB", "OBJ"
 ENGINE = "GENERIC"                     # "UNITY", "UNREAL", "ROBLOX", "GODOT", "GENERIC"
 TRIANGULATE = True                     # triangulate export copies
@@ -26,13 +26,24 @@ OVERWRITE = False                      # refuse to replace an existing file unle
 
 if FORMAT not in ("FBX", "GLB", "OBJ"):
     raise ValueError(f"Unknown FORMAT {FORMAT!r}; use FBX, GLB or OBJ")
+if not PATH or not str(PATH).strip():
+    raise ValueError("Export PATH must be explicitly configured.")
+if not OBJECTS:
+    raise RuntimeError("No named export targets. Configure OBJECTS.")
+for name in OBJECTS:
+    target = bpy.data.objects.get(name)
+    if target is None or target.type != "MESH":
+        raise RuntimeError("Export target missing or not a mesh: " + str(name))
+    if (any(mod.type == "ARMATURE" for mod in target.modifiers) or
+            (target.data.shape_keys and target.data.shape_keys.key_blocks)):
+        raise ValueError("Rigged/shape-key mesh requires a dedicated animation export workflow: " + name)
 
 out_path = os.path.abspath(bpy.path.abspath(PATH))
-os.makedirs(os.path.dirname(out_path), exist_ok=True)
 if os.path.exists(out_path) and not OVERWRITE:
     raise FileExistsError(f"Refusing to overwrite existing export: {out_path}. Set OVERWRITE=True to replace it.")
 if FORMAT == "OBJ" and os.path.exists(os.path.splitext(out_path)[0] + ".mtl") and not OVERWRITE:
     raise FileExistsError(f"Refusing to overwrite existing OBJ material file: {os.path.splitext(out_path)[0] + '.mtl'}. Set OVERWRITE=True to replace it.")
+os.makedirs(os.path.dirname(out_path), exist_ok=True)
 extension = os.path.splitext(out_path)[1] or (".glb" if FORMAT == "GLB" else "." + FORMAT.lower())
 fd, temp_path = tempfile.mkstemp(prefix="._blender_mcp_export_", suffix=extension, dir=os.path.dirname(out_path))
 os.close(fd)
@@ -71,8 +82,6 @@ try:
         if ob.type != 'MESH':
             print("skip non-mesh:", name)
             continue
-        if any(m.type == 'ARMATURE' for m in ob.modifiers) or (ob.data.shape_keys and ob.data.shape_keys.key_blocks):
-            print(f"WARNING: {name} has an armature modifier or shape keys; they are not exported by this script.")
         if APPLY_MODIFIERS:
             me = bpy.data.meshes.new_from_object(
                 ob.evaluated_get(depsgraph), preserve_all_data_layers=True, depsgraph=depsgraph

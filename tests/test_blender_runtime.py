@@ -356,7 +356,7 @@ class BlenderRuntimeTests(unittest.TestCase):
             out, err = run_script("pbr_material.py", NAME="Tex", TEXTURES=textures)
             self.assertIsNone(err, out)
         mat = bpy.data.materials["Tex"]
-        self.assertEqual(len(self._generated_nodes(mat)), 4)   # 3 images + 1 normal map
+        self.assertEqual(len(self._generated_nodes(mat)), 6)   # 3 images + normal map + alpha multiply/clip
         bsdf = mat.node_tree.nodes["Principled BSDF"]
         for socket in ("Base Color", "Roughness", "Normal"):
             self.assertEqual(len(bsdf.inputs[socket].links), 1, socket)
@@ -628,13 +628,13 @@ class BlenderRuntimeTests(unittest.TestCase):
 
     def test_bevel_and_shade_applies_modifiers_cleanly(self):
         obj = add_mesh("Box", cube)
-        out, err = run_script("bevel_and_shade.py", TARGETS=["Box"], APPLY_MODIFIERS=True)
+        out, err = run_script("bevel_and_shade.py", TARGETS=["Box"], EDIT_IN_PLACE=True, APPLY_MODIFIERS=True)
         self.assertIsNone(err, out)
         self.assertEqual(len(obj.modifiers), 0)
         self.assertGreater(len(obj.data.polygons), 6)   # bevel added geometry
 
     def test_setup_scene_creates_collection_lights_and_camera(self):
-        out, err = run_script("setup_scene.py", ASSET_NAME="Probe", ADD_STUDIO_LIGHTS=True, ADD_CAMERA=True)
+        out, err = run_script("setup_scene.py", ASSET_NAME="Probe", ADD_STUDIO_LIGHTS=True, ADD_CAMERA=True, SET_UNITS=True)
         self.assertIsNone(err, out)
         self.assertIn("Probe", bpy.data.collections)
         self.assertEqual(bpy.context.scene.unit_settings.system, 'METRIC')
