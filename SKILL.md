@@ -53,12 +53,14 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Request | Pipeline | Read |
 |---|---|---|
 | Furniture, tools, weapons, vehicles, machines, rigid props | Hard-surface modeling | `references/hard-surface.md` |
+| Measured vehicle, decorative sword, table and furniture examples | Parametric proportion blockouts | `references/measured-proportion-recipes.md`, `scripts/vehicle_proportion_example.py`, `scripts/prop_proportion_example.py` |
 | Creatures, plants, rocks, terrain, food, organic forms | Organic modeling; add sculpt/high-poly when needed | `references/organic.md`; `references/sculpting-highpoly.md` when relevant |
 | Characters, anatomy, deformation, rigging, animation | Character + deformation topology | `references/character-rig.md`; `references/topology-retopology.md` |
 | Rooms, buildings, streets, levels, modular scenery | Environment | `references/environment.md` |
 | Architecture, interiors, walkthroughs, spatial blockouts | Architecture/interiors | `references/architecture-interiors.md` |
 | Dimension-driven parts, CAD-like meshes, 3D printing | Technical modeling | `references/cad-technical.md` |
 | Low-poly, stylized, fantasy, voxel, retro/PS1, Roblox-like blockiness | Stylized art direction | `references/stylized-lowpoly.md` |
+| Voxel grids, visible-face culling, palette texture atlases | Voxel palette recipe | `references/voxel-atlas-recipe.md`, `scripts/voxel_atlas_example.py` |
 | Hand-painted textures, painterly highlights, color atlases | Hand-painted pipeline | `references/hand-painted-pipeline.md`; add `references/uv-baking.md` when texturing/baking is involved; runnable snippets in `references/handpaint-recipes.md` |
 | UV layout, texture painting setup, baking maps, high-to-low projection | UV and baking | `references/uv-baking.md` |
 | Edge flow, mesh density, cleanup strategy, retopology | Topology and retopology | `references/topology-retopology.md` |
@@ -205,6 +207,9 @@ Run them by pasting their contents into `execute_blender_code` (they only use bp
 | `apply_and_origin.py` | Apply transforms, set origin (bottom center / center / custom), ground the object |
 | `bevel_and_shade.py` | Bevel hard edges + weighted normals + sharp by angle |
 | `make_lods.py` | Generate LOD copies with Decimate and report tri counts |
+| `vehicle_proportion_example.py` | Configurable sedan blockout with measured wheelbase, ground clearance and separate axle pivots |
+| `prop_proportion_example.py` | Decorative sword or four-legged table example with measurable ratios |
+| `voxel_atlas_example.py` | Exposed-only voxel mesh with single-row 64x8 palette atlas and UVs |
 | `pbr_material.py` | Create a clean Principled BSDF material from simple parameters |
 | `export_asset.py` | Export FBX / glTF / OBJ with safe settings for game engines |
 

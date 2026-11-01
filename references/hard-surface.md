@@ -2,6 +2,8 @@
 
 Use this guide for furniture, tools, weapons, vehicles, machinery, armor, props, and other objects defined by controlled edges, planes, joints, and mechanical forms.
 
+For dimensioned examples of a sedan, decorative sword and table, use `references/measured-proportion-recipes.md` and their three scripts. The measurements are **example starting points**, not universal rules.
+
 ## 1. Plan the object
 
 - Identify the primary silhouette, functional parts, moving parts, major material regions, and intended viewing distance.
