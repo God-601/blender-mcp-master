@@ -71,3 +71,10 @@ Run the same tasks in each supported agent/client. Record:
 - final asset and limitations
 
 A compatibility matrix is only updated after an actual run. See `references/agent-compatibility.md` for the current client matrix and evidence protocol. `scripts/capability_probe.py` reports Blender-side API availability, but it does not prove that an agent/client can discover or invoke the MCP tools. Do not mark Codex, Claude, Cursor, OpenCode, or Kilo Code as verified until a real session completes the same task.
+
+
+## Evaluated mesh metrics
+
+`scripts/benchmark_report.py` and `scripts/inspection_report.py` report **evaluated** topology after applicable modifiers, and retain separate `base_faces`/`base_triangles` values for comparison. Do not interpret base mesh counts as final engine cost. Generated instances not realized into the evaluated mesh, exporter triangulation, rigs/animations and actual rendering cost still require task-specific tests. Visual results remain **NOT VERIFIED** without captured views and review.
+
+For game-ready delivery, run a GLB round-trip (export → import to a clean scene → compare geometry, transforms and material references) where possible. A smoke test is evidence of parseability only; it does not certify every material or downstream engine.
