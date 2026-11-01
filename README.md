@@ -22,11 +22,15 @@ Plan the shape. Model in stages. Catch defects. Protect the scene. Explain what 
 npx skills add God-601/blender-mcp-master
 ```
 
+**Beta ZIP:** [v0.2.0-beta.1 Release](https://github.com/God-601/blender-mcp-master/releases/tag/v0.2.0-beta.1) · [Windows and agent installation](docs/QUICKSTART.md).
+
+**Optional npm resource server (if published):** `npx -y blender-mcp-master@0.2.0-beta.1`. It serves documentation and script templates over MCP, **not** the Blender connection.
+
 You also need a **separate Blender-control MCP** server and its Blender addon. This skill guides the agent; it does **not** connect to Blender by itself.
 
 Without Skills CLI: copy `SKILL.md`, `references/`, and `scripts/` into your agent's skills folder.
 
-**Optional documentation-only MCP:** `npx -y github:God-601/blender-mcp-master`. Not published to the npm registry; this command is **not** the Blender-control server.
+**Alternative (GitHub source):** `npx -y github:God-601/blender-mcp-master` starts the same read-only resource server without waiting for npm publication.
 
 ## Under the hood
 
@@ -40,6 +44,8 @@ Without Skills CLI: copy `SKILL.md`, `references/`, and `scripts/` into your age
 | **Build deliberately** | Hard-surface, organic, stylized, architecture, UVs and game assets. |
 | **Review the result** | Evaluated mesh checks, visual checkpoints and targeted corrections. |
 | **Keep control** | Explicit targets, cautious edits and honest verification statuses. |
+
+**Project guides:** [Quickstart](docs/QUICKSTART.md) · [Changelog](CHANGELOG.md) · [Skill ecosystem comparison](docs/ECOSYSTEM-COMPARISON.md) · [Contributing](CONTRIBUTING.md)
 
 **Start here:** [SKILL.md](SKILL.md) · [Modeling standards](references/professional-modeling-standards.md) · [Clarification gate](references/clarification-gate.md) · [Examples](references/production-recipes.md) · [Compatibility](references/agent-compatibility.md)
 
@@ -67,11 +73,17 @@ O agente pergunta quando falta informação, planeja, modela em etapas, inspecio
 npx skills add God-601/blender-mcp-master
 ```
 
+**ZIP beta:** [Release v0.2.0-beta.1](https://github.com/God-601/blender-mcp-master/releases/tag/v0.2.0-beta.1) · [Instalação no Windows](docs/QUICKSTART.md).
+
+**npm opcional (se já publicado):** `npx -y blender-mcp-master@0.2.0-beta.1`. É um servidor MCP de leitura de documentação, não controla o Blender.
+
 É necessário configurar **separadamente o Blender-control MCP** e o addon no Blender. A skill orienta o agente; ela não controla o Blender sozinha.
 
 Sem Skills CLI: copie `SKILL.md`, `references/` e `scripts/` para a pasta de skills do seu agente.
 
-**MCP opcional, apenas para documentação:** `npx -y github:God-601/blender-mcp-master`. Ainda não publicado no registro npm. Não substitui o MCP que controla o Blender.
+**Alternativa sem npm:** `npx -y github:God-601/blender-mcp-master` executa o servidor de recursos diretamente pelo GitHub.
+
+[Comparação com outras skills](docs/ECOSYSTEM-COMPARISON.md) · [Changelog](CHANGELOG.md)
 
 ## O que inclui
 
