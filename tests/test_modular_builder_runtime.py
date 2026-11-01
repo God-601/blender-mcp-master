@@ -88,3 +88,19 @@ class ModularBuilderTests(unittest.TestCase):
         out, err = run_modular([{"name": "Arch", "type": "arch"}])
         self.assertIsInstance(err, ValueError)
         self.assertNotIn("Arch", bpy.data.objects)
+
+    def test_arch_default_has_outward_winding_positive_volume(self):
+        out, err = run_modular([{
+            "name": "GateArch", "type": "arch", "outer_radius": 1.5,
+            "wall_thickness": 0.25, "leg_height": 2.0,
+            "depth": 0.5, "segments": 16
+        }])
+        self.assertIsNone(err, out)
+        bm = bmesh.new()
+        try:
+            bm.from_mesh(bpy.data.objects["GateArch"].data)
+            self.assertTrue(all(edge.is_manifold for edge in bm.edges))
+            self.assertTrue(all(edge.is_contiguous for edge in bm.edges))
+            self.assertGreater(bm.calc_volume(signed=True), 0.0)
+        finally:
+            bm.free()

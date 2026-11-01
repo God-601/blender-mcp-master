@@ -62,7 +62,14 @@ def add_operation(obj, operation, collection, index):
         width = float(operation.get("width", 0.02))
         if width <= 0:
             raise ValueError("bevel width must be positive")
+        positive_dims = [float(d) for d in obj.dimensions if d > 1e-8]
+        if positive_dims:
+            cap = min(positive_dims) * 0.20
+            if width > cap:
+                print("WARNING: mesh operation bevel clamped for", obj.name, "from", width, "to", cap)
+                width = cap
         mod = obj.modifiers.new("MCP_Bevel_%02d" % index, "BEVEL")
+        mod.use_clamp_overlap = True
         mod.width = width
         mod.segments = max(1, min(12, int(operation.get("segments", 2))))
         mod.limit_method = "ANGLE"

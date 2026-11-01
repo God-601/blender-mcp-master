@@ -49,10 +49,17 @@ for ob in objs:
     dims = ob.dimensions
     size = max(dims.x, dims.y, dims.z) or 1.0
     width = size * BEVEL_FRACTION
+    positive_dims = [float(d) for d in dims if d > 1e-8]
+    if positive_dims:
+        cap = min(positive_dims) * 0.20
+        if width > cap:
+            print(f"[{ob.name}] WARNING: bevel requested {width:.6f} but clamped to {cap:.6f}")
+            width = cap
 
     if ADD_BEVEL and "AutoBevel" not in ob.modifiers:
         m = ob.modifiers.new("AutoBevel", 'BEVEL')
         m.width = width
+        m.use_clamp_overlap = True
         m.segments = BEVEL_SEGMENTS
         m.limit_method = 'ANGLE'
         m.angle_limit = math.radians(SHARP_ANGLE_DEG)

@@ -20,6 +20,10 @@ Works with any agent that can read this file (Claude, Codex, Cursor, Gemini CLI,
 7. **Budget before detail.** Decide the target (triangles, texture size, material count) from the target use *before* modeling (see `references/budgets.md`) and state it in the plan. Detail beyond the chosen budget is a bug; a platform's hard limit is never exceeded, while the default numbers are adjustable starting points.
 8. **Verify, then report.** Finish with measurable facts (tri count, dimensions, materials, issues found/fixed), not adjectives.
 
+### Professional production contract (required for substantial assets)
+
+A model is **not** production-ready because code executed or a topology check passed. Read `references/professional-modeling-standards.md` and `references/professional-agent-playbook.md` before nontrivial modeling. Use `references/modeling-decision-framework.md` to choose techniques and `references/production-recipes.md` for component/acceptance examples. Separate measurable geometry evidence from actual visual inspection and destination import evidence. Never mark visual quality PASS without inspecting real viewport images. Treat missing evidence as NOT VERIFIED; preserve all unrelated scene objects.
+
 ## 1. Session start checklist
 
 ```
@@ -82,6 +86,10 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Repeatable asset and cross-agent evaluation | Benchmarking | `references/benchmarking.md` |
 | Optimize game assets, mesh topology, draw overhead, LOD or Roblox performance | Game asset optimization | `references/game-asset-optimization.md` |
 | Shared modeling standards, topology and operation selection | Modeling foundations | `references/modeling-foundations.md` |
+| Professional agent quality and process | Production standards | `references/professional-modeling-standards.md`, `references/professional-agent-playbook.md` |
+| Contextual technique selection and failure recovery | Decision framework | `references/modeling-decision-framework.md` |
+| Reference-oriented chairs, props, architecture, characters and trees | Production recipes | `references/production-recipes.md` |
+| Read-only evaluated geometry, solid orientation and explicit fit/ground checks | Professional geometry inspection | `scripts/inspect_geometry.py`, `references/inspection-policies.md` |
 | Quality loop, visual review, contextual validation | Modeling QA | `references/modeling-quality-loop.md`; `references/quality-checklist.md` |
 
 Always also follow sections 3 to 6 below. For shared topology and operation standards, load `references/modeling-foundations.md`; for cross-cutting visual review and reliable MCP iteration, load `references/modeling-quality-loop.md`. For game-ready material/UV/LOD/export work, load `references/p1-production-pipeline.md` alongside `references/materials.md` and `references/game-ready-export.md`.
@@ -178,6 +186,7 @@ Run them by pasting their contents into `execute_blender_code` (they only use bp
 | `hard_surface_builder.py` | Recessed mechanical panel with boolean pocket and four oriented fasteners |
 | `geometry_nodes_builder.py` | Editable repeated post array with Count, Spacing, Height, and Radius inputs (requires Geometry Nodes support) |
 | `organic_tree_builder.py` | Seeded stylized tree with tapered trunk, branches, and icosphere canopy clusters |
+| `inspect_geometry.py` | Read-only evaluated mesh inspection with optional explicit solid, shell, dimensions, ground and relation policies; orientation and gaps are context-sensitive |
 | `inspection_report.py` | Read-only technical report for explicit mesh targets; reports topology, bounds, modifiers, and materials |
 | `localized_correction.py` | Apply explicit normals, merge-by-distance, scale-bake, bevel, and weighted-normal corrections to duplicates only |
 | `technique_history.py` | Append a review-required execution record to a tagged Text datablock in the current .blend; does not save automatically |

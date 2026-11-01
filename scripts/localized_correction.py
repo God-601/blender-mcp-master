@@ -57,7 +57,14 @@ def apply_correction(obj, operation):
         width = float(operation.get("width", 0.02))
         if width <= 0:
             raise ValueError("bevel width must be positive")
+        dimensions = [float(d) for d in obj.dimensions if d > 1e-8]
+        if dimensions:
+            cap = min(dimensions) * 0.20
+            if width > cap:
+                print("WARNING: localized bevel clamped for", obj.name, "from", width, "to", cap)
+                width = cap
         mod = obj.modifiers.new("Localized_Bevel", "BEVEL")
+        mod.use_clamp_overlap = True
         mod.width = width
         mod.segments = max(1, min(8, int(operation.get("segments", 2))))
     elif kind == "weighted_normal":

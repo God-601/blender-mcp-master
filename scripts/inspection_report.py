@@ -13,7 +13,7 @@ def inspect_object(obj):
     bm = bmesh.new()
     try:
         bm.from_mesh(mesh)
-        non_manifold = sum(1 for edge in bm.edges if not edge.is_manifold)
+        non_manifold = sum(1 for edge in bm.edges if not edge.is_manifold and not edge.is_boundary and not edge.is_wire)
         boundary = sum(1 for edge in bm.edges if edge.is_boundary)
         wire = sum(1 for edge in bm.edges if edge.is_wire)
         loose_vertices = sum(1 for vert in bm.verts if not vert.link_edges)
@@ -35,7 +35,7 @@ def inspect_object(obj):
         "loose_vertices": loose_vertices,
         "modifiers": [{"name": mod.name, "type": mod.type} for mod in obj.modifiers],
         "materials": [mat.name if mat else None for mat in mesh.materials],
-        "status": "ISSUE" if wire or loose_vertices else ("REVIEW" if non_manifold else "PASS"),
+        "status": "ISSUE" if wire or loose_vertices else ("REVIEW" if non_manifold or boundary else "PASS"),
     }
 
 

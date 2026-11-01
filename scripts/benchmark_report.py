@@ -18,7 +18,7 @@ def metrics(obj):
     bm = bmesh.new()
     try:
         bm.from_mesh(obj.data)
-        non_manifold = sum(1 for edge in bm.edges if not edge.is_manifold)
+        non_manifold = sum(1 for edge in bm.edges if not edge.is_manifold and not edge.is_boundary and not edge.is_wire)
         boundary = sum(1 for edge in bm.edges if edge.is_boundary)
     finally:
         bm.free()
