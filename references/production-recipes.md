@@ -45,3 +45,20 @@ Use these as **decision and inspection recipes**. They supplement existing execu
 ## Recipe acceptance record
 
 For any recipe, record `component_id, target_dimensions, real_dimensions, relationship_checks, expected_topology, target_views, result, evidence`. Use `scripts/inspect_geometry.py` for measurable checks and `references/visual-inspection.md` for artistic review. Label incomplete checks NOT VERIFIED. Expand recipes by testing a *real example asset*, not by adding untested parameter tables.
+
+## R07 — Measured sedan, furniture and sword examples
+
+For the historical proportion ranges, configurable scripts and measurable
+acceptance checks, load `references/measured-proportion-recipes.md`.
+This adds source-backed **examples** (wheelbase/diameter, blade:grip ratio,
+table top/leg sizes), not universal dimensions. Run
+`scripts/vehicle_proportion_example.py` or `scripts/prop_proportion_example.py`.
+Check geometry and visual references rather than trusting an object count.
+
+## R08 — Voxel grid and color-atlas example
+
+For the historically used **0.28 m grid** and **64×8 palette atlas** examples,
+load `references/voxel-atlas-recipe.md` and
+`scripts/voxel_atlas_example.py`. Both numbers are adjustable and are NOT
+universal. Validate exposed-face topology, UV tile placement and scale; verify
+filtering/texture preservation in the target application separately.

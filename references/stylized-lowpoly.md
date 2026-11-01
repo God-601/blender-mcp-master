@@ -36,6 +36,8 @@ Define:
 - Read references/hand-painted-pipeline.md for the full painting sequence and references/uv-baking.md when UVs or bakes are needed.
 - Avoid adding procedural noise as a shortcut for painterly detail; it often produces a dirty, uniform surface rather than deliberate brushwork.
 
+See `references/voxel-atlas-recipe.md` for a reproducible voxel-grid example with exposed-face culling and a **64x8** texture atlas. Historical **0.28 m** grid values are suggestions, never mandatory.
+
 ## 5. Voxel, studs, and block-based construction
 
 - Define the grid unit and snap all relevant dimensions to it.
