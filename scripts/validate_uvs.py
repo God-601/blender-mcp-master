@@ -3,7 +3,6 @@
 Paste into Blender MCP execute_blender_code. No mesh or UV data is modified.
 """
 import bpy
-import math
 
 # ---- CONFIG ----------------------------------------------------------------
 TARGETS = []          # Explicit object names; empty = selected mesh objects ONLY.
@@ -14,6 +13,8 @@ OUT_OF_TILE_TOLERANCE = 1e-4
 
 missing = []
 invalid = []
+warnings = []
+incomplete = []
 
 
 def resolve_targets():
@@ -34,10 +35,6 @@ def resolve_targets():
     return selected
 
 
-def uv_area(a, b, c):
-    return abs((b.x-a.x)*(c.y-a.y) - (b.y-a.y)*(c.x-a.x)) * 0.5
-
-
 objects = resolve_targets()
 print(f"=== UV VALIDATION | Blender {bpy.app.version_string} | {len(objects)} target(s) ===")
 for name in missing:
@@ -45,7 +42,9 @@ for name in missing:
 for name, kind in invalid:
     print(f"WARN: target {name!r} is {kind}, not MESH")
 if not objects:
-    print("RESULT: INCOMPLETE - no mesh targets")
+    incomplete.append("no mesh targets")
+if missing or invalid:
+    incomplete.append("invalid or missing targets")
     
 for obj in objects:
     mesh = obj.data
@@ -53,15 +52,18 @@ for obj in objects:
     print(f"\n[{obj.name}]")
     if layer is None:
         print("WARN: requested UV layer not found" if UV_LAYER_NAME else "INFO: no active UV layer")
+        incomplete.append(obj.name + ": UV layer unavailable")
         continue
     uv_data = layer.data
     if len(uv_data) != len(mesh.loops):
         print(f"WARN: UV loop count {len(uv_data)} does not match mesh loop count {len(mesh.loops)}")
+        incomplete.append(obj.name + ": UV loop count mismatch")
         continue
 
     coords = [item.uv.copy() for item in uv_data]
     if not coords:
         print("WARN: UV layer is empty")
+        incomplete.append(obj.name + ": empty UV layer")
         continue
     min_u, max_u = min(v.x for v in coords), max(v.x for v in coords)
     min_v, max_v = min(v.y for v in coords), max(v.y for v in coords)
@@ -71,23 +73,25 @@ for obj in objects:
         or v.y < -OUT_OF_TILE_TOLERANCE or v.y > 1 + OUT_OF_TILE_TOLERANCE
     )
     zero_area = 0
-    triangle_count = 0
     for poly in mesh.polygons:
         if len(poly.loop_indices) < 3:
             continue
-        anchor = coords[poly.loop_indices[0]]
-        area = 0.0
-        for i in range(1, len(poly.loop_indices)-1):
-            area += uv_area(anchor, coords[poly.loop_indices[i]], coords[poly.loop_indices[i+1]])
+        points = [coords[i] for i in poly.loop_indices]
+        area = abs(sum(points[i].x * points[(i + 1) % len(points)].y -
+                       points[(i + 1) % len(points)].x * points[i].y
+                       for i in range(len(points)))) * 0.5
         if area <= ZERO_AREA_EPSILON:
             zero_area += 1
-        triangle_count += len(poly.loop_indices) - 2
 
     print(f"INFO: UV layer={layer.name!r}, loops={len(coords)}, polygons={len(mesh.polygons)}")
     print(f"INFO: UV bounds U[{min_u:.5f}, {max_u:.5f}] V[{min_v:.5f}, {max_v:.5f}]")
     print(f"{'WARN' if outside else 'PASS'}: coordinates outside 0-1 tile: {outside}")
     print(f"{'WARN' if zero_area else 'PASS'}: polygons with zero/negligible UV area: {zero_area}")
+    if outside or zero_area:
+        warnings.append(obj.name)
     print("INFO: UV overlap and texel density are not measured by this script; inspect a checker/material view.")
     print("INFO: UDIM or intentional tiling can legitimately extend beyond 0-1.")
 
 print("\nUV validation complete. Read-only: no UVs, objects, or materials were changed.")
+print("RESULT:", "INCOMPLETE - CHECK TARGETS OR UV LAYERS" if incomplete else
+      "REVIEW WARNINGS" if warnings else "NO WARNINGS REPORTED")
