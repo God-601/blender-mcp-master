@@ -638,10 +638,13 @@ class BlenderRuntimeTests(unittest.TestCase):
 
     def test_bevel_and_shade_applies_modifiers_cleanly(self):
         obj = add_mesh("Box", cube)
-        out, err = run_script("bevel_and_shade.py", TARGETS=["Box"], EDIT_IN_PLACE=True, APPLY_MODIFIERS=True)
+        out, err = run_script("bevel_and_shade.py", TARGETS=["Box"], APPLY_MODIFIERS=True)
         self.assertIsNone(err, out)
         self.assertEqual(len(obj.modifiers), 0)
-        self.assertGreater(len(obj.data.polygons), 6)   # bevel added geometry
+        self.assertEqual(len(obj.data.polygons), 6)
+        copy = bpy.data.objects["Box_Shaded"]
+        self.assertEqual(len(copy.modifiers), 0)
+        self.assertGreater(len(copy.data.polygons), 6)
 
     def test_setup_scene_creates_collection_lights_and_camera(self):
         out, err = run_script("setup_scene.py", ASSET_NAME="Probe", ADD_STUDIO_LIGHTS=True, ADD_CAMERA=True, SET_UNITS=True)
