@@ -115,8 +115,8 @@ def build_arch(spec, collection):
     profile.append((inner, leg_height))
     for i in range(1, segments + 1):
         angle = 3.141592653589793 * i / segments
-        profile.append((inner * __import__("math").cos(angle),
-                        leg_height + inner * __import__("math").sin(angle)))
+        profile.append((inner * math.cos(angle),
+                        leg_height + inner * math.sin(angle)))
     profile.append((-inner, 0.0))
 
     # Normalize the 2D profile winding before extruding along Y.
@@ -139,6 +139,17 @@ def build_arch(spec, collection):
     if not mesh.polygons:
         bpy.data.meshes.remove(mesh)
         raise ValueError("arch profile generated an invalid mesh")
+    # Winding can reverse when projecting the concave arch profile onto XZ.
+    # A closed architectural solid must have positive signed volume.
+    bm = bmesh.new()
+    try:
+        bm.from_mesh(mesh)
+        if bm.calc_volume(signed=True) < 0:
+            bmesh.ops.reverse_faces(bm, faces=list(bm.faces))
+            bm.to_mesh(mesh)
+    finally:
+        bm.free()
+    mesh.update()
     obj = bpy.data.objects.new(name, mesh)
     collection.objects.link(obj)
     obj.location = Vector(spec.get("location", (0, 0, 0)))

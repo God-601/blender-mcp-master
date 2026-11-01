@@ -162,3 +162,38 @@ class GeometryBuilderRuntimeTests(unittest.TestCase):
         self.assertIsNone(err, out)
         self.assertIs(bpy.data.objects["Stable"], original)
         self.assertIn("already exists", out)
+
+    def test_lathe_reversed_profile_has_positive_solid_volume_and_consistent_caps(self):
+        import bmesh
+        for label, profile in (
+            ("Ascending", [(0.5, 0.0), (0.7, 0.7), (0.35, 1.1)]),
+            ("Descending", [(0.35, 1.1), (0.7, 0.7), (0.5, 0.0)]),
+        ):
+            with self.subTest(profile=label):
+                bpy.ops.wm.read_factory_settings(use_empty=True)
+                out, err = run_builder([{"name": label, "type": "lathe",
+                                         "profile": profile, "segments": 12}])
+                self.assertIsNone(err, out)
+                bm = bmesh.new()
+                try:
+                    bm.from_mesh(bpy.data.objects[label].data)
+                    self.assertTrue(all(edge.is_manifold for edge in bm.edges))
+                    self.assertTrue(all(edge.is_contiguous for edge in bm.edges))
+                    self.assertGreater(bm.calc_volume(signed=True), 0.05)
+                finally:
+                    bm.free()
+
+    def test_extreme_bevel_request_is_clamped_before_modifier_evaluation(self):
+        out, err = run_builder([{"name": "ThinPanel", "type": "box",
+                                 "dimensions": (1.0, 1.0, 0.004),
+                                 "bevel": 0.012, "bevel_segments": 3}])
+        self.assertIsNone(err, out)
+        obj = bpy.data.objects["ThinPanel"]
+        self.assertIn("bevel width clamped", out)
+        self.assertLessEqual(obj.modifiers[0].width, 0.00080001)
+        evaluated = obj.evaluated_get(bpy.context.evaluated_depsgraph_get())
+        mesh = evaluated.to_mesh()
+        try:
+            self.assertTrue(all(poly.area > 1e-12 for poly in mesh.polygons))
+        finally:
+            evaluated.to_mesh_clear()

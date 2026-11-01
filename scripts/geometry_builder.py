@@ -233,6 +233,18 @@ def _lathe(name, params, collection):
         faces.append(tuple(reversed(rings[0])))
     if profile[-1][0] > 0:
         faces.append(tuple(rings[-1]))
+    # The caller may provide a profile from top-to-bottom. Reverse all
+    # faces when the resulting closed solid has negative signed volume;
+    # side walls and caps must flip together, not independently.
+    signed_volume = 0.0
+    for face in faces:
+        p0 = Vector(verts[face[0]])
+        for j in range(1, len(face) - 1):
+            signed_volume += p0.dot(
+                Vector(verts[face[j]]).cross(Vector(verts[face[j + 1]]))
+            ) / 6.0
+    if signed_volume < 0.0:
+        faces = [tuple(reversed(face)) for face in faces]
     return _mesh_object(name, verts, faces, collection, params.get("location", (0, 0, 0)))
 
 
@@ -303,7 +315,16 @@ def _add_optional_bevel(obj, spec):
     if width <= 0:
         return
     segments = max(1, int(spec.get("bevel_segments", 2)))
+    # Overall dimensions give a conservative upper guard, not a guarantee
+    # against collisions with *local* clearances; inspect evaluated faces.
+    dimensions = [float(d) for d in obj.dimensions if d > 1e-8]
+    if dimensions:
+        cap = 0.20 * min(dimensions)
+        if width > cap:
+            print("WARNING: bevel width clamped for", obj.name, "from", width, "to", cap)
+            width = cap
     modifier = obj.modifiers.new("MCP_Bevel", "BEVEL")
+    modifier.use_clamp_overlap = True
     modifier.width = width
     modifier.segments = segments
     modifier.limit_method = "ANGLE"
