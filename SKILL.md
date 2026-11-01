@@ -90,6 +90,8 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Optimize game assets, mesh topology, draw overhead, LOD or Roblox performance | Game asset optimization | `references/game-asset-optimization.md` |
 | Shared modeling standards, topology and operation selection | Modeling foundations | `references/modeling-foundations.md` |
 | Professional agent quality and process | Production standards | `references/professional-modeling-standards.md`, `references/professional-agent-playbook.md` |
+| Complex cross-discipline request needing a sequence of specialist stages | Lightweight workflow director | `references/workflow-director.md` |
+| Cross-agent performance comparison or skill evaluation | Paired evaluation protocol | `references/skill-evaluation-protocol.md` |
 | Missing brief, conflicting requirements or uncertain art direction | P0 clarification gate | `references/clarification-gate.md` |
 | Contextual technique selection and failure recovery | Decision framework | `references/modeling-decision-framework.md` |
 | Reference-oriented chairs, props, architecture, characters and trees | Production recipes | `references/production-recipes.md` |
