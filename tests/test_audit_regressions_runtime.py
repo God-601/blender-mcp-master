@@ -128,6 +128,8 @@ class ProfessionalMutationRegressionTests(unittest.TestCase):
     def test_tree_branches_attach_near_trunk_centerline(self):
         out, err = execute_script("scripts/organic_tree_builder.py")
         self.assertIsNone(err, out)
+        # Object transforms are lazily evaluated by Blender after construction.
+        bpy.context.view_layer.update()
         for i in range(1, 8):
             branch = bpy.data.objects["MCP_Tree_Branch_%02d" % i]
             zmin = min(float(v.co.z) for v in branch.data.vertices)

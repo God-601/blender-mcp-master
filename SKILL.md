@@ -89,7 +89,7 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Professional agent quality and process | Production standards | `references/professional-modeling-standards.md`, `references/professional-agent-playbook.md` |
 | Contextual technique selection and failure recovery | Decision framework | `references/modeling-decision-framework.md` |
 | Reference-oriented chairs, props, architecture, characters and trees | Production recipes | `references/production-recipes.md` |
-| Read-only evaluated geometry, solid orientation and explicit fit/ground checks | Professional geometry inspection | `scripts/inspect_geometry.py` |
+| Read-only evaluated geometry, solid orientation and explicit fit/ground checks | Professional geometry inspection | `scripts/inspect_geometry.py`, `references/inspection-policies.md` |
 | Quality loop, visual review, contextual validation | Modeling QA | `references/modeling-quality-loop.md`; `references/quality-checklist.md` |
 
 Always also follow sections 3 to 6 below. For shared topology and operation standards, load `references/modeling-foundations.md`; for cross-cutting visual review and reliable MCP iteration, load `references/modeling-quality-loop.md`. For game-ready material/UV/LOD/export work, load `references/p1-production-pipeline.md` alongside `references/materials.md` and `references/game-ready-export.md`.
