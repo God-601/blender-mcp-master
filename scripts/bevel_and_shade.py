@@ -1,96 +1,171 @@
-"""bevel_and_shade.py - add a Bevel modifier (angle-limited), set smooth shading with
-sharp edges by angle, and optionally Weighted Normal. Version-aware (Blender 3.x and 4.x).
-Paste into execute_blender_code.
+"""Bevel and shade explicit mesh targets without editing their sources by default.
+
+Set TARGETS explicitly, inspect the copy, then opt into EDIT_IN_PLACE only
+when the original should be changed. No scene-wide/selected-object fallback.
 """
 import bpy
 import bmesh
 import math
 
 # ---- CONFIG ----------------------------------------------------------------
-TARGETS = []                 # object names; empty = selected mesh objects
-BEVEL_FRACTION = 0.01        # bevel width as a fraction of the object's largest dimension
+TARGETS = []                  # explicit object names; empty means no operation
+EDIT_IN_PLACE = False         # default: create independent owned copies
+OUTPUT_SUFFIX = "_Shaded"
+COLLECTION_NAME = "MCP_Bevel_Shading"
+BEVEL_FRACTION = 0.01
 BEVEL_SEGMENTS = 2
-SHARP_ANGLE_DEG = 30.0       # edges sharper than this stay hard
+SHARP_ANGLE_DEG = 30.0
 ADD_BEVEL = True
-ADD_WEIGHTED_NORMAL = True   # recommended with bevels on hard-surface
-APPLY_MODIFIERS = False      # True = apply the created modifiers (destructive; do this last)
+ADD_WEIGHTED_NORMAL = True
+APPLY_MODIFIERS = False       # destructive to output; only edit source if explicitly opted in
 # ----------------------------------------------------------------------------
 
-objs = [bpy.data.objects[n] for n in TARGETS if n in bpy.data.objects] if TARGETS else \
-       [o for o in bpy.context.selected_objects if o.type == 'MESH']
-
+OWNER_KEY = "_blender_mcp_bevel_shading"
+OWNER_VALUE = "bevel_shading_v1"
 ver = bpy.app.version
 
 
+def get_collection():
+    col = bpy.data.collections.get(COLLECTION_NAME)
+    if col is None:
+        col = bpy.data.collections.new(COLLECTION_NAME)
+        col[OWNER_KEY] = OWNER_VALUE
+        bpy.context.scene.collection.children.link(col)
+    elif col.get(OWNER_KEY) != OWNER_VALUE:
+        raise ValueError("Refusing to reuse unowned collection: " + COLLECTION_NAME)
+    return col
+
+
 def smooth_by_angle(ob):
-    """Smooth shading + mark sharp edges by angle, works on 3.x and 4.x."""
     me = ob.data
-    for p in me.polygons:
-        p.use_smooth = True
+    for polygon in me.polygons:
+        polygon.use_smooth = True
     bm = bmesh.new()
-    bm.from_mesh(me)
-    ang = math.radians(SHARP_ANGLE_DEG)
-    for e in bm.edges:
-        if len(e.link_faces) == 2:
-            e.smooth = e.calc_face_angle(0.0) < ang
-        else:
-            e.smooth = True
-    bm.to_mesh(me)
-    bm.free()
+    try:
+        bm.from_mesh(me)
+        angle = math.radians(SHARP_ANGLE_DEG)
+        for edge in bm.edges:
+            edge.smooth = edge.calc_face_angle(0.0) < angle if len(edge.link_faces) == 2 else True
+        bm.to_mesh(me)
+    finally:
+        bm.free()
     if ver < (4, 1, 0):
         me.use_auto_smooth = True
         me.auto_smooth_angle = math.radians(SHARP_ANGLE_DEG)
     me.update()
 
 
-for ob in objs:
-    if ob.type != 'MESH':
-        continue
+def check_target(ob):
+    if ob is None or ob.type != "MESH":
+        return "missing or non-mesh object"
+    if ob.library or ob.data.library:
+        return "linked/library data"
+    if ob.mode != "OBJECT":
+        return "object must be in Object Mode"
+    if ob.data.shape_keys:
+        return "shape keys (review deformation/mesh before shading)"
+    if EDIT_IN_PLACE and ob.data.users > 1:
+        return "shared mesh datablock (edit would affect other objects)"
+    return None
+
+
+def create_output(source, collection):
+    if EDIT_IN_PLACE:
+        return source
+    name = source.name + OUTPUT_SUFFIX
+    if name in bpy.data.objects:
+        raise ValueError("Output already exists; refusing overwrite: " + name)
+    output = source.copy()
+    output.data = source.data.copy()
+    output.name = name
+    output[OWNER_KEY] = OWNER_VALUE
+    output["source_object"] = source.name
+    collection.objects.link(output)
+    return output
+
+
+def add_shading(ob):
     dims = ob.dimensions
     size = max(dims.x, dims.y, dims.z) or 1.0
     width = size * BEVEL_FRACTION
     positive_dims = [float(d) for d in dims if d > 1e-8]
-    if positive_dims:
+    if positive_dims and width > min(positive_dims) * 0.20:
         cap = min(positive_dims) * 0.20
-        if width > cap:
-            print(f"[{ob.name}] WARNING: bevel requested {width:.6f} but clamped to {cap:.6f}")
-            width = cap
+        print("WARNING: bevel width clamped for", ob.name, width, "to", cap)
+        width = cap
 
     if ADD_BEVEL and "AutoBevel" not in ob.modifiers:
-        m = ob.modifiers.new("AutoBevel", 'BEVEL')
-        m.width = width
-        m.use_clamp_overlap = True
-        m.segments = BEVEL_SEGMENTS
-        m.limit_method = 'ANGLE'
-        m.angle_limit = math.radians(SHARP_ANGLE_DEG)
-        try:
-            m.harden_normals = True
-        except AttributeError:
-            pass
+        mod = ob.modifiers.new("AutoBevel", "BEVEL")
+        mod.width = width
+        mod.use_clamp_overlap = True
+        mod.segments = BEVEL_SEGMENTS
+        mod.limit_method = "ANGLE"
+        mod.angle_limit = math.radians(SHARP_ANGLE_DEG)
+        if hasattr(mod, "harden_normals"):
+            mod.harden_normals = True
 
     smooth_by_angle(ob)
 
     if ADD_WEIGHTED_NORMAL and "AutoWeightedNormal" not in ob.modifiers:
-        w = ob.modifiers.new("AutoWeightedNormal", 'WEIGHTED_NORMAL')
-        w.keep_sharp = True
-        w.mode = 'FACE_AREA'
+        mod = ob.modifiers.new("AutoWeightedNormal", "WEIGHTED_NORMAL")
+        mod.keep_sharp = True
+        mod.mode = "FACE_AREA"
         if ver < (4, 1, 0):
-            ob.data.use_auto_smooth = True   # required by Weighted Normal before 4.1
+            ob.data.use_auto_smooth = True
 
     if APPLY_MODIFIERS:
-        bpy.context.view_layer.objects.active = ob
-        for name in ("AutoBevel", "AutoWeightedNormal"):
-            if name in ob.modifiers:
-                try:
-                    if hasattr(bpy.context, "temp_override"):      # Blender 3.2+
+        previous_active = bpy.context.view_layer.objects.active
+        previous_selection = list(bpy.context.selected_objects)
+        try:
+            for selected in previous_selection:
+                selected.select_set(False)
+            ob.select_set(True)
+            bpy.context.view_layer.objects.active = ob
+            for name in ("AutoBevel", "AutoWeightedNormal"):
+                if name in ob.modifiers:
+                    if hasattr(bpy.context, "temp_override"):
                         with bpy.context.temp_override(object=ob, active_object=ob):
                             bpy.ops.object.modifier_apply(modifier=name)
-                    else:                                          # Blender 2.9x to 3.1
+                    else:
                         bpy.ops.object.modifier_apply({"object": ob, "active_object": ob}, modifier=name)
-                except Exception as ex:
-                    print(f"[{ob.name}] could not apply {name}: {ex}")
+        finally:
+            ob.select_set(False)
+            for selected in previous_selection:
+                if selected.name in bpy.data.objects:
+                    selected.select_set(True)
+            bpy.context.view_layer.objects.active = previous_active
 
-    print(f"[{ob.name}] bevel width={width:.4f} m, segments={BEVEL_SEGMENTS}, sharp>{SHARP_ANGLE_DEG} deg, "
-          f"modifiers={[m.name for m in ob.modifiers]}")
+    print("SHADED:", ob.name, "bevel_width=", round(width, 6),
+          "modifiers=", [m.type for m in ob.modifiers])
 
-print("Done. Use look(shading='wireframe') and look(mode='angles') to verify shading.")
+
+if not TARGETS:
+    print("RESULT: NO TARGETS — set explicit TARGETS; no selected-object fallback.")
+else:
+    working_collection = None if EDIT_IN_PLACE else get_collection()
+    created = []
+    errors = []
+    for name in dict.fromkeys(TARGETS):
+        source = bpy.data.objects.get(name)
+        reason = check_target(source)
+        if reason:
+            errors.append((name, reason))
+            print("SKIP:", name, reason)
+            continue
+        obj = None
+        try:
+            obj = create_output(source, working_collection)
+            add_shading(obj)
+            if obj is not source:
+                created.append(obj)
+        except Exception as exc:
+            errors.append((name, str(exc)))
+            print("ERROR:", name, repr(exc))
+            if obj is not None and obj is not source:
+                mesh = obj.data
+                bpy.data.objects.remove(obj, do_unlink=True)
+                if mesh.users == 0:
+                    bpy.data.meshes.remove(mesh)
+    print("BEVEL/SHADING RESULT:",
+          "SUCCESS" if not errors else "PARTIAL",
+          "copies=", [obj.name for obj in created], "errors=", errors)
