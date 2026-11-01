@@ -11,7 +11,7 @@ Works with any agent that can read this file (Claude, Codex, Cursor, Gemini CLI,
 
 ## 0. The 8 golden rules (read these even if you read nothing else)
 
-1. **Probe before you build.** Call `get_addon_status` once, then `get_scene_info`. Never assume Blender version, units, or what is already in the scene.
+1. **Clarify before you build.** Apply the P0 clarification gate in `references/clarification-gate.md`. Ask a focused question when a missing or conflicting requirement materially changes the asset, then probe with `get_addon_status` and `get_scene_info` (read-only discovery can happen while clarifying). Never assume Blender version, units, or user intent.
 2. **Small steps, print everything.** One logical operation per `execute_blender_code` call. Always `print()` what you need to verify (counts, dimensions, names). Never write a 300-line script blind.
 3. **Inspect, then correct.** Use `look` after changes that affect silhouette, shading, topology or composition; inspect multiple angles before adding detail and before delivery. See `references/modeling-quality-loop.md`.
 4. **Never leave the scene dirty.** Don't delete or modify user objects you didn't create. Work in a dedicated collection named after the asset. Prefix or tag your objects.
@@ -29,12 +29,13 @@ A model is **not** production-ready because code executed or a topology check pa
 ```
 1. get_addon_status        -> Blender version, enabled asset libraries / generators
 2. get_scene_info(fields=["size","ground","materials","modifiers","details"], settings included)
-3. Ask the user ONLY what you cannot infer: target use (game / render / print / animation),
-   style (realistic / stylized / low-poly / voxel), budget (tris, platform), reference images.
+3. Apply references/clarification-gate.md BEFORE modeling: identify BLOCKER, QUALITY-RISK,
+   and OPTIONAL gaps. Ask briefly if critical use, scope, references, animation or dimensions
+   are ambiguous; prefer safe defaults only for optional details.
 4. Pick the pipeline in section 2, load the matching reference file(s).
 ```
 
-If the user gave a clear target, do not ask: choose sensible defaults, state them in one line, and proceed.
+If the user gave a sufficiently clear target, do not ask unnecessary questions: state optional assumptions and proceed. If a missing decision changes the model substantially, ask **before modeling**, not after.
 
 ### Version compatibility (check `blender_version` from `get_addon_status`)
 
@@ -87,6 +88,7 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Optimize game assets, mesh topology, draw overhead, LOD or Roblox performance | Game asset optimization | `references/game-asset-optimization.md` |
 | Shared modeling standards, topology and operation selection | Modeling foundations | `references/modeling-foundations.md` |
 | Professional agent quality and process | Production standards | `references/professional-modeling-standards.md`, `references/professional-agent-playbook.md` |
+| Missing brief, conflicting requirements or uncertain art direction | P0 clarification gate | `references/clarification-gate.md` |
 | Contextual technique selection and failure recovery | Decision framework | `references/modeling-decision-framework.md` |
 | Reference-oriented chairs, props, architecture, characters and trees | Production recipes | `references/production-recipes.md` |
 | Read-only evaluated geometry, solid orientation and explicit fit/ground checks | Professional geometry inspection | `scripts/inspect_geometry.py`, `references/inspection-policies.md` |
@@ -106,7 +108,7 @@ Before substantial modeling, write a compact plan that identifies:
 4. **Selected workflow:** the modeling and look-development methods plus the reference modules needed. Choose freely between procedural modeling, direct mesh editing, sculpting, external/reference assets, or a hybrid approach based on task fit and available tools.
 5. **Acceptance criteria:** how visual quality, technical validity, and delivery will be checked.
 
-Do not turn this into a long essay. If the request is clear, infer sensible defaults, state important assumptions briefly, and proceed. Ask the user only when an ambiguity could materially change the result or when a critical, irreversible choice requires approval. Research relevant documentation or references when available if a method or API is uncertain; distinguish verified facts from assumptions.
+Before the plan, apply `references/clarification-gate.md`: stop and ask for BLOCKER requirements; prefer a focused clarification for QUALITY-RISK gaps in complex assets; infer only OPTIONAL decisions. Keep questions brief and avoid repeating answered constraints. Once essential requirements are known, write a compact plan, state remaining assumptions, and proceed. Ask before any irreversible or paid step that requires permission. Research relevant documentation or references when available if a method or API is uncertain; distinguish verified facts from assumptions.
 
 After planning, inspect the scene and tools before modifying anything. Complete a primary-form blockout and inspect it before adding fine detail. For a complex task, divide execution into small stages with checkpoints. For a simple task, keep the plan proportionately short.
 
@@ -119,6 +121,7 @@ At delivery, fix high-impact defects when feasible. If the asset is usable but n
 ## 3. The core loop
 
 ```
+CLARIFY -> P0 gate: ask if essential brief or quality-critical art direction is missing
 PLAN   -> state target, budget, units, and the 3-6 build steps (1 short paragraph, no essay)
 BLOCK  -> blockout with primitives at correct proportions; look (angles) BEFORE any detail
 REFINE -> bevels, secondary forms, details; look (solid + wireframe)

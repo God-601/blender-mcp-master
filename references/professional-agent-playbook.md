@@ -4,16 +4,17 @@ Read `SKILL.md` first, then `professional-modeling-standards.md` and task-specif
 
 ## Operating protocol
 
-1. **Discover** the active client tool list/schema; inspect addon status and scene. Check Blender version, unit settings and saved state. Do not assume examples in this repo match the installed MCP server.
-2. **Translate** the request into a compact production brief with the reference hierarchy, exact/estimated dimensions, silhouette landmarks, downstream use, target budgets and deliverable.
-3. **Design** a component dependency graph: semantic parts, attachments, pivots, repeated modules, construction methods, and preflight ownership checks.
-4. **Build blockout** within a uniquely owned collection. Establish overall bounds and relation of primary masses; take front/side/three-quarter views if possible. Match *mass and negative space* before detail.
-5. **Review against reference:** for every major feature note observed/correct/incorrect/unknown. If a reference is unavailable, label checks based on it NOT VERIFIED instead of claiming correspondence.
-6. **Refine in controlled stages:** primary structure → secondary connections → topology/shading → material/UV → presentation. For each consequential stage capture evidence and keep local rollback.
-7. **Validate** technical geometry with explicit target names in `scripts/inspect_geometry.py` and specialized validators; interpret policies by asset type. Audit evaluated modifier output, not only base vertices.
-8. **Inspect visually** using actual `look`/image result from the session. Technical PASS is never equivalent to aesthetic PASS.
-9. **Correct** the highest-impact defect first. State its root cause and smallest safe fix, change only owned components, and inspect the corrected result.
-10. **Deliver** only requested files and truthful statuses. Report Blender/tool versions, test evidence, skipped checks, asset counts, outputs and known limitations.
+1. **Clarify (P0)** using `references/clarification-gate.md`: resolve essential missing or conflicting decisions with a focused question before modeling; don't ask about optional details or answers already supplied. Read-only scene inspection may help resolve uncertainty.
+2. **Discover** the active client tool list/schema; inspect addon status and scene. Check Blender version, unit settings and saved state. Do not assume examples in this repo match the installed MCP server.
+3. **Translate** the request into a compact production brief with the reference hierarchy, exact/estimated dimensions, silhouette landmarks, downstream use, target budgets and deliverable.
+4. **Design** a component dependency graph: semantic parts, attachments, pivots, repeated modules, construction methods, and preflight ownership checks.
+5. **Build blockout** within a uniquely owned collection. Establish overall bounds and relation of primary masses; take front/side/three-quarter views if possible. Match *mass and negative space* before detail.
+6. **Review against reference:** for every major feature note observed/correct/incorrect/unknown. If a reference is unavailable, label checks based on it NOT VERIFIED instead of claiming correspondence.
+7. **Refine in controlled stages:** primary structure → secondary connections → topology/shading → material/UV → presentation. For each consequential stage capture evidence and keep local rollback.
+8. **Validate** technical geometry with explicit target names in `scripts/inspect_geometry.py` and specialized validators; interpret policies by asset type. Audit evaluated modifier output, not only base vertices.
+9. **Inspect visually** using actual `look`/image result from the session. Technical PASS is never equivalent to aesthetic PASS.
+10. **Correct** the highest-impact defect first. State its root cause and smallest safe fix, change only owned components, and inspect the corrected result.
+11. **Deliver** only requested files and truthful statuses. Report Blender/tool versions, test evidence, skipped checks, asset counts, outputs and known limitations.
 
 ## Quality and efficiency rules
 

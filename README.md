@@ -6,6 +6,7 @@
 
 A cross-agent Blender skill for planning, creating, inspecting, refining, and validating 3D assets across hard-surface, organic, stylized, hand-painted, PBR, environment, character, and game-ready workflows.
 
+- **Clarify before modeling:** if essential requirements are missing or conflicting, ask a focused question instead of inventing a design.
 - **Plan before modeling:** define purpose, style, constraints, deliverables, and acceptance criteria.
 - **Specialized guidance:** load only the reference modules relevant to the task.
 - **Quality loop:** inspect, block out, refine, validate, correct, and report.
@@ -55,6 +56,7 @@ Example request:
 - `scripts/` — reusable Blender Python utilities and templates, including declarative geometry, hard-surface, organic, modular, Geometry Nodes, inspection, correction, and benchmark utilities.
 - `references/architecture.md` and `references/module-contracts.md` — system boundaries and cross-module contracts.
 - `references/geometry-engine.md` — current geometry capabilities, usage, and the construction roadmap.
+- `references/clarification-gate.md` — P0 requirement-triage and focused questioning before modeling.
 - `references/mesh-operations.md` — duplicate-first inset/extrude, boolean, and modifier-based mesh refinement.
 - `references/parametric-geometry-nodes.md` — editable Geometry Nodes post array and compatibility limits.
 - `references/benchmark-prompts.md` — fixed prompts and evidence requirements for cross-agent modeling benchmarks.
@@ -108,6 +110,7 @@ MIT
 
 A Blender MCP Master é uma skill para agentes compatíveis que planejam, criam, inspecionam, refinam e validam assets 3D no Blender — de hard surface e modelagem orgânica a hand-painted, PBR, cenários, personagens e assets para jogos.
 
+- **Perguntar quando faltam dados importantes:** esclarecer requisitos essenciais antes de modelar, sem questionários desnecessários.
 - **Planejamento antes da modelagem:** definir finalidade, estilo, limitações, entregáveis e critérios de aceitação.
 - **Guias especializados:** consultar somente os módulos relevantes para a tarefa.
 - **Ciclo de qualidade:** inspecionar, bloquear formas, refinar, validar, corrigir e relatar.
