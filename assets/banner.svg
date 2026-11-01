@@ -1,28 +1,54 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320" width="1280" height="320" role="img" aria-labelledby="t d">
-  <title id="t">blender-mcp-master</title>
-  <desc id="d">Agent skill for better 3D modeling in Blender through MCP</desc>
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0" stop-color="#14181f"/>
-      <stop offset="1" stop-color="#1f2a3a"/>
-    </linearGradient>
-    <linearGradient id="ac" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#ea7600"/>
-      <stop offset="1" stop-color="#f5b041"/>
-    </linearGradient>
-  </defs>
-  <rect width="1280" height="320" rx="20" fill="url(#bg)"/>
-  <!-- isometric cube mark -->
-  <g transform="translate(150 160)">
-    <polygon points="0,-90 78,-45 0,0 -78,-45" fill="#f5b041"/>
-    <polygon points="-78,-45 0,0 0,90 -78,45" fill="#ea7600"/>
-    <polygon points="78,-45 0,0 0,90 78,45" fill="#b85a00"/>
-    <polyline points="0,-90 78,-45 78,45 0,90 -78,45 -78,-45 0,-90" fill="none" stroke="#14181f" stroke-width="3" stroke-linejoin="round"/>
-    <polyline points="-78,-45 0,0 78,-45" fill="none" stroke="#14181f" stroke-width="3" stroke-linejoin="round"/>
-    <line x1="0" y1="0" x2="0" y2="90" stroke="#14181f" stroke-width="3"/>
-  </g>
-  <text x="290" y="150" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="72" font-weight="700" fill="#ffffff">blender-mcp-master</text>
-  <rect x="292" y="168" width="360" height="6" rx="3" fill="url(#ac)"/>
-  <text x="292" y="218" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="28" fill="#c9d4e3">Agent skill for cleaner, faster, game-ready 3D models</text>
-  <text x="292" y="256" font-family="Segoe UI, Helvetica, Arial, sans-serif" font-size="22" fill="#8fa3bd">Works with Claude, Codex, Cursor and any agent that reads SKILL.md</text>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 540" width="1440" height="540" role="img" aria-labelledby="title desc">
+<title id="title">Blender MCP Master</title><desc id="desc">A dark editorial composition showing a glowing orange 3D wireframe sculpture surrounded by design guides and precision markers.</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#090d16"/><stop offset=".53" stop-color="#121827"/><stop offset="1" stop-color="#10131c"/></linearGradient>
+  <linearGradient id="orange" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#ffb46a"/><stop offset=".5" stop-color="#ff7b29"/><stop offset="1" stop-color="#db4319"/></linearGradient>
+  <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#8bafc5"/><stop offset=".5" stop-color="#344c68"/><stop offset="1" stop-color="#1b293f"/></linearGradient>
+  <linearGradient id="face" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#312d32"/><stop offset="1" stop-color="#242c43"/></linearGradient>
+  <radialGradient id="glow"><stop stop-color="#f56b24" stop-opacity=".24"/><stop offset="1" stop-color="#f56b24" stop-opacity="0"/></radialGradient>
+  <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse"><path d="M32 0H0V32" fill="none" stroke="#92acdb" stroke-opacity=".075"/></pattern>
+  <filter id="blur"><feGaussianBlur stdDeviation="24"/></filter>
+</defs>
+<rect width="1440" height="540" rx="24" fill="url(#bg)"/>
+<path d="M750 0H1440V540H750Z" fill="url(#grid)"/>
+<ellipse cx="1110" cy="261" rx="360" ry="300" fill="url(#glow)"/>
+<path d="M0 0H1440V540H0Z" fill="none" stroke="#4b5570" stroke-opacity=".45" stroke-width="2"/>
+<g transform="translate(70 59)">
+  <path d="M0 19 19 0 38 19 19 38Z" fill="none" stroke="#ff9c49" stroke-width="4"/>
+  <path d="M19 0V38M0 19H38" stroke="#ff9c49" stroke-width="2" opacity=".7"/>
+  <text x="57" y="28" font-size="17" letter-spacing="4" font-weight="700" fill="#ffb276" font-family="Segoe UI,Arial,sans-serif">OPEN SOURCE AGENT SKILL</text>
+</g>
+<text x="70" y="200" font-family="Segoe UI,Arial,sans-serif" font-size="100" font-weight="900" fill="#f7f7f9" letter-spacing="-5">BLENDER</text>
+<text x="70" y="300" font-family="Segoe UI,Arial,sans-serif" font-size="102" font-weight="900" fill="#f7f7f9" letter-spacing="-5">MCP <tspan fill="url(#orange)">MASTER</tspan></text>
+<path d="M75 328H575" stroke="#4c5973" stroke-width="2"/>
+<text x="75" y="375" font-family="Segoe UI,Arial,sans-serif" font-size="24" fill="#cad2df">Think in shapes. Build with precision.</text>
+<text x="75" y="408" font-family="Segoe UI,Arial,sans-serif" font-size="20" fill="#8897b2">Agent guidance for Blender modeling + QA.</text>
+<g transform="translate(75 455)" font-family="Segoe UI,Arial,sans-serif" font-size="15" font-weight="600" letter-spacing="1">
+<rect width="135" height="36" rx="18" fill="#ff8a39"/><text x="26" y="24" fill="#151923">ASK FIRST</text>
+<rect x="150" width="150" height="36" rx="18" fill="#1e2d41" stroke="#40536d"/><text x="172" y="24" fill="#d9e1ef">MODEL SMART</text>
+<rect x="315" width="140" height="36" rx="18" fill="#1e2d41" stroke="#40536d"/><text x="340" y="24" fill="#d9e1ef">VERIFY</text>
+</g>
+<!-- original conceptual isometric object: designed geometry, not an output of an agent -->
+<g transform="translate(1040 262)">
+<ellipse cx="9" cy="158" rx="235" ry="55" fill="#ff672e" opacity=".15" filter="url(#blur)"/>
+<g stroke-linejoin="round" stroke-width="2">
+<!-- top block -->
+<path d="M-168 -23 -8 -129 159 -35 0 73Z" fill="url(#steel)" stroke="#c4d9e9"/>
+<path d="M-168 -23 0 73 0 200 -168 99Z" fill="#253b57" stroke="#6685a0"/>
+<path d="M0 73 159 -35 159 87 0 200Z" fill="#17273b" stroke="#597b9d"/>
+<path d="M-168 -23 -8 -129 159 -35 0 73Z" fill="url(#face)" opacity=".7"/>
+<!-- orange stepped inner volume -->
+<path d="M-97 -14 -8 -72 83 -20 -5 39Z" fill="url(#orange)" stroke="#ffd5ae" stroke-width="2.8"/>
+<path d="M-97 -14 -5 39 -5 109 -97 54Z" fill="#ad441d" stroke="#e88747"/>
+<path d="M-5 39 83 -20 83 50 -5 109Z" fill="#6f3b2b" stroke="#f78a49"/>
+<path d="M-8 -72V-129M-97 -14 -168 -23M83 -20 159 -35M-5 109 0 200" fill="none" stroke="#ffe5b6" stroke-opacity=".55" stroke-dasharray="5 6"/>
+<!-- wireframe geometry linework -->
+<path d="M-168 -23 -8 -129 159 -35 0 73 -168 -23 159 -35M-168 99 0 73 159 87M0 73V200M-168 99 0 200 159 87" fill="none" stroke="#e5f0ff" stroke-opacity=".30"/>
+<path d="M-168 -23 -84 25 -84 148M-88 -77 79 18 79 142M-8 -129 0 73" fill="none" stroke="#e5f0ff" stroke-opacity=".22"/>
+</g>
+<g fill="#ff9d46"><circle cx="-168" cy="-23" r="5"/><circle cx="159" cy="-35" r="5"/><circle cx="0" cy="200" r="5"/><circle cx="-8" cy="-129" r="5"/></g>
+<g fill="none" stroke="#ff9652" stroke-width="2" stroke-opacity=".75"><path d="M-248 -115h64M-248 -115v64"/><path d="M224 119v58h-55"/><circle cx="0" cy="20" r="243" stroke-dasharray="4 10" opacity=".35"/></g>
+</g>
+<g font-family="Consolas,Menlo,monospace" font-size="14" fill="#8595ad">
+<text x="1264" y="94">01 / FORM</text><text x="1268" y="445">02 / MESH</text><text x="775" y="123">X  +</text><text x="757" y="466">Z  +</text></g>
 </svg>
