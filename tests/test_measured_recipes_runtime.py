@@ -72,7 +72,16 @@ class MeasuredRecipeRuntimeTests(unittest.TestCase):
         mesh = obj.data
         self.assertEqual(int(obj["cell_count"]), 8)
         self.assertEqual(len(mesh.polygons), int(obj["exposed_quads"]))
-        self.assertLess(len(mesh.polygons), 8*6)
+        # Independently compute the six-neighbor exposed surface, not from
+        # metadata written by the same script under test.
+        cells = {(0,0,0),(1,0,0),(2,0,0),(0,1,0),
+                 (1,1,0),(2,1,0),(1,0,1),(1,1,1)}
+        dirs = ((1,0,0),(-1,0,0),(0,1,0),(0,-1,0),(0,0,1),(0,0,-1))
+        exposed = sum(
+            tuple(cell[i]+step[i] for i in range(3)) not in cells
+            for cell in cells for step in dirs)
+        self.assertEqual(exposed, 28)
+        self.assertEqual(len(mesh.polygons), exposed)
         self.assertAlmostEqual(obj.dimensions.x, .84, places=5)
         self.assertAlmostEqual(obj.dimensions.y, .56, places=5)
         self.assertAlmostEqual(obj.dimensions.z, .56, places=5)
