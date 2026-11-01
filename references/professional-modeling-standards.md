@@ -16,7 +16,7 @@ Record these fields, with `unknown` rather than inventing a specification:
 | Cost limits | triangles after modifiers, material slots/draw calls, texel density, time and tool availability |
 | Acceptance | measurable shape/technical checks, visual viewpoints, export round trip, human approval if critical |
 
-Pick defaults for an underspecified routine prop, label assumptions, and start. Do not interrogate the user for details that do not change the modeling method. For high-stakes fit/print/rig compatibility, confirm critical dimensions before destructive or irreversible work.
+**P0 clarification gate:** apply `references/clarification-gate.md` before substantial work. Ask a focused question if the brief has a BLOCKER (missing/contradictory requirements) or a QUALITY-RISK choice that will materially change a complex asset. For an exploratory routine prop, pick only safe OPTIONAL defaults and label assumptions. Do not interrogate the user for implementation trivia or details already given. Confirm critical fit/print/rig dimensions before destructive or irreversible work.
 
 ## 2. Quality gates and proof obligations
 
