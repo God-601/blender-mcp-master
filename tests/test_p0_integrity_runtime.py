@@ -42,7 +42,8 @@ class P0SafetyRuntimeTests(unittest.TestCase):
         out, err = run_script("pbr_material.py", NAME="UserOwned")
         self.assertIsInstance(err, ValueError, out)
         self.assertIn("unowned material", str(err))
-        self.assertEqual(tuple(user.diffuse_color), (0.1, 0.2, 0.3, 1.0))
+        for actual, expected in zip(user.diffuse_color, (0.1, 0.2, 0.3, 1.0)):
+            self.assertAlmostEqual(actual, expected, places=6)
 
     def test_material_will_not_change_shared_mesh_slots(self):
         first = self.cube("Original")
@@ -145,9 +146,10 @@ class P0SafetyRuntimeTests(unittest.TestCase):
     def test_setup_refuses_unowned_collection_without_changing_units(self):
         user = bpy.data.collections.new("DoNotTouch")
         bpy.context.scene.collection.children.link(user)
+        before = bpy.context.scene.unit_settings.system
         out, err = run_script("setup_scene.py", ASSET_NAME="DoNotTouch", SET_UNITS=True)
         self.assertIsInstance(err, ValueError)
-        self.assertEqual(bpy.context.scene.unit_settings.system, "NONE")
+        self.assertEqual(bpy.context.scene.unit_settings.system, before)
 
     def test_export_rejects_shape_keys_without_writing_any_file(self):
         obj = self.cube("Animated")
