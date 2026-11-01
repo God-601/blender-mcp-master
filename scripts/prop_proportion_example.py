@@ -1,7 +1,7 @@
 """Two measured prop examples from historical hard-surface proportion recipes.
 
-EXAMPLE="SWORD": decorative rigid fantasy prop, not a manufactured weapon.
-EXAMPLE="TABLE": game/art furniture blockout, not an engineering-certified table.
+Select SWORD for a decorative rigid fantasy prop, not a manufactured weapon.
+Select TABLE for a game/art furniture blockout, not an engineering-certified table.
 Dimensions are editable *starting examples* in meters. Never overwrite scene data.
 """
 import bpy
