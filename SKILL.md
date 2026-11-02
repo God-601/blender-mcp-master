@@ -24,6 +24,10 @@ Works with any agent that can read this file (Claude, Codex, Cursor, Gemini CLI,
 
 When an operation or API is uncertain, consult `references/official-blender-documentation.md` and verify behavior against the **actual** Blender version before running code. For substantial assets, use `references/evidence-first-workflow.md` to require explicit stage exits, defect reproduction, minimal correction, no-regression checks and an evidence-backed delivery report. These guides complement—not replace—the quality and scene-safety rules below.
 
+### GENERAL KICKOFF — required on every NEW modeling project
+
+Before scene changes, recap all supplied context and ask one general open-ended question about the desired result or priorities, **even when the technical brief is complete**. The user can say "pode seguir". **do not repeat answered requirements**. If a blocking decision is missing, incorporate it in the kickoff. Read-only discovery is allowed while waiting; follow-ups to the same project do not restart the interview. See references/clarification-gate.md.
+
 ### Professional production contract (required for substantial assets)
 
 A model is **not** production-ready because code executed or a topology check passed. Read `references/professional-modeling-standards.md` and `references/professional-agent-playbook.md` before nontrivial modeling. Use `references/modeling-decision-framework.md` to choose techniques and `references/production-recipes.md` for component/acceptance examples. Separate measurable geometry evidence from actual visual inspection and destination import evidence. Never mark visual quality PASS without inspecting real viewport images. Treat missing evidence as NOT VERIFIED; preserve all unrelated scene objects.
@@ -39,7 +43,7 @@ A model is **not** production-ready because code executed or a topology check pa
 4. Pick the pipeline in section 2, load the matching reference file(s).
 ```
 
-If the user gave a sufficiently clear target, do not ask unnecessary questions: state optional assumptions and proceed. If a missing decision changes the model substantially, ask **before modeling**, not after.
+Even when the user gives a complete target, ask the one-question GENERAL KICKOFF first; once answered, state optional assumptions and proceed without redundant questions. If a missing decision changes the model substantially, ask **before modeling**, not after.
 
 ### Version compatibility (check `blender_version` from `get_addon_status`)
 
@@ -118,7 +122,7 @@ Before substantial modeling, write a compact plan that identifies:
 4. **Selected workflow:** the modeling and look-development methods plus the reference modules needed. Choose freely between procedural modeling, direct mesh editing, sculpting, external/reference assets, or a hybrid approach based on task fit and available tools.
 5. **Acceptance criteria:** how visual quality, technical validity, and delivery will be checked.
 
-Before the plan, apply `references/clarification-gate.md`: stop and ask for BLOCKER requirements; prefer a focused clarification for QUALITY-RISK gaps in complex assets; infer only OPTIONAL decisions. Keep questions brief and avoid repeating answered constraints. Once essential requirements are known, write a compact plan, state remaining assumptions, and proceed. Ask before any irreversible or paid step that requires permission. Research relevant documentation or references when available if a method or API is uncertain; distinguish verified facts from assumptions.
+Before the plan, apply the GENERAL KICKOFF in `references/clarification-gate.md` and stop to ask for BLOCKER requirements; prefer a focused clarification for QUALITY-RISK gaps in complex assets; infer only OPTIONAL decisions. Keep questions brief and avoid repeating answered constraints. Once essential requirements are known, write a compact plan, state remaining assumptions, and proceed. Ask before any irreversible or paid step that requires permission. Research relevant documentation or references when available if a method or API is uncertain; distinguish verified facts from assumptions.
 
 After planning, inspect the scene and tools before modifying anything. Complete a primary-form blockout and inspect it before adding fine detail. For a complex task, divide execution into small stages with checkpoints. For a simple task, keep the plan proportionately short.
 
@@ -229,7 +233,7 @@ Finish with a short report: what was built, relevant dimensions and triangle cou
 
 ## 9. Asking the user
 
-Ask only when an ambiguity materially changes the result or a critical decision needs the user's approval. Otherwise choose reasonable defaults, state consequential assumptions briefly, and continue. Avoid repeated questions for information already provided.
+On every NEW modeling project ask the general kickoff question; after that, ask only when ambiguity materially changes the result or a critical decision needs approval. Otherwise choose reasonable defaults, state consequential assumptions briefly, and continue. Avoid repeated questions for information already provided.
 
 ## 10. Safety
 
