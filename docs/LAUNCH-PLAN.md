@@ -12,18 +12,20 @@ This is a **launch checklist**, not evidence that the skill has already passed a
 
 **Current working document:** [1.0 evidence ledger](RELEASE-1.0-EVIDENCE.md). Do not require T10 for the 1.0 decision; the detector is experimental. No comparative token/agent advantage is verified yet because the T08 trial lost an unsaved Blender scene. No package version bump, public Release or npm publication is authorized by a passing automated preflight.
 
-## Release gate (do not mark without evidence)
+## Minimal 1.0 release gate (maintainer-approved scope)
 
-- [ ] All required CI jobs green on the exact release commit, including Python static, the supported bpy matrix, npm, packaging and the targeted mutation campaign.
-- [ ] A clean-install test of the candidate ZIP, the bundled directory structure, SHA-256 check, and discovery by at least one supported agent (the preflight workflow is NOT a Release).
-- [ ] At least 5 real modeling benchmark assets: chair, sword, house, rock/tree and character or hard-surface panel.
-- [ ] Save the actual .blend and front/side/three-quarter screenshots; store versions of Blender, agent and Blender-control MCP.
-- [ ] Test scene protection by placing unrelated user-owned objects before the run.
-- [ ] For one requested game-ready asset, import a produced FBX/GLB into an actual target engine and inspect scale, pivot, material/texture and topology.
-- [ ] Compare at least one fixed benchmark with **skill enabled** versus **without skill** using the same prompt and scene, without cherry-picking.
-- [ ] Have an independent reviewer assess actual visual quality; do not infer an artistic grade from a successful bpy script.
-- [ ] Document known limitations and ensure install instructions accurately separate skill, optional read-only MCP resources and Blender-control MCP.
-- [ ] Confirm the final release matches the capabilities listed in the README.
+- [x] PRs #29–#32 integrated; #28 functionality included without reintroducing the old SKILL.md.
+- [x] Integrated `main` Python, Blender bpy 4.2/4.5/5.0/5.1/5.2, npm and regression CI passed.
+- [ ] Run a **clean, isolated ZIP skill installation** from the candidate with SHA256 verification; inspect its JSON smoke report.
+- [ ] Confirm ZIP/README/release notes and advertised limitations are accurate on the final candidate commit.
+- [ ] Obtain explicit maintainer authorization for any stable tag, GitHub Release or npm publication.
+
+**Not release blockers by maintainer decision:** two-agent acceptance,
+actual engine import, independent artistic review, repeated A/B token
+benchmark, Blender 3.x CI and T10. These remain **NOT VERIFIED** where
+not actually tested. The automated isolated directory installation does
+not demonstrate real client discovery or Blender-control MCP connectivity.
+Never claim those capabilities were validated merely because CI passed.
 
 ## Demo kit
 
