@@ -4,6 +4,8 @@ The default workflow is **copy first, verify, then approve**. A script reporting
 PARTIAL is not a safe final result. Test user data in a separate scratch Blender
 project first, and inspect the resulting .blend in the actual MCP session.
 
+**Crash-safe P0 requirement:** Before substantial modeling, baking or rendering, inspect whether the current .blend has a saved checkpoint. If it is unsaved and contains user-owned work, request or create a uniquely named, non-overwriting saved copy before risky actions; no default overwrite. For important protected targets, run read-only `scripts/scene_baseline_snapshot.py` before and after, storing JSON outside Blender and comparing with `scripts/compare_scene_baselines.py`. A new scene containing default Cube/Camera/Light after a crash does NOT prove preservation. See `references/crash-recovery-and-baselines.md`.
+
 ## Mutator protocol
 1. Discover Blender version, scene, and object/data ownership. Review the object
    names and export destination before any tool call that changes state.
