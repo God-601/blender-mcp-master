@@ -28,6 +28,10 @@ Aprovado se existir hierarquia, contatos corretos e revisão visual autêntica, 
 
 Aprovado se os dados e nomes originais continuarem intactos, inclusive quando houver erro.
 
+**Pré-condição do T03:** confirme por leitura que USER_Keep_Mesh e USER_Keep_Light existem na mesma instância/sessão do Blender-control MCP. Se não existirem, o teste fica NOT VERIFIED: abra o arquivo correto ou crie e salve os dois objetos antes de pedir a modelagem; o agente deve parar antes de qualquer mutação.
+
+**Encaixe do painel:** solicite que parafusos, placas e suportes encontrem a superfície pretendida em vez de atravessar material sem um recorte intencional. Para pares nomeados, use `references/component-fit-and-joints.md` e análise read-only; faça revisão visual das juntas antes da conclusão.
+
 ## T04 — Retopologia guiada
 
 > Construa uma malha descartável com dois loops quadrangulares de borda. Inspecione índices reais e execute a união usando scripts/retopology_advanced.py em uma cópia. Verifique quads, normais e preservação da fonte. Em seguida, experimente índices inválidos: o script deve recusar a operação sem deixar um objeto de saída falhado.
