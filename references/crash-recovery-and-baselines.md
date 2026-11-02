@@ -36,6 +36,15 @@ a valid scene-preservation PASS for the interrupted run.
 - Record the failure, time, checkpoint and whether the original file was saved.
 - Reconnect read-only and confirm the actual file path, scene names, objects,
   ownership and Blender version before any further mutating calls.
+- **v1.1 identity gate:** configure `EXPECTED_BLEND_FILE`, optional
+  `EXPECTED_SCENE_NAME`, and explicit `PROTECTED_OBJECTS` in
+  `scripts/scene_recovery_probe.py`. Run it read-only after reopening an
+  already saved trusted checkpoint. `READY_FOR_BASELINE_COMPARISON`
+  means only file path/scene/object names and types are consistent, **not**
+  that geometry, materials or scene properties survived unchanged. If
+  `NOT VERIFIED`, stop and inspect manually; never resume mutating calls.
+  Even when ready, compare archived pre-crash and post-crash baselines with
+  `scripts/compare_scene_baselines.py` and inspect untracked properties.
 - Reopen the last safe checkpoint, or explicitly restart in a fresh copy.
   If the original scene was unsaved or unavailable, original-scene
   preservation is **NOT VERIFIED**. Do not call newly constructed default
