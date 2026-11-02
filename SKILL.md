@@ -127,6 +127,8 @@ Select a guide by the route above. The names below make scripts and specialist m
 
 `scripts/scene_baseline_snapshot.py` — read-only protected-object selected-property snapshot; `scripts/compare_scene_baselines.py` — pure-Python before/after fingerprint comparison. Neither substitutes for a saved .blend backup.
 
+`scripts/clean_install_smoke.py` — pure-Python isolated ZIP install and checksum smoke test; does not claim live agent discovery.
+
 `scripts/agent_efficiency_compare.py` — pure-Python read-only comparison of matching run metrics; no billed-token or artistic-quality claims without source evidence.
 
 `scripts/apply_and_origin.py` · `scripts/asset_performance_audit.py` · `scripts/benchmark_report.py` · `scripts/bevel_and_shade.py`
