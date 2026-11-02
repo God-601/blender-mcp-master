@@ -53,8 +53,12 @@ collision. Treat joint design as a modeling operation, not decoration.
    flag correct face contacts for review, and **does not** analyze separate
    face islands inside one mesh object. For combined meshes, use face-island
    inspection, visualization, and further targeted analysis.
-5. **Correct the actual cause:** adjust component dimensions/position to
-   the mating surface, rebuild the receiving cavity, or use an explicit
+5. **Correct the actual cause:** when closing a gap, do not simply extend a grip,
+   leg, beam or rail several millimeters into another solid unless a receiving
+   slot/socket or explicitly designed embed exists. Inspect the interface in
+   section/close-up and record the intended insertion depth. Adjust component
+   dimensions/position to the mating surface, rebuild the receiving cavity,
+   or use an explicit
    targeted Boolean/retopology operation on a safe copy when justified.
    Do not blindly merge meshes, disable collision warnings, hide defects
    behind materials, or delete internal geometry without confirming ownership.
