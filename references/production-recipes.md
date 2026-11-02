@@ -9,6 +9,7 @@ Use these as **decision and inspection recipes**. They supplement existing execu
 - Plan: silhouette blockout from front/side/three-quarter, build supports, set joins, bevel according to local thickness, UV/material pass.
 - **Must verify:** legs share ground plane within stated tolerance, no unintended floating support, backrest structurally reaches seat/rails, symmetry only when design calls for it; pivot and evaluated triangle budget.
 - Do not mark leg-to-seat physical contact PASS from bounding boxes alone: use visual geometry and, when required, exact intersection/mesh checks.
+- Build the chair leg **top at the underside of the seat** (or explicitly model/document mortise-and-tenon geometry). Never extend a thick leg arbitrarily through the seat just to hide the join. Apply the same intentional-contact rule to backrest posts and rails; see `references/component-fit-and-joints.md`.
 
 ## R02 — Fictional sword / rigid prop
 
