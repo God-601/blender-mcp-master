@@ -10,7 +10,7 @@ A portable Agent Skill for AI-driven Blender modeling. It is **not a Blender-con
 ## Core rules — always apply
 
 1. **Clarify before you build.** New-project GENERAL KICKOFF is mandatory; read `references/clarification-gate.md` before changing the scene.
-2. **Protect existing work.** Discover objects, mesh owners, settings, actual tool schemas and Blender version. Edit explicitly named targets in an owned collection; preserve all unrelated user objects. Follow `references/p0-integrity.md`.
+2. **Protect existing work and recover from crashes.** Discover objects, ownership, settings, actual tool schemas and Blender version. Create or request a non-overwriting saved checkpoint before substantial edits/renders if the scene is unsaved. For protected objects record read-only baselines, edit only named owned targets and recheck after. Never interpret rebuilt default objects after a Blender crash as proof the original scene survived. Follow `references/p0-integrity.md` and `references/crash-recovery-and-baselines.md`.
 3. **Plan by destination.** State asset purpose, visual reference, scale/units, component structure, technical constraints, triangle/material/texture budgets and how quality will be verified. Do not invent platform limits.
 4. **Small reversible operations.** Prefer duplicate-first mesh edits and modifiers, a single logical code operation per step, and concise actual observations. Ask permission for destructive/in-place edits, overwrites and paid operations.
 5. **Visual checkpoints.** Inspect actual front/side/three-quarter views after blockout and major geometry or material changes; no visual tool means visual quality is NOT VERIFIED.
@@ -59,6 +59,7 @@ For nontrivial assets read `references/modeling-quality-loop.md`, `references/mo
 | Unnecessary planar X triangulation or editable face cleanup | `references/clean-editable-topology.md`, `scripts/topology_face_diagnostics.py` |
 | Token/context and tool efficiency | `references/token-efficient-agent-execution.md` |
 | Version-dependent Blender API or MCP mismatch | `references/official-blender-documentation.md`, `references/capability-mapping.md` |
+| Safe checkpoints and protected-object comparisons | `references/crash-recovery-and-baselines.md`, `scripts/scene_baseline_snapshot.py`, `scripts/compare_scene_baselines.py` |
 | Local reusable records / reviewers | `references/technique-registry.md`, `scripts/technique_registry.py`, `scripts/visual_review_report.py` |
 
 **Tool-first:** Prefer the connected Blender MCP's structured tools and the agent's native file-search/read/edit tools over generic Bash when available. Bash is valid if it better serves a reproducible task. The optional read-only resource MCP supports `get_blender_reference_outline` and `get_blender_reference_excerpt` to fetch small source-backed sections; use full-document reads only when actually necessary. Always inspect the whole script and safety configuration before executing a mutating Blender script. Save concise checkpoints rather than repeating logs. Do not trade away safety or the mandatory kickoff for fewer tokens.
@@ -92,7 +93,7 @@ Select a guide by the route above. The names below make scripts and specialist m
 
 `references/benchmark-prompts.md` · `references/benchmarking.md` · `references/budgets.md` · `references/cad-technical.md`
 
-`references/capability-mapping.md` · `references/character-rig.md` · `references/clarification-gate.md` · `references/environment.md`
+`references/capability-mapping.md` · `references/character-rig.md` · `references/clarification-gate.md` · `references/crash-recovery-and-baselines.md` · `references/environment.md`
 
 `references/evidence-first-workflow.md` · `references/game-asset-optimization.md` · `references/game-ready-export.md` · `references/geometry-engine.md`
 
@@ -123,6 +124,8 @@ Select a guide by the route above. The names below make scripts and specialist m
 `scripts/inspect_component_fit.py` — optional read-only explicit-pair AABB/BVH candidates; real visual joint correctness is NOT VERIFIED until inspected.
 
 `scripts/uv_diagnostics.py` — optional read-only base-mesh UV overlap and texel-density inspection with explicit targets; engine/padding remain NOT VERIFIED.
+
+`scripts/scene_baseline_snapshot.py` — read-only protected-object selected-property snapshot; `scripts/compare_scene_baselines.py` — pure-Python before/after fingerprint comparison. Neither substitutes for a saved .blend backup.
 
 `scripts/agent_efficiency_compare.py` — pure-Python read-only comparison of matching run metrics; no billed-token or artistic-quality claims without source evidence.
 
