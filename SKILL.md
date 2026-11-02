@@ -72,6 +72,7 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Hand-painted textures, painterly highlights, color atlases | Hand-painted pipeline | `references/hand-painted-pipeline.md`; add `references/uv-baking.md` when texturing/baking is involved; runnable snippets in `references/handpaint-recipes.md` |
 | UV layout, texture painting setup, baking maps, high-to-low projection | UV and baking | `references/uv-baking.md` |
 | Edge flow, mesh density, cleanup strategy, retopology | Topology and retopology | `references/topology-retopology.md` |
+| Explicit boundary loop bridging, planar hole capping, interior vertex relax | Guided advanced retopology | `references/advanced-retopology.md`, `scripts/retopology_advanced.py` |
 | Sculpting, high-poly detail, remesh, high-to-low production | Sculpt/high-poly | `references/sculpting-highpoly.md` |
 | PBR, procedural nodes, toon shading, material diagnostics | Shading and materials | `references/materials.md` |
 | Smooth/sharp normals, bevel highlights, toon ramp, outline | Shading recipes | `references/shading-recipes.md` |
@@ -92,6 +93,7 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Visual inspection and localized corrections | Visual review | `references/visual-inspection.md`, `scripts/inspection_report.py`, `scripts/localized_correction.py` |
 | Cross-agent support evidence | Agent compatibility | `references/agent-compatibility.md` |
 | Store tested technique executions in the current .blend | Technique history | `scripts/technique_history.py` |
+| Share manually reviewed techniques across local projects (opt-in only) | Local technique registry | `references/technique-registry.md`, `scripts/technique_registry.py` |
 | Collect technical benchmark evidence | Benchmarking | `references/benchmarking.md`, `references/benchmark-prompts.md`, `scripts/benchmark_report.py` |
 | Probe Blender-side API capabilities | Runtime capability probe | `scripts/capability_probe.py` |
 | Repeatable asset and cross-agent evaluation | Benchmarking | `references/benchmarking.md` |
