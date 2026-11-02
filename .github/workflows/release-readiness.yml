@@ -74,11 +74,25 @@ jobs:
           PY
           (cd dist && sha256sum blender-mcp-master-1.0-PREFLIGHT-NOT-A-RELEASE.zip > SHA256SUMS.txt)
           test -s dist/SHA256SUMS.txt
+      - name: Fresh isolated skill install and integrity smoke
+        run: |
+          python scripts/clean_install_smoke.py \
+            dist/blender-mcp-master-1.0-PREFLIGHT-NOT-A-RELEASE.zip \
+            dist/SHA256SUMS.txt \
+            --report dist/clean-install-report.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          obj = json.loads(Path("dist/clean-install-report.json").read_text(encoding="utf-8"))
+          assert obj["result"] == "PASS"
+          assert obj["actual_agent_discovery"] == "NOT VERIFIED"
+          PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: blender-mcp-master-1.0-PREFLIGHT-NOT-A-RELEASE
           path: |
             dist/blender-mcp-master-1.0-PREFLIGHT-NOT-A-RELEASE.zip
             dist/SHA256SUMS.txt
+            dist/clean-install-report.json
           if-no-files-found: error
           retention-days: 30
