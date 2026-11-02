@@ -23,6 +23,17 @@ Run `scripts/asset_performance_audit.py` after providing explicit mesh object na
 
 Blender's official Decimate modifier supports Collapse, Un-Subdivide and Planar modes. Its reported face ratio is not a universal percentage of visual complexity; evaluate the result in its actual modifier stack.
 
+### New v1.1 read-only silhouette proxy
+
+Configure `PAIRS = [{"source": "Original", "optimized": "Copy"}]` in
+`scripts/compare_asset_silhouettes.py`. It compares evaluated orthographic
+convex-hull projection area and extents in front, side, top and three-quarter
+views, plus evaluated triangle counts. A change beyond the configured
+project-relative tolerance is `ISSUE`. A match is `REVIEW`, **never a
+visual PASS**: hulls miss concavities, gaps, missing rivets, surfaces,
+UVs and shading. Preserve the original .blend and capture actual
+matching views; change only the explicitly owned optimized copy.
+
 ## 2. Workflow and gates
 
 1. Establish the **target**: Roblox/general mesh or avatar, Unity, Unreal, Godot, still render, animation, printing, etc. Confirm only actual engine limits from the target's official docs.
