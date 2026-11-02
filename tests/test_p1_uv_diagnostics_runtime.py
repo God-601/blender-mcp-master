@@ -80,7 +80,8 @@ class P1UVDiagnosticTests(unittest.TestCase):
         bpy.ops.mesh.primitive_cube_add()
         obj=bpy.context.object
         obj.name="UV_Test"
-        obj.data.uv_layers.clear()
+        while obj.data.uv_layers:
+            obj.data.uv_layers.remove(obj.data.uv_layers[0])
         d=self.analyze()["reports"][0]
         self.assertEqual(d["status"],"NOT VERIFIED")
         self.assertIn("UV layer",d["reason"])
