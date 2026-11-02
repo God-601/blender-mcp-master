@@ -104,7 +104,12 @@ test("every listed reference and script can be read through the MCP tools", asyn
     for (const name of scripts) {
       const result = await client.callTool({ name: "get_blender_script", arguments: { name } });
       assert.ok(!result.isError, `${name}: ${JSON.stringify(result.content)}`);
-      assert.match(result.content[0].text, /import bpy/);
+      if (name === "visual_review_report.py") {
+        // Evidence receipts run in ordinary Python and intentionally do not require Blender.
+        assert.match(result.content[0].text, /def assess_review/);
+      } else {
+        assert.match(result.content[0].text, /import bpy/);
+      }
     }
   });
 });

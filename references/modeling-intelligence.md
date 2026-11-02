@@ -85,6 +85,7 @@ After each meaningful inspection:
 6. stop if repeated iterations fail to improve the result
 
 Do not use a numeric score as the only decision signal. Preserve reviewer notes and unverified criteria. History is a retrieval aid, not autonomous learning; do not treat unreviewed runs as successful examples.
+For a user-approved cross-project registry, consult `references/technique-registry.md` and only use human-reviewed records with actual evidence and matching Blender version.
 
 ## Definition of done
 

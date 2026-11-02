@@ -11,7 +11,7 @@ Before creating geometry, identify:
 - **Budget:** triangle count, material slots, texture dimensions, and scene/render constraints appropriate to the target.
 - **Required deliverable:** .blend only, or a specific export format plus any textures.
 
-If the user has already specified these, do not ask again. If a missing detail materially changes the result, ask one concise question; otherwise state a reasonable assumption and proceed.
+If the user has already specified these, do not ask the same details again. For a NEW project still ask the single GENERAL KICKOFF question in `clarification-gate.md` before scene mutation. If a missing detail materially changes the result, ask one concise question; otherwise state a reasonable assumption and proceed.
 
 ## 2. Use an explicit quality loop
 
@@ -21,8 +21,9 @@ If the user has already specified these, do not ask again. If a missing detail m
 4. **Refine:** add secondary forms, bevels, supporting loops, organic variation, or other details appropriate to the style. Keep operations non-destructive while iterating.
 5. **Inspect visually:** request a fresh view after meaningful changes. Use multiple angles for shape, solid/material shading for surface issues, and wireframe for topology. Frame the asset itself where supported.
 6. **Validate technically:** run the validation script and relevant model-specific checks. Treat the report as evidence, not as a substitute for looking at the mesh.
-7. **Correct:** fix the highest-impact issue first (silhouette/proportion, then geometry/shading, then materials/UVs, then minor polish). Reinspect after corrections.
-8. **Deliver:** save/export only when requested. Validate the actual output file or report explicitly that the export itself was not tested.
+7. **Record visual evidence:** when actual reviewed screenshots are available, use `scripts/visual_review_report.py` to track views and local defects. It does NOT inspect pixels or certify art; missing views stay NOT VERIFIED.
+8. **Correct:** fix the highest-impact issue first (silhouette/proportion, then geometry/shading, then materials/UVs, then minor polish). Reinspect after corrections.
+9. **Deliver:** save/export only when requested. Validate the actual output file or report explicitly that the export itself was not tested.
 
 Do not call visual-inspection tools after every trivial property change. Do call them after changes that can affect silhouette, shading, topology, composition, or export correctness.
 
