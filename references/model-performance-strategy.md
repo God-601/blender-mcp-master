@@ -30,6 +30,7 @@ Blender's official Decimate modifier supports Collapse, Un-Subdivide and Planar 
 3. Measure actual evaluated geometry from named objects. Snapshot source files and note source/instance relationships.
 4. Optimize on **separate, owned copies** using `optimize_mesh.py`, `make_lods.py`, or guided retopology, with dry-run first. Do not bulk-delete unseen faces or alter shared data.
 5. Compare the same object/view: front, side, back and three-quarter silhouette, thin parts, UVs, shading, material boundaries and pivots.
+   **Release acceptance from T06:** record which details disappeared and whether curvature became overly faceted (e.g. less rivets/rougher chest lid). A 29.5% triangle reduction with degraded hero silhouette is a tradeoff, never an unconditional optimization PASS. Inspect intended part contacts; AABB overlap alone is a REVIEW candidate, not a geometric penetration proof.
 6. Re-run measured triangles/materials and inspect whether the target improved without new defects. Any warning about missing targets means **INCOMPLETE**, not success.
 7. If exporting, re-import a copy and test in the actual intended engine where available. Measure runtime FPS/frame time there, not in a Blender Python script.
 8. Report before/after metrics, reversible steps, any degradation and explicit **NOT VERIFIED** outcomes.
