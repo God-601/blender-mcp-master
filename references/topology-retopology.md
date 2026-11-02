@@ -22,6 +22,10 @@ Choose the least risky approach that meets the target:
 
 Do not promise perfect automatic retopology from ordinary bpy scripts. Automated methods can make a usable starting point; inspect and correct important forms.
 
+### Guided executable retopology tools
+
+For a verified **existing ordered boundary** or chosen interior vertices, the copy-first `scripts/retopology_advanced.py` implements three limited, deterministic operations: `bridge_loops` (equal-length loops), `fill_hole` (planar n-gon), and `relax_vertices` (Laplacian smoothing). Read `references/advanced-retopology.md` for exact input format, source preservation rules, and acceptance tests. This does not perform automatic QuadriFlow or build deformation-ready edge flow; manual or external review remains necessary.
+
 ## 3. Build a usable low-poly mesh
 
 - Preserve silhouette at the target camera distance first.
