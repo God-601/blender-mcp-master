@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased — 1.0 preparation (PR #32, not on main)
+## 1.0.0 — first stable release (2026-11-02)
 
 - Integrated CI-tested UV diagnostics, copy-first guided retopology,
   mandatory new-project kickoff and conservative material/geometry audits.
@@ -16,11 +16,13 @@
   reductions that visibly damage stylized assets.
 - Prepared nonpublishing release-readiness ZIP checks and disabled
   automatic legacy beta publishing on `main/package.json` changes.
-- Tracked T01–T09 evidence and outstanding 1.0 manual acceptance gates.
+- Tracked T01–T09 evidence and known unverified aspects, and added
+  isolated ZIP-install smoke checks on the integrated main branch.
 
-**Still not a 1.0 release:** independent second-agent acceptance, target
-engine import, artistic approval, clean release install, protected branch
-integration and authorization to publish remain outstanding.
+**Limitations:** live multi-client discovery, real engine import, independent
+artistic scoring, reliable token savings and Blender 3.x CI remain
+NOT VERIFIED. Clean isolated ZIP installation passed on main; T10 is
+experimental, not a release gate. See `docs/RELEASE-1.0-EVIDENCE.md`.
 
 
 ## 0.2.0-beta.1 — first public beta
