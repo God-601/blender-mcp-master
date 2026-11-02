@@ -36,6 +36,7 @@ class ReleaseReadinessStaticTests(unittest.TestCase):
         source = (ROOT / ".github/workflows/release-stable-1.1.yml").read_text(encoding="utf-8")
         self.assertIn("workflow_run:", source)
         self.assertIn("github.event.workflow_run.conclusion == 'success'", source)
+        self.assertIn("github.event.workflow_run.head_sha == '9b4a120c59a40e1db1cdb22d925dd62cb565451e'", source)
         self.assertIn('MAIN_SHA', source)
         self.assertIn('RELEASE_SHA', source)
         self.assertIn('p.version !== "1.1.0"', source)
