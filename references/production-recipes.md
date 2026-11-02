@@ -14,6 +14,7 @@ Use these as **decision and inspection recipes**. They supplement existing execu
 ## R02 — Fictional sword / rigid prop
 
 - Components: blade profile, bevel/edge zone, guard, grip, pommel; define a common longitudinal axis.
+- **Editable topology:** do not create gratuitous center-vertex X fans on flat blade/guard panels. Preserve deliberate blade tip and bevel triangulation, shading splits, and UV/material seams. A GLB triangulated representation with split vertices is not automatically a broken surface; compare visual surface and topology requirements independently. See `references/clean-editable-topology.md`.
 - Plan: silhouette in orthographic front view first, taper via explicit profile, separate guard/grip pivots where needed, shading with conservative bevel.
 - **Must verify:** blade/handle axial alignment, no unintended negative space at assembly junctions, thickness suits artistic brief, bevel doesn't collapse the thin blade, material roughness distinguishes regions.
 - A decorative sword does not need manufacturing-ready structural calculations.
