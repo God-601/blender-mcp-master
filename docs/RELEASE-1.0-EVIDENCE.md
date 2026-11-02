@@ -2,9 +2,10 @@
 
 **Last updated:** 2026-11-02. This document distinguishes measured,
 agent-reported and missing evidence for the pre-1.0 acceptance decision.
-It does NOT announce Blender MCP Master v1.0. The published version is
-`v0.2.0-beta.1`; the improvements described below remain on review branches.
-No merge, stable tag, npm publish or GitHub Release is authorized by this ledger.
+It does NOT announce Blender MCP Master v1.0. The published version remains
+`v0.2.0-beta.1`. PRs #29–#32 are merged into `main`; PR #28 was closed as
+superseded because its UV implementation was included exactly in #32.
+No stable tag, npm publish or GitHub Release is authorized by this ledger.
 
 ## Real modeling exercises reported by a Codex user
 
@@ -53,45 +54,39 @@ must NOT be marketed as a comprehensive automatic retopology/topology fix.
   Verify target material/UV/normals, welding requirements and actual engine
   separately. Do not claim engine validation from Blender-only reimport.
 
-## Non-negotiable gates for a stable 1.0
+## Updated maintainer scope — only clean install remains to be validated
 
-| Gate | Status as of this record | How to close it |
-| --- | --- | --- |
-| Integrate PR stack without duplicate UV patch | **OPEN** | Review #28–#32 dependency/diff; merge in dependency-safe order after CI and authorization |
-| Python + bpy matrix, npm, security audit, package integrity | **AUTOMATED in review**, not release commit | All required checks pass on exact final release candidate commit; test ZIP hash / manifest |
-| 3.1.2 support claim | **LIMITED / NOT VERIFIED by CI** | Run exact tests headless in Blender 3.1.2 or explicitly state 3.x is experimental |
-| Real tests on at least 2 declared clients | **OPEN** | Save client/MCP versions, logs, actual assets and images for Codex and another client |
-| Real downstream engine import | **OPEN** | Import an actual exported model into a selected engine and inspect units, material, pivot, UV and collider |
-| Independent artistic quality | **PARTIAL** | Review captured original renders, avoid subjective PASS without visuals; run controlled attempts |
-| Crash-safe paired efficiency evidence | **OPEN** | Repeat both matched variants with saved identical starting scene, normalized tool counts and honest token availability |
-| Clean install of candidate ZIP | **OPEN** | Extract verified hash, install in new agent home, check skill discovery and live Blender-control MCP |
-| User release approval | **OPEN** | Explicit signoff after final acceptance; publication remains a separate authorized step |
+**Release acceptance:** integrated PRs + green Python/bpy/npm checks + independently
+packaged SHA256-verified ZIP **installed into a clean isolated agent-style
+home** + accurate public limitations + final maintainer publication
+authorization. The new CI smoke uses `scripts/clean_install_smoke.py`; its
+report must be checked on the exact candidate commit. It validates files
+and helper behavior, **not actual Codex/Claude discovery or live Blender**.
 
-**Scope discipline:** Completing manual gate results may reveal real new bugs.
-Fix those and rerun the relevant CI. Adding untested features to get a bigger
-1.0 feature list is not a release requirement. T10 must stay out of the
-stable release gate unless the user changes scope.
+| Item | Result or policy |
+| --- | --- |
+| PR integration | **PASS**: #29, #30, #31, #32 merged. #28 closed as fully incorporated via #32 |
+| Integrated CI | **PASS**: [main Python + Blender](https://github.com/God-601/blender-mcp-master/actions/runs/41493641047) and [main npm](https://github.com/God-601/blender-mcp-master/actions/runs/41493641037) |
+| Fresh standalone ZIP installation | **PENDING CI smoke** on the new candidate; requires clean-home install, hash validation, resource checks and JSON evidence |
+| User release approval | **PENDING**, separate authorization required before tagging/publishing |
+| Blender 3.1.2 CI and live Codex/Claude discovery | **NOT VERIFIED**; optional after 1.0 and not claimed |
+| Real second-agent end-to-end modeling | **NOT VERIFIED**; optional after 1.0 |
+| Engine import | **NOT VERIFIED**; optional after 1.0; do not advertise compatibility as tested |
+| Independent artistic scoring / token savings | **NOT VERIFIED / INCONCLUSIVE**; optional after 1.0; no superiority claim |
+| T10 real-agent test | **EXCLUDED** from 1.0 by maintainer choice; experimental narrow diagnostic only |
 
-## Integration plan and nonpublishing candidate procedure
+This is an explicit acceptance-risk decision, **not a declaration that the
+omitted tests passed**. Future users must see the known limitations.
 
-1. Reconcile #28 UV work against the equivalent files included in #32.
-   Integrate #29 → #30 → #31 → #32 in dependency order, with a fresh final
-   review and no implicit PR closing or publishing.
-2. Run static, bpy 4.2/4.5/5.x matrix, Node 18/20/22, mutation checks and
-   `.github/workflows/release-readiness.yml` on the exact target commit.
-3. Download `blender-mcp-master-1.0-PREFLIGHT-NOT-A-RELEASE.zip` from CI,
-   verify `SHA256SUMS.txt`, and smoke-test on a clean Codex or Claude
-   installation with a separately installed Blender-control MCP. No live
-   tools are provided by the Agent Skill ZIP.
-4. Obtain external validation above. Prepare reviewed `v1.0.0-rc.1`
-   release notes and change package version / lockfile together **only when
-   accepted**; check fresh installation again.
-5. After human authorization, publish a correctly tagged GitHub prerelease
-   candidate; test the exact distributed asset. Final `v1.0.0` and
-   optional npm publish require another explicit approval.
-6. Update README/QUICKSTART and docs that currently refer to the public beta,
-   and add the verified compatibility/engine matrix. Do not advertise
-   unverified 3.x or cross-agent behavior.
+### Nonpublishing procedure
+
+1. Create a candidate ZIP from the desired release commit; verify checksums,
+   archive safety and install into an empty temporary `.agents/skills` home.
+2. Check the produced clean-install JSON and existing CI matrix on that commit.
+3. Verify accurate draft release notes, current package version and install
+   links before any final release.
+4. Obtain explicit authorization to tag or publish. Do not automatically
+   publish npm or GitHub releases.
 
 ## References
 
