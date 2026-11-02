@@ -81,8 +81,8 @@ does not control Blender.
 - [x] Functional PRs #29–#32 integrated; UV work from #28 included on main.
 - [x] Automated Python, supported bpy matrix, Node/npm checks passed on the
   integrated `main` commit.
-- [ ] Fresh isolated ZIP skill installation and SHA256 report passed on the
-  **exact** final candidate commit.
+- [x] Fresh isolated ZIP skill installation and SHA256 report passed on PR #33
+  ([preflight run](https://github.com/God-601/blender-mcp-master/actions/runs/41495964213)); repeat automatically on main after merge.
 - [ ] Verify the package version/lockfile, README links, current release notes
   and final ZIP match the intended `v1.0.0` publication.
 - [ ] Explicit maintainer authorization to create tag, GitHub Release or
