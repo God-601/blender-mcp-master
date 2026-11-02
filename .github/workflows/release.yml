@@ -1,9 +1,8 @@
-name: Publish beta ZIP release and npm
+name: Publish legacy beta ZIP release and npm (manual only)
 
+# IMPORTANT: No auto-release on main/package.json changes. Stable 1.0 needs
+# a separate reviewed/tagged release process after external acceptance.
 on:
-  push:
-    branches: [main]
-    paths: [package.json]
   workflow_dispatch:
 
 permissions:
