@@ -8,10 +8,10 @@
 | --- | --- | --- |
 | Integrate pending functional PRs | **PASS** | #29 → #30 → #31 → #32 merged to `main`; #28's identical UV script/tests/reference were carried in #32, and #28 was closed as superseded |
 | Python, Blender bpy and npm regression CI | **PASS on integrated main `18f8e713`** | [Python + five bpy versions](https://github.com/God-601/blender-mcp-master/actions/runs/41493641047) and [npm](https://github.com/God-601/blender-mcp-master/actions/runs/41493641037) |
-| Clean standalone ZIP installation | **PASS on PR #33** ([preflight CI](https://github.com/God-601/blender-mcp-master/actions/runs/41495964213)); rerun automatically after merge to main | SHA256 verification, secure extraction into a fresh isolated `~/.agents/skills/blender-mcp-master`, validate frontmatter/linked resource paths, parse scripts and run read-only baseline comparison; publish JSON smoke evidence |
+| Clean standalone ZIP installation | **PASS on main** ([preflight CI](https://github.com/God-601/blender-mcp-master/actions/runs/41496817023)) | SHA256 verification, secure extraction into a fresh isolated `~/.agents/skills/blender-mcp-master`, validate frontmatter/linked resource paths, parse scripts and run read-only baseline comparison; publish JSON smoke evidence |
 | Honest capability and compatibility disclosure | **In progress** | Do not claim confirmed agent discovery, live Blender MCP control, engine import, 3.1.2 CI support, artistic superiority, token savings or full solid-intersection detection |
 | Final candidate packaging | **In progress** | Packaging, SHA256 and smoke succeed on the exact 1.0 candidate commit; `README`, release notes and package manifest agree on released version |
-| Owner authorization to tag and publish | **Not requested yet** | Explicit approval; automated preflight alone never tags, publishes npm or creates a public Release |
+| Owner authorization to tag and publish | **APPROVED by maintainer on 2026-11-02** | Separate guarded publish workflow will tag and create the GitHub v1.0.0 release after the exact main commit passes required CI; npm depends on authorized credentials |
 
 The automated clean-install test proves the ZIP can be installed **into an isolated agent-style skills directory** and the installed resources work. It does **not** launch the Codex/Claude application, prove its discovery behavior, or connect to Blender. Such testing is optional rather than a v1.0 gate by maintainer choice.
 
@@ -38,6 +38,6 @@ These items may justify future improvements, but the public 1.0 must explicitly 
 1. The nonpublishing `.github/workflows/release-readiness.yml` builds a ZIP and checksum and runs `scripts/clean_install_smoke.py`.
 2. Review the CI JSON clean-install report on the candidate SHA and verify latest Python/Blender/npm regressions.
 3. Confirm actual `v1.0.0` package version, lockfile, links, release notes and artifact checksum, with no mismatched beta instructions.
-4. Obtain explicit maintainer authorization before tag/GitHub Release/npm publication. No such publication is triggered by ordinary merges.
+4. Maintainer authorized this stable launch. The new one-time guarded v1.0.0 workflow checks completed CI on the exact main SHA before creating the tag and GitHub Release; optional npm publishing requires credentials.
 
-[Release evidence](RELEASE-1.0-EVIDENCE.md) · [Launch plan](LAUNCH-PLAN.md) · [Draft release notes](release-notes-1.0-DRAFT.md)
+[Release evidence](RELEASE-1.0-EVIDENCE.md) · [Launch plan](LAUNCH-PLAN.md) · [Release notes](release-notes-1.0.md)
