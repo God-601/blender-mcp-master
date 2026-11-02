@@ -150,3 +150,31 @@ test("npm pack contains the skill content and excludes tests and dependencies", 
   }
   assert.ok(!files.some((path) => path.startsWith("tests/") || path.startsWith("node_modules/") || path.startsWith(".github/")), "package must not ship tests, deps or CI files");
 });
+
+
+test("MCP resource outline and bounded excerpts preserve source and reject traversal", async () => {
+  await withClient(async (client) => {
+    const name = "topology-retopology.md";
+    const outline = await client.callTool({
+      name: "get_blender_reference_outline", arguments: { name }
+    });
+    assert.ok(!outline.isError, JSON.stringify(outline.content));
+    assert.match(outline.content[0].text, /Topology and Retopology/);
+    const excerpt = await client.callTool({
+      name: "get_blender_reference_excerpt", arguments: { name, startLine: 1, maxLines: 8 }
+    });
+    assert.ok(!excerpt.isError, JSON.stringify(excerpt.content));
+    assert.match(excerpt.content[0].text, /SOURCE references\/topology-retopology.md lines 1-8\//);
+    assert.match(excerpt.content[0].text, /NEXT_LINE=9/);
+    const full = await client.callTool({ name: "get_blender_reference", arguments: { name } });
+    assert.ok(excerpt.content[0].text.length < full.content[0].text.length);
+    for (const bad of [
+      {name: "../SKILL.md", startLine: 1},
+      {name, startLine: 0},
+      {name, startLine: 1, maxLines: 900}
+    ]) {
+      const outcome = await client.callTool({name: "get_blender_reference_excerpt", arguments: bad});
+      assert.equal(outcome.isError, true, JSON.stringify(bad));
+    }
+  });
+});
