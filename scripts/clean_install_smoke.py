@@ -159,8 +159,7 @@ def main():
     if args.report:
         Path(args.report).write_text(
             json.dumps(report, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    # Return a code to Python callers; no SystemExit because this project also
-    # runs script templates inside persistent Blender processes.
+    # Return a boolean to callers without terminating a host process.
     return report["result"] == "PASS"
 
 
