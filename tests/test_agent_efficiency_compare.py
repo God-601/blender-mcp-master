@@ -72,6 +72,26 @@ class PairedEfficiencyTests(unittest.TestCase):
         self.assertEqual(result["metrics"]["bash_calls_delta"], -8)
         self.assertEqual(result["token_usage"]["status"], "NOT VERIFIED")
 
+    def test_blender_crash_or_reconstructed_unsaved_scene_blocks_comparison(self):
+        m = load_module()
+        before, after = record(200), record(100)
+        after["incidents"] = ["Blender crashed during first render; original unsaved scene lost"]
+        after["checks"]["scene_preserved"] = "NOT VERIFIED"
+        result = m.compare(before, after)
+        self.assertFalse(result["comparable"])
+        self.assertEqual(result["token_usage"]["status"], "NOT VERIFIED")
+        self.assertIn("with_skill:run_incident", result["mismatched_or_missing_fields"])
+        self.assertIn("with_skill:scene_preservation_not_proven",
+                      result["mismatched_or_missing_fields"])
+
+    def test_missing_scene_preservation_evidence_blocks_comparison(self):
+        m = load_module()
+        before, after = record(), record()
+        before["checks"].pop("scene_preserved")
+        self.assertFalse(m.compare(before, after)["comparable"])
+        after["run_status"] = "recovered_after_crash"
+        self.assertFalse(m.compare(record(), after)["comparable"])
+
     def test_report_does_not_modify_inputs(self):
         m = load_module()
         a, b = record(), record(30)
