@@ -40,5 +40,9 @@ are **NOT VERIFIED**.
 - **P3:** visual rubric and independent reviewers of actual .blend/render
   assets versus references.
 
-See `references/workflow-director.md` and
-`references/skill-evaluation-protocol.md` for the two immediate adaptations.
+For the explicit Superpowers-inspired stage gates, defect diagnosis, and no-regression
+checks, read [`references/evidence-first-workflow.md`](../references/evidence-first-workflow.md).
+For authoritative Blender-side research and version gating, read
+[`references/official-blender-documentation.md`](../references/official-blender-documentation.md).
+See `references/workflow-director.md` and `references/skill-evaluation-protocol.md`
+for the existing specialist routing and paired-evaluation protocols.
