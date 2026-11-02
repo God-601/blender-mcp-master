@@ -20,6 +20,10 @@ Works with any agent that can read this file (Claude, Codex, Cursor, Gemini CLI,
 7. **Budget before detail.** Decide the target (triangles, texture size, material count) from the target use *before* modeling (see `references/budgets.md`) and state it in the plan. Detail beyond the chosen budget is a bug; a platform's hard limit is never exceeded, while the default numbers are adjustable starting points.
 8. **Verify, then report.** Finish with measurable facts (tri count, dimensions, materials, issues found/fixed), not adjectives.
 
+### Reference and evidence protocol
+
+When an operation or API is uncertain, consult `references/official-blender-documentation.md` and verify behavior against the **actual** Blender version before running code. For substantial assets, use `references/evidence-first-workflow.md` to require explicit stage exits, defect reproduction, minimal correction, no-regression checks and an evidence-backed delivery report. These guides complement—not replace—the quality and scene-safety rules below.
+
 ### Professional production contract (required for substantial assets)
 
 A model is **not** production-ready because code executed or a topology check passed. Read `references/professional-modeling-standards.md` and `references/professional-agent-playbook.md` before nontrivial modeling. Use `references/modeling-decision-framework.md` to choose techniques and `references/production-recipes.md` for component/acceptance examples. Separate measurable geometry evidence from actual visual inspection and destination import evidence. Never mark visual quality PASS without inspecting real viewport images. Treat missing evidence as NOT VERIFIED; preserve all unrelated scene objects.
@@ -97,6 +101,8 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Reference-oriented chairs, props, architecture, characters and trees | Production recipes | `references/production-recipes.md` |
 | Read-only evaluated geometry, solid orientation and explicit fit/ground checks | Professional geometry inspection | `scripts/inspect_geometry.py`, `references/inspection-policies.md` |
 | Quality loop, visual review, contextual validation | Modeling QA | `references/modeling-quality-loop.md`; `references/quality-checklist.md` |
+| Blender API or modeling behavior uncertain | Official documentation and version research | `references/official-blender-documentation.md` |
+| Quality gates, root-cause correction, or evidence-first delivery | Execution method | `references/evidence-first-workflow.md` |
 
 Always also follow sections 3 to 6 below. For shared topology and operation standards, load `references/modeling-foundations.md`; for cross-cutting visual review and reliable MCP iteration, load `references/modeling-quality-loop.md`. For game-ready material/UV/LOD/export work, load `references/p1-production-pipeline.md` alongside `references/materials.md` and `references/game-ready-export.md`.
 
