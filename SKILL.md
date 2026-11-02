@@ -51,7 +51,7 @@ For nontrivial assets read `references/modeling-quality-loop.md`, `references/mo
 | Low-poly, voxel, hand-painted | `references/stylized-lowpoly.md`, `references/voxel-atlas-recipe.md`, `references/hand-painted-pipeline.md` |
 | Architecture, CAD and modular scenes | `references/architecture-interiors.md`, `references/cad-technical.md`, `references/modular-modeling.md` |
 | Geometry Nodes and procedural generation | `references/geometry-engine.md`, `references/parametric-geometry-nodes.md` |
-| UV, textures, baking, materials | `references/uv-baking.md`, `references/materials.md`, `references/shading-recipes.md` |
+| UV, textures, baking, materials | `references/uv-baking.md`, `references/materials.md`, `references/shading-recipes.md`, `scripts/uv_diagnostics.py` |
 | Game asset optimization and export | `references/game-asset-optimization.md`, `references/p1-production-pipeline.md`, `references/game-ready-export.md` |
 | Measured 3D geometry/material/texture cost | `references/model-performance-strategy.md`, `scripts/asset_performance_audit.py` |
 | Token/context and tool efficiency | `references/token-efficient-agent-execution.md` |
@@ -112,6 +112,8 @@ Select a guide by the route above. The names below make scripts and specialist m
 `references/voxel-atlas-recipe.md` · `references/workflow-director.md`
 
 ### Available scripts (Blender bpy unless documented otherwise)
+
+`scripts/uv_diagnostics.py` — optional read-only base-mesh UV overlap and texel-density inspection with explicit targets; engine/padding remain NOT VERIFIED.
 
 `scripts/agent_efficiency_compare.py` — pure-Python read-only comparison of matching run metrics; no billed-token or artistic-quality claims without source evidence.
 
