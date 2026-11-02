@@ -25,6 +25,13 @@ class ReleaseReadinessStaticTests(unittest.TestCase):
         self.assertIn("CHANGELOG.md CONTRIBUTING.md", text)
         self.assertNotRegex(text, r"(?m)^\s*(?:gh release create|npm publish|git push)\b")
 
+    def test_stable_v1_release_is_one_time_and_pinned_to_published_sha(self):
+        source = (ROOT / ".github/workflows/release-stable-1.0.yml").read_text(encoding="utf-8")
+        self.assertIn("github.event.workflow_run.head_sha == '30a7f65ea0c070a70be26f63fc5c2eaf0f987147'", source)
+        self.assertIn("github.event.workflow_run.conclusion == 'success'", source)
+        self.assertIn("gh release create", source)
+        self.assertIn("Tag exists at a DIFFERENT SHA", source)
+
     def test_release_evidence_does_not_fabricate_agent_or_engine_pass(self):
         evidence = (ROOT / "docs/RELEASE-1.0-EVIDENCE.md").read_text(encoding="utf-8")
         self.assertIn("T08", evidence)
