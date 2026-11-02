@@ -49,7 +49,7 @@ jobs:
       - name: Build and verify standalone Agent Skill ZIP
         run: |
           mkdir -p dist/blender-mcp-master
-          cp -R SKILL.md README.md LICENSE references scripts assets docs dist/blender-mcp-master/
+          cp -R SKILL.md README.md LICENSE CHANGELOG.md CONTRIBUTING.md references scripts assets docs dist/blender-mcp-master/
           ( cd dist && zip -q -r "blender-mcp-master-$VERSION.zip" blender-mcp-master )
           python - <<'PY'
           import os, zipfile
