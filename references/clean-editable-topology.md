@@ -66,3 +66,18 @@ rather than deleting it unconditionally.
 `references/component-fit-and-joints.md`,
 `references/quality-checklist.md`,
 `scripts/inspect_geometry.py`.
+
+## v1.1 — Boundary-aware X-fan audit
+
+`scripts/topology_face_diagnostics.py` now adds, **for each candidate**,
+`material_boundary`, `uv_seam_candidate` and `shape_keys_present`.
+If any flag is present it recommends `PRESERVE_UNTIL_REVIEW`; otherwise
+`REVIEW_FOR_CLEAN_QUAD_ON_COPY`. Both are guidance only; the script
+NEVER dissolves edges, changes materials or repairs UVs.
+
+An observed four-triangle fan does not prove waste. Shared vertices in
+editable meshes can have per-loop UV discontinuities, and shape keys can
+make a seemingly flat edit destructive. Check normals, UV boundaries,
+material IDs and deformation before considering a copy-first cleanup.
+T10 remains an optional live-agent test rather than a certified automatic
+retopology promise.
