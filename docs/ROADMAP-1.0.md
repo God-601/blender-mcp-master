@@ -1,92 +1,43 @@
-# Blender MCP Master — release 1.0 execution backlog
+# Blender MCP Master — minimal 1.0 release gate
 
-**Status date:** 2026-11-02. This is an execution ledger, not a declaration that a beta feature is production-ready. Update status and attach actual evidence before checking an item complete.
+**Updated:** 2026-11-02. Maintainer decision: the 1.0 launch no longer requires T10, a second agent, a game-engine import, independent artistic review, or a repeated paired token benchmark. Those remain honest **NOT VERIFIED** scope limitations and potential post-1.0 improvements, not hidden PASS results.
 
-Definitions:
-- **Implemented (PR)** = code and docs exist on a non-main branch; requires CI and review before landing.
-- **CI verified** = all named automated jobs passed for the exact commit; not equivalent to artistic or live MCP verification.
-- **External validation** = a real Blender MCP client, human visual reviewer or actual engine importer is necessary.
+## Required before a public 1.0
 
-## P0 — blockers for a stable public release
+| Gate | Current status | Acceptance |
+| --- | --- | --- |
+| Integrate pending functional PRs | **PASS** | #29 → #30 → #31 → #32 merged to `main`; #28's identical UV script/tests/reference were carried in #32, and #28 was closed as superseded |
+| Python, Blender bpy and npm regression CI | **PASS on integrated main `18f8e713`** | [Python + five bpy versions](https://github.com/God-601/blender-mcp-master/actions/runs/41493641047) and [npm](https://github.com/God-601/blender-mcp-master/actions/runs/41493641037) |
+| Clean standalone ZIP installation | **Run in CI from the candidate ZIP** | SHA256 verification, secure extraction into a fresh isolated `~/.agents/skills/blender-mcp-master`, validate frontmatter/linked resource paths, parse scripts and run read-only baseline comparison; publish JSON smoke evidence |
+| Honest capability and compatibility disclosure | **In progress** | Do not claim confirmed agent discovery, live Blender MCP control, engine import, 3.1.2 CI support, artistic superiority, token savings or full solid-intersection detection |
+| Final candidate packaging | **In progress** | Packaging, SHA256 and smoke succeed on the exact 1.0 candidate commit; `README`, release notes and package manifest agree on released version |
+| Owner authorization to tag and publish | **Not requested yet** | Explicit approval; automated preflight alone never tags, publishes npm or creates a public Release |
 
-| ID | Work | State | Evidence / acceptance |
-| --- | --- | --- | --- |
-| P0-01 | Resolve docs/readme regressions, ensure accurate architecture + install paths | CI verified on PR #29; merge pending | GitHub Actions logs for PR #29; requires review and integration |
-| P0-02 | Correct UV test API and verify overlap/density diagnostics | CI verified on PR #28; integration pending | Tests on bpy matrix, including missing UV layer |
-| P0-03 | General kickoff, guided retopology, reviewed registry, visual evidence receipts | CI verified on PR #30; real behavior still pending | Python/bpy/npm checks on exact PR head; actual agent behavior not verified |
-| P0-04 | Minimize unnecessary Bash usage/context loading in resource navigation | CI verified in PR #31: Python/bpy 4.2/4.5/5.0/5.1/5.2 and Node 18/20/22 | MCP bounded excerpt/outline integration tests; no invented token reduction |
-| P0-05 | Read-only evaluated mesh, materials and texture workload audit | CI verified in PR #31: Python/bpy 4.2/4.5/5.0/5.1/5.2 and Node 18/20/22 | Real bpy tests: evaluated geometry, duplicated datablocks, material warning, read-only behavior |
-| P0-06 | Preserve safety + clarify versioned setup and token-conscious workflow | CI verified in PR #31: Python/bpy 4.2/4.5/5.0/5.1/5.2 and Node 18/20/22 | Mandatory kickoff + P0 integrity behavior not weakened |
-| P0-07 | Real end-to-end Blender MCP project on at least 2 supported clients | **NOT VERIFIED**; external | Exact agents/MCP/Blender versions, full logs, output .blend, views; follow Issue #19 |
-| P0-08 | Real engine import/export with one intended target | **NOT VERIFIED**; external | Open exported file in intended engine; verify scale, UV, materials, pivots and geometry; Issue #18 |
-| P0-09 | Independent artistic review, controlled with/without-skill comparison | **NOT VERIFIED**; external | At least chair, sword, house, organic and mechanical/character assets, same conditions; Issue #20 |
-| P0-10 | Release packaging, ZIP hash, clean install and accurate claims | **NOT VERIFIED** for final release | SHA256SUMS, actual agent install, tagged beta-to-stable process with approved release commit |
+The automated clean-install test proves the ZIP can be installed **into an isolated agent-style skills directory** and the installed resources work. It does **not** launch the Codex/Claude application, prove its discovery behavior, or connect to Blender. Such testing is optional rather than a v1.0 gate by maintainer choice.
 
-**No merge, version bump, npm publish or stable-release announcement should occur simply because this backlog exists.**
+## Implemented and previously evaluated
 
-## November 2 field-test integration — 1.0 readiness, excluding T10
+- Core safety: source ownership, saved checkpoints, read-only protected-object snapshots and failure handling.
+- Measured geometry/UV and material audits; evaluated topology includes modifiers.
+- Guided retopology with rollback, conservative component-fit candidates and required visual REVIEW when geometry contact is uncertain.
+- Reversible optimization, truthful glTF seam/triangulation handling, bounded reference reads, npm MCP resource server.
+- Reported field scenarios T01–T09; see [evidence ledger](RELEASE-1.0-EVIDENCE.md). T08 remains **inconclusive** (unsaved Blender scene crashed); no measurable token improvement may be advertised.
+- The optional coplanar X-fan inspector is experimental; **T10 is not required**.
 
-The actual user-reported T01–T09 modeling sessions are indexed in
-[RELEASE-1.0-EVIDENCE.md](RELEASE-1.0-EVIDENCE.md). Those sessions provide
-useful practical observations but do **not** establish a clean 2-agent,
-engine-ready or controlled-token efficiency comparison. T08's crash and
-lost unsaved scene invalidate its paired efficiency claim. Real token counts
-remain NOT VERIFIED.
+## Optional follow-up after v1.0 (not release blockers)
 
-**New P0 safety fixes on PR #32:** opt-in read-only protected-object snapshots,
-pure Python before/after comparison, saved-scene checkpoints, crash recovery,
-and gating matched efficiency data when preservation is incomplete. CI must
-pass on the exact updated head before these can be considered verified.
+- Verify a second agent and actual agent-client discovery/Blender-control behavior.
+- Perform a downstream engine import and independent artistic scoring.
+- Repeat the A/B benchmark with identical saved fixtures and genuine token records if making efficiency claims.
+- Extend Blender 3.1.2 coverage, UV padding/baking, topology diagnosis, deformation and visual checks.
 
-**New release packaging guard:** `.github/workflows/release-readiness.yml`
-builds an explicitly **nonpublishing** 1.0 preflight ZIP with checksum.
-The old beta release workflow no longer runs automatically on a change to
-`main/package.json`. A real release requires a new, reviewed version/tag
-process and explicit user approval.
+These items may justify future improvements, but the public 1.0 must explicitly describe them as unverified rather than silently claiming success.
 
-**T10 is out of scope for this release decision**, per maintainer direction.
-The optional editable X-fan detector remains narrow/experimental and cannot
-be called an auto-topology repair system. Its real-agent exercise may be run
-after 1.0; it is not a release blocker.
+## Release procedure (separate permission)
 
-**Outstanding stable-release gates remain:** dependency-safe PR integration,
-clean install smoke test from final candidate ZIP, second client behavior
-evidence, actual target-engine import, independent artistic acceptance, a
-repeatable crash-free matched benchmark if performance improvements are
-claimed, and user release authorization.
+1. The nonpublishing `.github/workflows/release-readiness.yml` builds a ZIP and checksum and runs `scripts/clean_install_smoke.py`.
+2. Review the CI JSON clean-install report on the candidate SHA and verify latest Python/Blender/npm regressions.
+3. Confirm actual `v1.0.0` package version, lockfile, links, release notes and artifact checksum, with no mismatched beta instructions.
+4. Obtain explicit maintainer authorization before tag/GitHub Release/npm publication. No such publication is triggered by ordinary merges.
 
-
-
-## P1 — improve reliability and quality
-
-- [ ] Replace the oversized root \`SKILL.md\` with a shorter progressive-disclosure entrypoint without losing safety/routing or breaking tests. Keep all supported workflows accessible through focused references; benchmark real loaded context and outcome quality.
-- [x] Add reproducible, deterministic comparison of matched agent runs with `scripts/agent_efficiency_compare.py` and `docs/EFFICIENCY-BENCHMARK.md`; both implemented and CI verified in PR #31. **Actual token savings remain NOT VERIFIED** until recorded agent runs.
-- [ ] Extend guided retopology with semantic boundary extraction, topology repairs, deformation-aware edge flow and pose-tested results; reject arbitrary automatic quad-remesh claims.
-- [ ] Implement actual image analysis loop only in clients that support visual inspection; capture before/after and preserve sources. A metadata receipt does not analyze an image.
-- [ ] Improve UV density/overlap, baking maps, LOD/material checks and downstream export tests for real target engines.
-- [ ] Validate Blender 3.x compatibility separately from the current CI-supported bpy 4.2/4.5/5.x matrix.
-- [ ] Re-run mutation tests and independent security/safety review on the final integration commit.
-- [ ] Prepare demo assets, changelog, 1.0 docs and release materials using [Launch plan](LAUNCH-PLAN.md).
-
-## How to execute and measure
-
-1. Land/fix small dependency PRs after CI and explicit review, then rebase dependent branches; do not force changes to main.
-2. For every implementation, write a failing behavioral test, implement the smallest viable change, repeat tests on CI and record exact run links.
-3. Execute same user brief with and without the skill, on the same client/runtime and a fresh copy of the same scene.
-4. Record actual token counts **only if exposed by the client**, together with bytes loaded, Bash calls, MCP calls, runtime, user object preservation, technical and visual outcomes.
-5. Do not mark visual quality or compatibility PASS without screenshots, actual agent/tool execution and independent evidence.
-6. Publish \`1.0\` only after P0 acceptance, a reviewed release candidate, actual clean-install smoke test and user authorization.
-
-## Relevant project entry points
-
-- [Agent efficiency protocol](../references/token-efficient-agent-execution.md)
-- [Performance strategy](../references/model-performance-strategy.md)
-- [Benchmark prompts](../references/benchmark-prompts.md)
-- [Agent behavior evaluation](../references/skill-evaluation-protocol.md)
-- [Release launch plan](LAUNCH-PLAN.md)
-- [Issues #18–#20](https://github.com/God-601/blender-mcp-master/issues)
-
-## Automated verification record
-
-- PR #31 head `5de719ba`: [Python static + bpy matrix passed](https://github.com/God-601/blender-mcp-master/actions/runs/41453735620) and [npm Node 18/20/22 passed](https://github.com/God-601/blender-mcp-master/actions/runs/41453735697).
-- These checks validate implementation mechanics and regression contracts. They do **not** measure actual token billing, artistic quality, FPS, export into a game engine, or client-to-Blender MCP interaction.
+[Release evidence](RELEASE-1.0-EVIDENCE.md) · [Launch plan](LAUNCH-PLAN.md) · [Draft release notes](release-notes-1.0-DRAFT.md)
