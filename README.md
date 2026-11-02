@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://github.com/God-601/blender-mcp-master/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/God-601/blender-mcp-master?include_prereleases&style=flat-square&label=release"></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-21262d?style=flat-square"></a>
-  <a href=".github/workflows/static-checks.yml"><img alt="GitHub Actions" src="https://img.shields.io/badge/CI-GitHub_Actions-21262d?style=flat-square"></a>
+  <a href="https://github.com/God-601/blender-mcp-master/actions/workflows/static-checks.yml"><img alt="GitHub Actions" src="https://img.shields.io/badge/CI-GitHub_Actions-21262d?style=flat-square"></a>
 </p>
 
 <p align="center">
