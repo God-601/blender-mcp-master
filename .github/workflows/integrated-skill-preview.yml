@@ -20,7 +20,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist/blender-mcp-master
-          cp -R SKILL.md README.md LICENSE references scripts assets docs dist/blender-mcp-master/
+          cp -R SKILL.md README.md LICENSE CHANGELOG.md CONTRIBUTING.md references scripts assets docs dist/blender-mcp-master/
           (cd dist && zip -q -r blender-mcp-master-INTEGRATED-TEST.zip blender-mcp-master)
           python - <<'PY'
           from pathlib import Path
