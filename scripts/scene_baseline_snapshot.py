@@ -49,7 +49,8 @@ def material_signature(mat):
         "name": mat.name, "library": mat.library.filepath if mat.library else None,
         "diffuse_color": vec(mat.diffuse_color),
         "use_nodes": bool(mat.use_nodes),
-        "blend_method": str(mat.blend_method),
+        "blend_method": str(getattr(mat, "blend_method", "NOT_AVAILABLE")),
+        "surface_render_method": str(getattr(mat, "surface_render_method", "NOT_AVAILABLE")),
     }
     if mat.use_nodes and mat.node_tree:
         properties["nodes"] = sorted(
