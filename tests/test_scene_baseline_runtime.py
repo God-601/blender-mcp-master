@@ -115,7 +115,7 @@ class BaselineRuntimeTests(unittest.TestCase):
         bpy.context.view_layer.update()
         result = compare_module().compare(before, run_snapshot(names))
         self.assertEqual(result["status"], "ISSUE")
-        self.assertEqual(sorted(result["changed"]), names)
+        self.assertEqual(sorted(result["changed"]), sorted(names))
 
     def test_existing_material_change_is_detected(self):
         mat = bpy.data.materials.new("ProtectedMaterial")
