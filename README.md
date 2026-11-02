@@ -1,4 +1,4 @@
-<h1 align="center">Blender MCP Master</h1>
+# Blender MCP Master
 
 <p align="center">
   <strong>Model with intent. Verify with evidence.</strong><br>
@@ -20,11 +20,13 @@
 
 ---
 
+<p align="center"><img src="assets/banner.svg" width="100%" alt="Concept illustration: isometric mesh study representing Blender MCP Master, not an actual generated Blender model"></p>
+
 ### Better decisions. Better meshes.
 
 Blender MCP Master helps AI agents **plan, model, inspect, and validate** Blender assets using task-specific instructions, scripts, and evidence-based quality checks.
 
-> **Important:** This skill does **not** control Blender by itself. Live editing needs a separate **Blender-control MCP server and Blender addon**. The optional MCP resource server here is *read-only*.
+> **Important:** This skill does **not** control Blender by itself. Live editing needs a separate Blender-control MCP server and Blender addon. The optional MCP resource server here is *read-only*.
 
 | Define | Build | Inspect | Deliver |
 | :--- | :--- | :--- | :--- |
@@ -66,6 +68,8 @@ npx -y github:God-601/blender-mcp-master
 Neither command provides Blender scene-control tools.
 </details>
 
+<p align="center"><img src="assets/workflow.svg" width="100%" alt="Clarify, plan, build, inspect and correct workflow diagram"></p>
+
 ## Workflow
 
 ```text
@@ -92,6 +96,8 @@ The agent must **inspect before it claims success**. Geometry checks, screenshot
 | **Delivery** | `PASS / ISSUE / N/A / NOT VERIFIED` plus known limitations |
 
 Supported workflows include hard-surface props, organic modeling, stylized and low-poly assets, architecture, environments, characters, UV/baking, materials, and game-ready exports. Available features depend on the actual Blender installation and connected MCP tools.
+
+<p align="center"><img src="assets/architecture.svg" width="100%" alt="Skill and separate Blender-control MCP architecture"></p>
 
 ## Documentation
 
@@ -120,11 +126,13 @@ Some tests require a compatible `bpy` runtime. Passing tests is not proof of art
 ---
 
 <a id="portugues"></a>
-## Português
+# Português
 
 **Uma skill para agentes de IA modelarem no Blender com método e evidências.** Ela orienta o agente; não instala nem substitui o Blender-control MCP.
 
 - **Instalar:** `npx skills add God-601/blender-mcp-master -g` ou [baixar o ZIP da Release](https://github.com/God-601/blender-mcp-master/releases/download/v0.2.0-beta.1/blender-mcp-master-0.2.0-beta.1.zip).
+- **Alternativa sem npm:** `npx -y github:God-601/blender-mcp-master` inicia o servidor de recursos somente leitura.
+- **CLI:** `npx skills add God-601/blender-mcp-master -g` instala a skill.
 - **Configurar:** conectar separadamente um Blender-control MCP. Veja o [guia para Windows e agentes](docs/QUICKSTART.md).
 - **Fluxo:** esclarecer → planejar → modelar → inspecionar → corrigir → relatar o que foi verificado.
 - **Aprofundar:** [documentação oficial](references/official-blender-documentation.md) · [verificação e recuperação](references/evidence-first-workflow.md) · [padrões profissionais](references/professional-modeling-standards.md).
