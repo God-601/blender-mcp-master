@@ -25,7 +25,19 @@ Use `scripts/pbr_material.py` for a basic material setup. It can update a materi
 - 0-1 bounds are expected for a single-tile workflow. Tiling and UDIM workflows are intentional exceptions.
 - Verify that UVs survive Decimate/LOD generation and triangulation. A valid UV layer alone does not prove the unwrap is good.
 
-Run `scripts/validate_uvs.py` for read-only bounds and zero-area diagnostics. It does not detect UV island overlap, distortion, packing efficiency or texel-density variance. Use Blender's UV Editor/checker texture for those checks.
+Run `scripts/validate_uvs.py` for bounds and zero-area diagnostics.
+For **optional UV-area overlap and texel-density measurements**, run
+`scripts/uv_diagnostics.py` with explicit `TARGETS`, intended texture
+resolution and policy flags. Positive-area triangle overlap is distinguished
+from shared-border contact. `ALLOW_STACKING=True` reports intentional
+mirroring/stacking as REVIEW rather than falsely passing a unique bake.
+
+The new inspector analyzes base mesh UVs, not evaluated Geometry Nodes output.
+Its pairwise overlap scan is capped; exceeding the cap reports NOT VERIFIED.
+Its density numbers are pixels per scene length unit, **not automatically
+pixels/meter**. It does **not** certify actual UV island padding, texture
+distortion, baking, post-modifier UVs or engine import. Always use Blender's UV
+Editor/checker texture and actual export/import checks when relevant.
 
 ## 3. LOD production
 
