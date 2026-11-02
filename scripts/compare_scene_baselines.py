@@ -2,7 +2,7 @@
 
 CLI: python scripts/compare_scene_baselines.py before.json after.json
 Files are snapshots printed by scripts/scene_baseline_snapshot.py.
-Exit 0 = PASS; 1 = ISSUE or NOT VERIFIED; 2 = input error.
+The JSON status is authoritative; the script does not terminate the Blender host.
 """
 import argparse
 import json
@@ -99,4 +99,4 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    main()
