@@ -38,9 +38,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          mkdir -p dist/blender-mcp-master/docs
-          cp -R SKILL.md README.md LICENSE references scripts assets dist/blender-mcp-master/
-          cp docs/QUICKSTART.md docs/EFFICIENCY-BENCHMARK.md docs/ROADMAP-1.0.md docs/LAUNCH-PLAN.md              docs/RELEASE-1.0-EVIDENCE.md dist/blender-mcp-master/docs/
+          mkdir -p dist/blender-mcp-master
+          cp -R SKILL.md README.md LICENSE references scripts assets docs dist/blender-mcp-master/
           (cd dist && zip -q -r blender-mcp-master-1.0-PREFLIGHT-NOT-A-RELEASE.zip blender-mcp-master)
           python - <<'PY'
           from pathlib import Path
