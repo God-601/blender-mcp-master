@@ -3,6 +3,8 @@ name: 1.0 readiness preflight (NO RELEASE)
 # Nonpublishing checks only. This is not a stable build, tag, npm publish,
 # or substitute for manual agent/Blender/game-engine acceptance.
 on:
+  push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 
