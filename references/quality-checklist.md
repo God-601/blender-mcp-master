@@ -38,6 +38,7 @@ Never mark an item PASS based only on an assumption. When a check produces a war
 - [ ] Degenerate faces and zero-area geometry have been investigated.
 - [ ] Non-manifold edges and open boundaries have been evaluated in context; they are not automatically defects on intentionally open surfaces, foliage, cloth, or similar assets.
 - [ ] N-gons are appropriate for the surface and workflow; curved, subdivided, or deforming regions receive extra scrutiny.
+- [ ] Inspect flat editable surfaces for redundant four-triangle center fans (X pattern). Use a single appropriate quad when safe, but preserve purposeful triangular edges, UV/normal/material seams, bevels, and shape; do not confuse GLB triangulation with editable face topology (`references/clean-editable-topology.md`).
 - [ ] Bevels, supporting loops, and sharp edges suit the scale and visual style.
 - [ ] Rigging, shape keys, modifiers, and shared mesh data are preserved when relevant.
 
