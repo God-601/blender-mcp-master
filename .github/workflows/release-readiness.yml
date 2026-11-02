@@ -1,4 +1,4 @@
-name: 1.0 readiness preflight (NO RELEASE)
+name: Release readiness preflight (NO RELEASE)
 
 # Nonpublishing checks only. This is not a stable build, tag, npm publish,
 # or substitute for manual agent/Blender/game-engine acceptance.
@@ -42,12 +42,12 @@ jobs:
           set -euo pipefail
           mkdir -p dist/blender-mcp-master
           cp -R SKILL.md README.md LICENSE CHANGELOG.md CONTRIBUTING.md references scripts assets docs dist/blender-mcp-master/
-          (cd dist && zip -q -r blender-mcp-master-1.0-PREFLIGHT-NOT-A-RELEASE.zip blender-mcp-master)
+          (cd dist && zip -q -r blender-mcp-master-1.1-PREFLIGHT-NOT-A-RELEASE.zip blender-mcp-master)
           python - <<'PY'
           from pathlib import Path
           from zipfile import ZipFile
           import re
-          p = Path("dist/blender-mcp-master-1.0-PREFLIGHT-NOT-A-RELEASE.zip")
+          p = Path("dist/blender-mcp-master-1.1-PREFLIGHT-NOT-A-RELEASE.zip")
           with ZipFile(p) as archive:
               names = set(archive.namelist())
               required = (
@@ -74,12 +74,12 @@ jobs:
               assert not missing, "Packaged README contains broken local links: " + repr(missing)
           print("Nonpublishing package verified:", p, p.stat().st_size, "bytes")
           PY
-          (cd dist && sha256sum blender-mcp-master-1.0-PREFLIGHT-NOT-A-RELEASE.zip > SHA256SUMS.txt)
+          (cd dist && sha256sum blender-mcp-master-1.1-PREFLIGHT-NOT-A-RELEASE.zip > SHA256SUMS.txt)
           test -s dist/SHA256SUMS.txt
       - name: Fresh isolated skill install and integrity smoke
         run: |
           python scripts/clean_install_smoke.py \
-            dist/blender-mcp-master-1.0-PREFLIGHT-NOT-A-RELEASE.zip \
+            dist/blender-mcp-master-1.1-PREFLIGHT-NOT-A-RELEASE.zip \
             dist/SHA256SUMS.txt \
             --report dist/clean-install-report.json
           python - <<'PY'
@@ -91,9 +91,9 @@ jobs:
           PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: blender-mcp-master-1.0-PREFLIGHT-NOT-A-RELEASE
+          name: blender-mcp-master-1.1-PREFLIGHT-NOT-A-RELEASE
           path: |
-            dist/blender-mcp-master-1.0-PREFLIGHT-NOT-A-RELEASE.zip
+            dist/blender-mcp-master-1.1-PREFLIGHT-NOT-A-RELEASE.zip
             dist/SHA256SUMS.txt
             dist/clean-install-report.json
           if-no-files-found: error
