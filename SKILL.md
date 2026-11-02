@@ -113,6 +113,8 @@ Select a guide by the route above. The names below make scripts and specialist m
 
 ### Available scripts (Blender bpy unless documented otherwise)
 
+`scripts/agent_efficiency_compare.py` — pure-Python read-only comparison of matching run metrics; no billed-token or artistic-quality claims without source evidence.
+
 `scripts/apply_and_origin.py` · `scripts/asset_performance_audit.py` · `scripts/benchmark_report.py` · `scripts/bevel_and_shade.py`
 
 `scripts/capability_probe.py` · `scripts/cleanup_mesh.py` · `scripts/export_asset.py` · `scripts/geometry_builder.py`
