@@ -76,6 +76,8 @@ Actual output files and paths:
 Known defects and unresolved verification:
 ~~~
 
+For real-client acceptance prompts, load `references/manual-acceptance-prompts.md` only when running test scenarios.
+
 ## Full path index — discover, do NOT load everything
 
 Select a guide by the route above. The names below make scripts and specialist manuals discoverable even when not used in the current task.
