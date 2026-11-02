@@ -5,6 +5,20 @@
 After the agent has actually captured and inspected Blender screenshots, it can write structured receipt metadata into `scripts/visual_review_report.py` (asset name, front/side/three-quarter artifacts, reviewer and observed defects) to create a no-mutation report. Without the three actual reviewed views, the result is `NOT VERIFIED`. With unresolved defects it is `ISSUE`; even with all metadata present it reports `REVIEW_RECORDED`, **not artistic PASS**. The tool cannot see image pixels or verify that screenshots correspond to the object. Correct the defects using explicit owned copies and recheck actual views.
 
 
+## File-backed evidence in v1.1
+
+Before claiming you captured front, side or three-quarter screenshots,
+configure explicit `EVIDENCE_ROOT` and `CAPTURES` in
+`scripts/visual_evidence_manifest.py` and run it with local Python.
+The tool checks real PNG/JPEG file signatures, size and SHA256 for each
+named file under the evidence root, including a reviewer identifier.
+It refuses traversal and missing files. A complete set yields
+`FILES_HASHED_REVIEW_REQUIRED`, **not** `PASS`: file presence, hash
+and a reviewer label cannot prove the pixels show the intended model.
+The reviewer must actually open/inspect each image and record defects,
+then feed those observations to `scripts/visual_review_report.py`.
+This is an evidence chain, not an autonomous image classifier.
+
 ## Purpose
 
 Visual inspection evaluates the actual visible model. It complements mesh diagnostics; neither replaces

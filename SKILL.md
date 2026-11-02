@@ -56,10 +56,13 @@ For nontrivial assets read `references/modeling-quality-loop.md`, `references/mo
 | Game asset optimization and export | `references/game-asset-optimization.md`, `references/p1-production-pipeline.md`, `references/game-ready-export.md` |
 | Measured 3D geometry/material/texture cost | `references/model-performance-strategy.md`, `scripts/asset_performance_audit.py` |
 | Check intentional joints versus accidental penetration | `references/component-fit-and-joints.md`, `scripts/inspect_component_fit.py` |
+| Compare optimization silhouette proxies | `references/model-performance-strategy.md`, `scripts/compare_asset_silhouettes.py` |
+| Hash real visual evidence files for review | `references/visual-inspection.md`, `scripts/visual_evidence_manifest.py` |
 | Unnecessary planar X triangulation or editable face cleanup | `references/clean-editable-topology.md`, `scripts/topology_face_diagnostics.py` |
 | Token/context and tool efficiency | `references/token-efficient-agent-execution.md` |
 | Version-dependent Blender API or MCP mismatch | `references/official-blender-documentation.md`, `references/capability-mapping.md` |
 | Safe checkpoints and protected-object comparisons | `references/crash-recovery-and-baselines.md`, `scripts/scene_baseline_snapshot.py`, `scripts/compare_scene_baselines.py` |
+| Verify re-opened checkpoint identity after crash | `references/crash-recovery-and-baselines.md`, `scripts/scene_recovery_probe.py` |
 | Local reusable records / reviewers | `references/technique-registry.md`, `scripts/technique_registry.py`, `scripts/visual_review_report.py` |
 
 **Tool-first:** Prefer the connected Blender MCP's structured tools and the agent's native file-search/read/edit tools over generic Bash when available. Bash is valid if it better serves a reproducible task. The optional read-only resource MCP supports `get_blender_reference_outline` and `get_blender_reference_excerpt` to fetch small source-backed sections; use full-document reads only when actually necessary. Always inspect the whole script and safety configuration before executing a mutating Blender script. Save concise checkpoints rather than repeating logs. Do not trade away safety or the mandatory kickoff for fewer tokens.
@@ -119,7 +122,7 @@ Select a guide by the route above. The names below make scripts and specialist m
 
 ### Available scripts (Blender bpy unless documented otherwise)
 
-`scripts/topology_face_diagnostics.py` — read-only planar four-triangle X fan candidates in editable base meshes; preserves intentional triangles and reports REVIEW only.
+`scripts/topology_face_diagnostics.py` — read-only planar four-triangle X fan candidates, with material-boundary/UV-seam/shape-key warnings; reports REVIEW, never auto-dissolves.
 
 `scripts/inspect_component_fit.py` — optional read-only explicit-pair AABB/BVH candidates; real visual joint correctness is NOT VERIFIED until inspected.
 
@@ -128,6 +131,12 @@ Select a guide by the route above. The names below make scripts and specialist m
 `scripts/scene_baseline_snapshot.py` — read-only protected-object selected-property snapshot; `scripts/compare_scene_baselines.py` — pure-Python before/after fingerprint comparison. Neither substitutes for a saved .blend backup.
 
 `scripts/clean_install_smoke.py` — pure-Python isolated ZIP install and checksum smoke test; does not claim live agent discovery.
+
+`scripts/compare_asset_silhouettes.py` — read-only before/after evaluated convex-hull projection differences; never certifies appearance.
+
+`scripts/visual_evidence_manifest.py` — hash explicitly named real screenshot files with no visual pixel analysis.
+
+`scripts/scene_recovery_probe.py` — read-only verification of saved checkpoint path and protected object identity after reconnect; baseline comparison still required.
 
 `scripts/agent_efficiency_compare.py` — pure-Python read-only comparison of matching run metrics; no billed-token or artistic-quality claims without source evidence.
 

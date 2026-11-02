@@ -94,10 +94,37 @@ def inspect(obj):
             # This identifies only a review candidate, not an automatic fix.
             candidate_count += 1
             if len(samples) < MAX_EXAMPLES:
+                uv_layer = bm.loops.layers.uv.active
+                uv_discontinuity = False
+                if uv_layer is not None:
+                    # Check the same topological vertex mapped to differing UVs
+                    # across the four faces. This is evidence of a seam, not
+                    # permission to weld or dissolve any triangle.
+                    uv_by_vertex = {}
+                    for face in faces:
+                        for loop in face.loops:
+                            key = loop.vert
+                            uv = loop[uv_layer].uv
+                            pair = (float(uv.x), float(uv.y))
+                            previous = uv_by_vertex.get(key)
+                            if previous is not None and (
+                                    abs(pair[0] - previous[0]) > 1e-6 or
+                                    abs(pair[1] - previous[1]) > 1e-6):
+                                uv_discontinuity = True
+                            uv_by_vertex[key] = pair
+                material_boundary = len({f.material_index for f in faces}) > 1
+                shape_key_sensitive = bool(mesh.shape_keys and
+                                           len(mesh.shape_keys.key_blocks) > 1)
                 samples.append({
                     "center_vertex_index": int(center.index),
                     "center_local": [round(float(x), 6) for x in center.co],
                     "four_triangle_face_indices": sorted(int(f.index) for f in faces),
+                    "material_boundary": material_boundary,
+                    "uv_seam_candidate": uv_discontinuity,
+                    "shape_keys_present": shape_key_sensitive,
+                    "recommendation": ("PRESERVE_UNTIL_REVIEW"
+                                       if material_boundary or uv_discontinuity or shape_key_sensitive
+                                       else "REVIEW_FOR_CLEAN_QUAD_ON_COPY"),
                 })
         report.update({
             "status": "REVIEW" if candidate_count else "PASS",
@@ -136,6 +163,7 @@ def main():
             "glTF/GLB may encode triangles and split vertices by UV, normal or material seam.",
             "Only four-triangle coplanar fans around a degree-four center vertex are detected; other unnecessary diagonals are NOT VERIFIED.",
             "A zero-candidate result is PASS for this narrow pattern only, not proof of clean topology.",
+            "Material/UV discontinuity or shape keys increase the risk of replacing a four-triangle fan; flags are hints only.",
             "No dissolving, merging, modifier application or destructive changes occur.",
         ],
     }

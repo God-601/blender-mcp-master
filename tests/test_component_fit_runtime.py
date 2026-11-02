@@ -93,6 +93,36 @@ class ComponentFitRuntimeTests(unittest.TestCase):
         self.assertEqual(pair["status"], "REVIEW")
         self.assertFalse(pair["aabb_positive_volume_overlap"])
 
+    def test_edge_only_contact_is_not_a_valid_surface_joint(self):
+        self.cube("A", 0)
+        b = self.cube("B", 1)
+        b.location.y = 1.0
+        result = run_checks([{"a": "A", "b": "B", "expectation": "surface_joint"}])
+        pair = result["pairs"][0]
+        self.assertEqual(pair["status"], "ISSUE")
+        self.assertEqual(pair["aabb_contact_case"], "edge_corner_or_diagonal_candidate")
+        self.assertEqual(pair["aabb_face_support_axes"], [2])
+        self.assertEqual(pair["actual_joint_quality"], "NOT VERIFIED")
+
+    def test_true_face_aabb_support_still_requires_review(self):
+        self.cube("A", 0)
+        self.cube("B", 1)
+        pair = run_checks([{"a": "A", "b": "B",
+                           "expectation": "surface_joint"}])["pairs"][0]
+        self.assertEqual(pair["status"], "REVIEW")
+        self.assertEqual(pair["aabb_contact_case"], "face_plane_candidate")
+        self.assertEqual(pair["aabb_face_support_axes"], [1, 2])
+        self.assertEqual(pair["actual_joint_quality"], "NOT VERIFIED")
+
+    def test_diagonal_near_gap_does_not_pass_as_face_joint(self):
+        self.cube("A", 0)
+        b = self.cube("B", 1.001)
+        b.location.y = 1.001
+        pair = run_checks([{"a": "A", "b": "B",
+                           "expectation": "surface_joint", "max_gap": 0.01}])["pairs"][0]
+        self.assertEqual(pair["status"], "ISSUE")
+        self.assertEqual(pair["aabb_contact_case"], "edge_corner_or_diagonal_candidate")
+
     def test_gapped_joint_is_definitive_issue(self):
         self.cube("A", 0)
         self.cube("B", 2)
