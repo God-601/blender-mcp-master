@@ -94,8 +94,11 @@ The Release ZIP and GitHub skill installs are usable independently of npm.
 - "Make a voxel tree with my project grid unit of 0.25 m and an 8-color
   palette. Check exposed faces, UV island layout and export warnings."
 
-The agent should ask a focused question only when missing information would
-materially change the result.
+For a NEW modeling project, the agent must ask one general, nonredundant kickoff
+question before changing the scene, even if the technical brief is complete.
+It must not repeat already supplied requirements or restart the interview
+when refining the same project; essential new blockers may still require clarification.
+Read-only discovery is allowed before the kickoff answer.
 
 ## What counts as success?
 
