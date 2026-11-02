@@ -24,7 +24,7 @@ Record these fields, with `unknown` rather than inventing a specification:
 
 **G1 — Primary blockout:** build to named dimensions and verify front/side/three-quarter silhouette and major negative spaces. Do not polish if the main forms are wrong. Stop and redesign when proportions contradict the brief.
 
-**G2 — Construction:** component attachment, symmetry or intentional asymmetry, clearances, thickness, pivots, component names and separation for movement. A bounding-box overlap is not proof of a Boolean intersection or attachment.
+**G2 — Construction and surface fit:** plan mating planes, sockets/insertion depth (if deliberate), component attachment, symmetry or intentional asymmetry, clearances, thickness, pivots, component names and separation for movement. **Do not sink supports, rails, beams, ornaments or wall elements arbitrarily into another piece in place of an actual joint.** Verify the intended face-to-face connection or documented embedded joinery in actual front/side/three-quarter and close-up views before fine details; revisit after modifiers. A bounding-box overlap is not proof of a Boolean intersection or attachment. See `references/component-fit-and-joints.md` and read-only `scripts/inspect_component_fit.py` for explicit-pair candidate checks; they cannot alone prove geometry fits.
 
 **G3 — Mesh:** evaluate *final* modifier output. Test for loose/degenerate geometry and deliberate winding. Closed solids should usually have consistently outward-facing normals and positive signed volume; intentional internal cavities may use opposite shell orientation. Open cards/cloth may have boundaries by design. Treat watertightness as a target-dependent requirement, not a universal rule.
 
