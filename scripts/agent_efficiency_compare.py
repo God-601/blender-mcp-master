@@ -30,6 +30,22 @@ def _total_tokens(record):
     return total if total > 0 else None
 
 
+def _unreliable_run(record):
+    """A crash, reconstructed unsaved scene or missing preservation evidence invalidates the pair."""
+    reasons = []
+    checks = record.get("checks")
+    if not isinstance(checks, dict) or checks.get("scene_preserved") != "PASS":
+        reasons.append("scene_preservation_not_proven")
+    incidents = record.get("incidents", [])
+    if not isinstance(incidents, list):
+        reasons.append("invalid_incident_record")
+    elif incidents:
+        reasons.append("run_incident")
+    if record.get("run_status", "completed") != "completed":
+        reasons.append("run_not_completed_cleanly")
+    return reasons
+
+
 def compare(baseline, with_skill):
     if not isinstance(baseline, dict) or not isinstance(with_skill, dict):
         raise ValueError("two JSON run objects are required")
@@ -38,6 +54,9 @@ def compare(baseline, with_skill):
         left, right = baseline.get(key), with_skill.get(key)
         if not isinstance(left, str) or not left.strip() or left != right:
             mismatches.append(key)
+    for side, run in (("baseline", baseline), ("with_skill", with_skill)):
+        for reason in _unreliable_run(run):
+            mismatches.append(side + ":" + reason)
     comparable = not mismatches
     result = {
         "case_id": baseline.get("case_id"),
@@ -50,6 +69,7 @@ def compare(baseline, with_skill):
             "Counts are supplied by the user/client; no provider billing or image quality was independently verified.",
             "Reduced Bash calls or fewer loaded characters alone do not prove reduced token usage.",
             "Compare scene integrity and technical/visual outcomes before interpreting any efficiency result.",
+            "Crash/recovery, missing original scene evidence or incomplete runs block paired comparisons.",
         ],
     }
     if not comparable:

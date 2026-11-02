@@ -99,6 +99,7 @@ class RetopologyRuntimeTests(unittest.TestCase):
         }])
         self.assertEqual(result["status"], "ERROR")
         self.assertIsNone(bpy.data.objects.get("InvalidBridge"))
+        self.assertIsNone(bpy.data.collections.get("MCP_Advanced_Retopology"), "Failed copy must not leave an empty owned collection")
         self.assertEqual(len(source.data.polygons), 0)
 
     def test_fill_explicit_planar_boundary_hole(self):

@@ -1,9 +1,8 @@
-name: Publish beta ZIP release and npm
+name: Publish legacy beta ZIP release and npm (manual only)
 
+# IMPORTANT: No auto-release on main/package.json changes. Stable 1.0 needs
+# a separate reviewed/tagged release process after external acceptance.
 on:
-  push:
-    branches: [main]
-    paths: [package.json]
   workflow_dispatch:
 
 permissions:
@@ -50,7 +49,7 @@ jobs:
       - name: Build and verify standalone Agent Skill ZIP
         run: |
           mkdir -p dist/blender-mcp-master
-          cp -R SKILL.md README.md LICENSE references scripts assets dist/blender-mcp-master/
+          cp -R SKILL.md README.md LICENSE CHANGELOG.md CONTRIBUTING.md references scripts assets docs dist/blender-mcp-master/
           ( cd dist && zip -q -r "blender-mcp-master-$VERSION.zip" blender-mcp-master )
           python - <<'PY'
           import os, zipfile

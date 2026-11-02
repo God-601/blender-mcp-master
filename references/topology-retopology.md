@@ -5,6 +5,7 @@ Topology is a tool for the asset's job, not a beauty score. Choose density and e
 ## 1. Pick the topology target
 
 - **Static real-time prop:** triangles are valid; place edges where they affect silhouette, shading, or texture projection.
+- **Flat hard-surface panels:** prefer a clean editable quad when no internal support edge is required. Avoid four coplanar triangles forming an unnecessary X around a center vertex. Native quads still render as two triangles; GLB triangles/vertex splits are expected and do not automatically mean a broken asset. See `references/clean-editable-topology.md` and read-only `scripts/topology_face_diagnostics.py`.
 - **Subdivision surface:** prioritize predictable loops and support edges. Avoid long, narrow faces and pole placements that create pinching on curved areas.
 - **Deforming character/creature:** use edge loops that follow anatomy and bending zones, with sufficient loops around shoulders, elbows, hips, knees, fingers, mouth, and eyelids as needed.
 - **High-poly sculpt source:** prioritize surface quality and sculptability, not export efficiency.

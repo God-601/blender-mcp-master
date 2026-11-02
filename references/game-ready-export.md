@@ -30,7 +30,7 @@ Choose the required format, units, forward/up axes, triangle budget, material co
 ## 4. Destination considerations
 
 - **Unity/Unreal/Godot/Roblox:** verify current import settings, scale conversion, axes, material support, texture compression, and any platform-specific limits in the actual destination.
-- **glTF/GLB:** useful for realtime PBR assets, but not all Blender nodes or modifiers are represented. Confirm exported materials and textures.
+- **glTF/GLB:** useful for realtime PBR assets, but not all Blender nodes or modifiers are represented. Confirm exported materials and textures. A reimported GLB commonly has split vertex records along UV/normal/material seams and native triangles; this alone is not proof of surface damage. Compare positions, normals (where available), UVs, per-triangle materials and silhouette. If the destination specifically requires welded topology, test that separately; do not merge away needed seams blindly.
 - **FBX:** common for skeletal meshes and game assets; verify axes, scale, smoothing, armature, and animation data in the importer.
 - **OBJ/STL:** mesh interchange formats with limited material/scene information; do not assume they preserve rigs, procedural shaders, or full scene organization.
 

@@ -1,0 +1,53 @@
+name: Build integrated Agent Skill test ZIP (no release)
+
+on:
+  push:
+    branches: ["review/integrated-skill-preview-2026-11"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview-zip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Package installable standalone Agent Skill
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/blender-mcp-master
+          cp -R SKILL.md README.md LICENSE CHANGELOG.md CONTRIBUTING.md references scripts assets docs dist/blender-mcp-master/
+          (cd dist && zip -q -r blender-mcp-master-INTEGRATED-TEST.zip blender-mcp-master)
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          p = Path("dist/blender-mcp-master-INTEGRATED-TEST.zip")
+          with ZipFile(p) as z:
+              names = set(z.namelist())
+              required = (
+                  "blender-mcp-master/SKILL.md",
+                  "blender-mcp-master/references/quality-checklist.md",
+                  "blender-mcp-master/references/manual-acceptance-prompts.md",
+                  "blender-mcp-master/scripts/uv_diagnostics.py",
+                  "blender-mcp-master/scripts/retopology_advanced.py",
+                  "blender-mcp-master/scripts/agent_efficiency_compare.py",
+                  "blender-mcp-master/docs/QUICKSTART.md",
+              )
+              assert all(name in names for name in required), "Missing required preview skill file"
+              assert z.testzip() is None, "ZIP failed integrity test"
+              assert all(not name.startswith("/") and ".." not in name.split("/") for name in names)
+          print("PACKAGED", p, p.stat().st_size)
+          PY
+          (cd dist && sha256sum blender-mcp-master-INTEGRATED-TEST.zip > SHA256SUMS.txt)
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: blender-mcp-master-INTEGRATED-TEST
+          path: |
+            dist/blender-mcp-master-INTEGRATED-TEST.zip
+            dist/SHA256SUMS.txt
+          if-no-files-found: error
+          retention-days: 30

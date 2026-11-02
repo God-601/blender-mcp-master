@@ -25,6 +25,8 @@ Never mark an item PASS based only on an assumption. When a check produces a war
 - [ ] The asset reads clearly from the views and distance appropriate to its use.
 - [ ] Primary, secondary, and tertiary details have a deliberate hierarchy.
 - [ ] No unintended floating parts, intersections, coplanar surfaces, or distracting gaps remain.
+- [ ] **Mating surfaces and joinery:** legs, beams, roofs, rails, posts and walls meet at deliberate contact planes or documented sockets/tenons; no arbitrary deep penetration, hidden protrusions, or fake connections. Check in close-up and relevant orthographic views; `references/component-fit-and-joints.md`.
+- [ ] Recheck joints after bevel/subdivision or export transformations. AABB/BVH overlap warnings alone only prioritize review; they do not prove a defective intersection or correct fit.
 - [ ] Style is consistent across shapes, edge treatment, materials, textures, and presentation.
 - [ ] Lighting and camera reveal the form rather than conceal defects.
 
@@ -36,6 +38,7 @@ Never mark an item PASS based only on an assumption. When a check produces a war
 - [ ] Degenerate faces and zero-area geometry have been investigated.
 - [ ] Non-manifold edges and open boundaries have been evaluated in context; they are not automatically defects on intentionally open surfaces, foliage, cloth, or similar assets.
 - [ ] N-gons are appropriate for the surface and workflow; curved, subdivided, or deforming regions receive extra scrutiny.
+- [ ] Inspect flat editable surfaces for redundant four-triangle center fans (X pattern). Use a single appropriate quad when safe, but preserve purposeful triangular edges, UV/normal/material seams, bevels, and shape; do not confuse GLB triangulation with editable face topology (`references/clean-editable-topology.md`).
 - [ ] Bevels, supporting loops, and sharp edges suit the scale and visual style.
 - [ ] Rigging, shape keys, modifiers, and shared mesh data are preserved when relevant.
 

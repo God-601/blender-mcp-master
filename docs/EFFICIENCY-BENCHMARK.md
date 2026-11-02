@@ -30,6 +30,10 @@ Create `baseline.json` and `with-skill.json` with fields like the following. The
 }
 ~~~
 
+**Crash/unsaved-scene gate (T08 regression):** The companion comparator refuses a paired efficiency claim if either run lacks `checks.scene_preserved=PASS`, has nonempty `incidents`, or has `run_status` other than `completed`. These fields are conditions, not a way to erase an unsuccessful attempt. A Blender crash followed by reconstructing `Cube/Camera/Light` does not restore the original scene. Refer to `references/crash-recovery-and-baselines.md` and save identical backed-up scene fixtures before both runs. Record `incidents: []` only when no incident occurred, not as a default to hide an event.
+
+**Known T08 trial (2026-11-02):** Two medieval tables met dimensions and triangle budget (968 versus 836 evaluated tris). First run reported 12 direct/14 nested calls including 3 terminal calls; second run reported 17 external/21 internal operations including 8 terminal operations. Those call categories have not been normalized. One trial crashed and lost an unsaved source scene, then rebuilt from a new default scene. Tokens and confirmed matched start fixture are NOT VERIFIED. **Result: inconclusive, not evidence of skill token savings or superior quality.** No claims about the skill-on/off assignment are made without the original logs.
+
 Do not copy the dummy identifiers into real benchmark files: derive the prompt hash and starting-scene hash from the actual contents. Only fill token counts when your client reports actual counts; otherwise omit `usage` entirely.
 
 ## Compare on Windows (PowerShell)

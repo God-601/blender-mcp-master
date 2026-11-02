@@ -8,7 +8,7 @@
 <p align="center">
   <a href="https://github.com/God-601/blender-mcp-master/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/God-601/blender-mcp-master?include_prereleases&style=flat-square&label=release"></a>
   <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-21262d?style=flat-square"></a>
-  <a href=".github/workflows/static-checks.yml"><img alt="GitHub Actions" src="https://img.shields.io/badge/CI-GitHub_Actions-21262d?style=flat-square"></a>
+  <a href="https://github.com/God-601/blender-mcp-master/actions/workflows/static-checks.yml"><img alt="GitHub Actions" src="https://img.shields.io/badge/CI-GitHub_Actions-21262d?style=flat-square"></a>
 </p>
 
 <p align="center">
@@ -69,6 +69,14 @@ Neither command provides Blender scene-control tools.
 </details>
 
 <p align="center"><img src="assets/workflow.svg" width="100%" alt="Clarify, plan, build, inspect and correct workflow diagram"></p>
+
+**1.0 preparation:** See the [evidence ledger](docs/RELEASE-1.0-EVIDENCE.md)
+and [release readiness roadmap](docs/ROADMAP-1.0.md). The current public
+version is still `v0.2.0-beta.1`; the integrated review branch adds
+crash-safe protected-object snapshots, manual quality gates and a
+**nonpublishing** preflight ZIP. A successful CI run is not a verified
+game-engine import or multi-client artistic benchmark. The T10 real-agent
+exercise is intentionally not required for 1.0.
 
 ## Workflow
 

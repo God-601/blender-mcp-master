@@ -164,6 +164,7 @@ def _run_one(target):
     if not isinstance(ops, list) or not ops:
         raise ValueError("operations must contain at least one explicit operation")
     # Every output uses independent mesh data, never a shared mesh datablock.
+    collection_preexisting = bpy.data.collections.get(COLLECTION_NAME) is not None
     col = _collection()
     output = source.copy()
     output.data = source.data.copy()
@@ -198,6 +199,8 @@ def _run_one(target):
         bpy.data.objects.remove(output, do_unlink=True)
         if mesh.users == 0:
             bpy.data.meshes.remove(mesh)
+        if not collection_preexisting and col.get(OWNER_KEY) == OWNER_VALUE and not col.objects:
+            bpy.data.collections.remove(col)
         raise
     else:
         bm.free()

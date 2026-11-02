@@ -10,10 +10,12 @@ This is a **launch checklist**, not evidence that the skill has already passed a
 
 **Product sentence:** "Blender MCP Master helps AI agents plan, build, inspect and safely refine Blender assets with measurable checks and honest delivery reports."
 
+**Current working document:** [1.0 evidence ledger](RELEASE-1.0-EVIDENCE.md). Do not require T10 for the 1.0 decision; the detector is experimental. No comparative token/agent advantage is verified yet because the T08 trial lost an unsaved Blender scene. No package version bump, public Release or npm publication is authorized by a passing automated preflight.
+
 ## Release gate (do not mark without evidence)
 
 - [ ] All required CI jobs green on the exact release commit, including Python static, the supported bpy matrix, npm, packaging and the targeted mutation campaign.
-- [ ] A clean-install test of the GitHub Release ZIP, the bundled directory structure, SHA-256 check, and discovery by at least one supported agent.
+- [ ] A clean-install test of the candidate ZIP, the bundled directory structure, SHA-256 check, and discovery by at least one supported agent (the preflight workflow is NOT a Release).
 - [ ] At least 5 real modeling benchmark assets: chair, sword, house, rock/tree and character or hard-surface panel.
 - [ ] Save the actual .blend and front/side/three-quarter screenshots; store versions of Blender, agent and Blender-control MCP.
 - [ ] Test scene protection by placing unrelated user-owned objects before the run.

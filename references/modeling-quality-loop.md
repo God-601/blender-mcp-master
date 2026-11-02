@@ -34,6 +34,7 @@ Do not call visual-inspection tools after every trivial property change. Do call
 - Are major proportions and negative spaces intentional?
 - Is the focal feature visible at the intended viewing distance?
 - Are parts accidentally intersecting, floating, or coplanar in ways that cause z-fighting?
+- Do joining components meet on their intended mating planes, or do posts/legs/rails/roofs arbitrarily penetrate other solids? Identify intentional joinery separately from clipping; inspect near the seam and repeat after modifiers. See `references/component-fit-and-joints.md` and read-only `scripts/inspect_component_fit.py` for conservative candidate evidence; overlapping bounds do **not** prove bad intersections.
 - Are repeated elements varied only when the design calls for variation?
 
 ### Surface and topology
