@@ -42,9 +42,9 @@ npx skills add God-601/blender-mcp-master -g
 
 **Or download the release ZIP**
 
-**[Download v0.2.0-beta.1 · Installable ZIP](https://github.com/God-601/blender-mcp-master/releases/download/v0.2.0-beta.1/blender-mcp-master-0.2.0-beta.1.zip)**
+**[Download v1.0.0 · Installable ZIP](https://github.com/God-601/blender-mcp-master/releases/download/v1.0.0/blender-mcp-master-1.0.0.zip)**
 
-Get [SHA256SUMS.txt](https://github.com/God-601/blender-mcp-master/releases/download/v0.2.0-beta.1/SHA256SUMS.txt) from the same release, verify the hash, extract the ZIP and copy its inner `blender-mcp-master` folder to your agent's skills directory. Full [Windows and agent setup instructions](docs/QUICKSTART.md).
+Get [SHA256SUMS.txt](https://github.com/God-601/blender-mcp-master/releases/download/v1.0.0/SHA256SUMS.txt) from the same release, verify the hash, extract the ZIP and copy its inner `blender-mcp-master` folder to your agent's skills directory. Full [Windows and agent setup instructions](docs/QUICKSTART.md).
 
 **2. Set up Blender control separately**
 
@@ -56,7 +56,7 @@ Connect a compatible Blender-control MCP and its addon; discover the actual tool
 If published to npm, the package can expose text references and script templates over stdio:
 
 ```bash
-npx -y blender-mcp-master@0.2.0-beta.1
+npx -y blender-mcp-master@1.0.0
 ```
 
 Without an npm publication, the GitHub source can be used instead:
@@ -70,13 +70,13 @@ Neither command provides Blender scene-control tools.
 
 <p align="center"><img src="assets/workflow.svg" width="100%" alt="Clarify, plan, build, inspect and correct workflow diagram"></p>
 
-**1.0 preparation:** The work from PRs #29–#32 is now integrated into
-`main`; #28's UV implementation was incorporated by #32. The latest public
-tag remains `v0.2.0-beta.1`. The [1.0 release roadmap](docs/ROADMAP-1.0.md)
-defines the remaining isolated clean-install and publication steps.
-See the [evidence ledger](docs/RELEASE-1.0-EVIDENCE.md) for known limitations.
-A successful package smoke test does **not** verify real Codex/Claude
-discovery, Blender-control MCP connectivity, engine imports or visual quality.
+**v1.0.0 stable:** The first stable release includes scene-safe workflows,
+measured geometry checks, guided retopology, a clean-install tested ZIP and
+explicit `NOT VERIFIED` outcomes. See the [release notes](docs/release-notes-1.0.md),
+[evidence ledger](docs/RELEASE-1.0-EVIDENCE.md) and
+[post-1.0 roadmap](docs/ROADMAP-NEXT.md). The isolated install smoke does **not**
+prove a real agent discovered the skill, connect Blender, import into an engine
+or certify artistic quality.
 
 ## Workflow
 
@@ -118,7 +118,7 @@ Supported workflows include hard-surface props, organic modeling, stylized and l
 | [Modeling standards](references/professional-modeling-standards.md) | Production requirements and quality evidence |
 | [Production recipes](references/production-recipes.md) | Concrete modeling examples |
 | [Skill comparisons](docs/ECOSYSTEM-COMPARISON.md) | Reference patterns, including Superpowers |
-| [1.0 release roadmap](docs/ROADMAP-1.0.md) | Verified implementation status and remaining real Blender/agent tests |
+| [Post-1.0 roadmap](docs/ROADMAP-NEXT.md) | Next updates: stability, geometry, engines, agents, visual quality |
 | [Agent efficiency](references/token-efficient-agent-execution.md) | Tool-first, bounded reads and progressive context loading |
 | [3D model optimization](references/model-performance-strategy.md) | Evaluated triangle, material, texture and Geometry Nodes guidance |
 | [Paired token benchmark](docs/EFFICIENCY-BENCHMARK.md) | Reproducible with/without skill comparison protocol |
@@ -142,7 +142,7 @@ Some tests require a compatible `bpy` runtime. Passing tests is not proof of art
 
 **Uma skill para agentes de IA modelarem no Blender com método e evidências.** Ela orienta o agente; não instala nem substitui o Blender-control MCP.
 
-- **Instalar:** `npx skills add God-601/blender-mcp-master -g` ou [baixar o ZIP da Release](https://github.com/God-601/blender-mcp-master/releases/download/v0.2.0-beta.1/blender-mcp-master-0.2.0-beta.1.zip).
+- **Instalar:** `npx skills add God-601/blender-mcp-master -g` ou [baixar o ZIP da Release](https://github.com/God-601/blender-mcp-master/releases/download/v1.0.0/blender-mcp-master-1.0.0.zip).
 - **Alternativa sem npm:** `npx -y github:God-601/blender-mcp-master` inicia o servidor de recursos somente leitura.
 - **CLI:** `npx skills add God-601/blender-mcp-master -g` instala a skill.
 - **Configurar:** conectar separadamente um Blender-control MCP. Veja o [guia para Windows e agentes](docs/QUICKSTART.md).
