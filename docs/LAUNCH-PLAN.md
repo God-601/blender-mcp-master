@@ -16,7 +16,7 @@ This is a **launch checklist**, not evidence that the skill has already passed a
 
 - [x] PRs #29–#32 integrated; #28 functionality included without reintroducing the old SKILL.md.
 - [x] Integrated `main` Python, Blender bpy 4.2/4.5/5.0/5.1/5.2, npm and regression CI passed.
-- [ ] Run a **clean, isolated ZIP skill installation** from the candidate with SHA256 verification; inspect its JSON smoke report.
+- [x] Run a **clean, isolated ZIP skill installation** from the candidate with SHA256 verification; [JSON smoke report built successfully](https://github.com/God-601/blender-mcp-master/actions/runs/41495964213). The workflow will rerun on main after integration.
 - [ ] Confirm ZIP/README/release notes and advertised limitations are accurate on the final candidate commit.
 - [ ] Obtain explicit maintainer authorization for any stable tag, GitHub Release or npm publication.
 
