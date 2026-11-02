@@ -37,6 +37,20 @@ T09, sem atribuir precisão ao AABB que ele não fornece.
 **Critério:** cenários positivos/negativos reproduzidos no Blender, com
 falsos positivos quantificados e provas de preservação da cena.
 
+## v1.1.0 — Entregue (escopo medido)
+
+A atualização v1.1.0 entrega diagnósticos conservadores de encaixes por
+AABB, riscos de UV/material/shape keys em topologia X, comparação de
+silhueta convexa antes/depois da otimização, hashing de capturas reais e
+verificação do checkpoint salvo após reconexão. Testes automatizados são
+executados com bpy 4.2–5.2, além de Python/Node.
+
+**Não foi entregue:** detecção exata de interseções entre sólidos,
+correção automática de topologia ou encaixes, avaliação artística de
+pixels ou benchmark comprovado em outro agente/engine. Esses são
+objetivos futuros, não resultados da versão 1.1.
+Veja [evidências v1.1](RELEASE-1.1-EVIDENCE.md).
+
 ## v1.2.0 — Pipeline de assets para jogos
 
 **Foco:** medir a qualidade do fluxo completo, não apenas o .blend.
