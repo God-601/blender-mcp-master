@@ -1,5 +1,8 @@
 # Game Asset Optimization
 
+Start with the non-mutating per-target `scripts/asset_performance_audit.py` and `references/model-performance-strategy.md` for actual evaluated geometry and budget warnings. These are not measured FPS or exact draw calls.
+
+
 Practical, evidence-driven optimization for static and real-time game assets. This guide is intentionally conservative: a lower triangle count is not automatically a better asset. Preserve silhouette, shading, UVs, material assignments, deformation, collision behavior, and readability at the intended camera distance.
 
 ## 1. Optimize the actual bottleneck
