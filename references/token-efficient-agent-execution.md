@@ -28,6 +28,8 @@ The package retains backward-compatible full-document tools. For an uncertain is
 
 These resource tools only serve files. They do **not** call Blender, execute scripts, inspect images or bypass user approval.
 
+To compare two controlled runs, pass their recorded JSON evidence to `python scripts/agent_efficiency_compare.py baseline.json with-skill.json`. It only computes a token delta when both records contain valid, comparable client usage values and never invents visual quality.
+
 ## Efficiency evaluation, not slogans
 
 For the same prompt, model, Blender scene, MCP and tool permission set, compare baseline versus tool-first workflow. Record:
