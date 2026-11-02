@@ -12,13 +12,17 @@ Works with any agent that can read this file (Claude, Codex, Cursor, Gemini CLI,
 ## 0. The 8 golden rules (read these even if you read nothing else)
 
 1. **Clarify before you build.** Apply the P0 clarification gate in `references/clarification-gate.md`. Ask a focused question when a missing or conflicting requirement materially changes the asset, then probe with `get_addon_status` and `get_scene_info` (read-only discovery can happen while clarifying). Never assume Blender version, units, or user intent.
-2. **Small steps, print everything.** One logical operation per `execute_blender_code` call. Always `print()` what you need to verify (counts, dimensions, names). Never write a 300-line script blind.
+2. **Small steps, bounded evidence.** One logical operation per `execute_blender_code` call. Print only the relevant observations (named targets, counts, dimensions, errors and statuses), with full traceback when necessary. Never write a 300-line script blind.
 3. **Inspect, then correct.** Use `look` after changes that affect silhouette, shading, topology or composition; inspect multiple angles before adding detail and before delivery. See `references/modeling-quality-loop.md`.
 4. **Never leave the scene dirty.** Don't delete or modify user objects you didn't create. Work in a dedicated collection named after the asset. Prefix or tag your objects.
 5. **Explicit scale and transforms.** Treat 1 Blender unit as 1 m only when the scene/workflow uses metric units; confirm the destination's scale convention (especially Roblox). Apply transforms when required for UVs, baking, rigging or export, without destructively changing user-owned objects.
 6. **Non-destructive first, destructive last.** Use modifiers (Bevel, Mirror, Array, Subdivision, Boolean) while iterating; apply only when finishing or when export requires it.
 7. **Budget before detail.** Decide the target (triangles, texture size, material count) from the target use *before* modeling (see `references/budgets.md`) and state it in the plan. Detail beyond the chosen budget is a bug; a platform's hard limit is never exceeded, while the default numbers are adjustable starting points.
 8. **Verify, then report.** Finish with measurable facts (tri count, dimensions, materials, issues found/fixed), not adjectives.
+
+### Tool-first and token-efficient execution
+
+Follow `references/token-efficient-agent-execution.md` for progressive disclosure, bounded tool output and minimal repeated reads. Prefer connected MCP and native file-reading tools to Bash for structured scene/file operations **when available**; Bash remains valid for necessary reproducible commands. Do not sacrifice scene backups, visual checkpoints, or the mandatory one-question GENERAL KICKOFF to save tokens. The optional resource server supports `get_blender_reference_outline` and `get_blender_reference_excerpt`; load full references only when required. See `references/model-performance-strategy.md` for mesh cost analysis.
 
 ### Reference and evidence protocol
 
@@ -79,6 +83,8 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Render, lighting, camera, turntable | Lighting/render | `references/lighting-render.md` |
 | Game engine target (Roblox, Unity, Unreal, Godot) | Game-ready + export | `references/game-ready-export.md`; add `references/uv-baking.md` for texture workflows |
 | Slow viewport, heavy scene, crashes | Performance | `references/performance.md` |
+| Measure evaluated mesh, materials and texture overhead without edits | Performance audit | `references/model-performance-strategy.md`, `scripts/asset_performance_audit.py` |
+| Reduce agent context, command output and unnecessary Bash use | Agent efficiency | `references/token-efficient-agent-execution.md` |
 | Something looks wrong | Troubleshooting | `references/troubleshooting.md` |
 | Need triangle / texture / scale numbers | Budgets | `references/budgets.md` |
 | Geometry construction from components, profiles, or lathed forms | Geometry engine | `references/geometry-engine.md` |
