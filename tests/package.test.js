@@ -109,9 +109,9 @@ test("every listed reference and script can be read through the MCP tools", asyn
       if (name === "visual_review_report.py") {
         // Evidence receipts run in ordinary Python and intentionally do not require Blender.
         assert.match(result.content[0].text, /def assess_review/);
-      } else if (name === "agent_efficiency_compare.py" || name === "compare_scene_baselines.py") {
+      } else if (name === "agent_efficiency_compare.py" || name === "compare_scene_baselines.py" || name === "clean_install_smoke.py") {
         // Both scripts are pure Python and intentionally work without Blender.
-        assert.match(result.content[0].text, /def compare\(/);
+        assert.match(result.content[0].text, /def (?:compare|smoke)\(/);
       } else {
         assert.match(result.content[0].text, /import bpy/);
       }

@@ -76,20 +76,21 @@ does not control Blender.
 - Material/scene snapshot hashes cover selected properties only; always
   preserve saved source files and use external backup practices.
 
-## Must be completed before removing DRAFT
+## Required before removing DRAFT
 
-- [ ] Merge reviewed PR changes in correct order; reconcile duplicate UV patch.
-- [ ] CI green for exact candidate commit, including 1.0 readiness package
-  and integrity checksum.
-- [ ] Clean skill discovery/install and real Blender-control MCP smoke test.
-- [ ] At least two documented agent clients, real model files and images.
-- [ ] Real engine import of a representative exported asset.
-- [ ] Independent artistic review / objective asset acceptance.
-- [ ] Sign off remaining T08 limitations or repeat an uninterrupted pair
-  if comparative efficiency is claimed.
-- [ ] Bump package, lock and release asset names together **after approval**.
-- [ ] Confirm Release workflow authorization, GitHub tag, release notes,
-  legal/README paths and optional npm ownership.
-- [ ] Obtain explicit maintainer authorization for publishing.
+- [x] Functional PRs #29–#32 integrated; UV work from #28 included on main.
+- [x] Automated Python, supported bpy matrix, Node/npm checks passed on the
+  integrated `main` commit.
+- [x] Fresh isolated ZIP skill installation and SHA256 report passed on PR #33
+  ([preflight run](https://github.com/God-601/blender-mcp-master/actions/runs/41495964213)); repeat automatically on main after merge.
+- [ ] Verify the package version/lockfile, README links, current release notes
+  and final ZIP match the intended `v1.0.0` publication.
+- [ ] Explicit maintainer authorization to create tag, GitHub Release or
+  publish an optional npm package.
+
+**Explicitly deferred (NOT VERIFIED):** real second-agent acceptance, actual
+engine import, independent artwork review, reliable token savings, Blender
+3.1.2 CI, and T10 end-to-end tests. These are not release blockers by
+maintainer choice, and must not appear as validated capabilities.
 
 Evidence: [RELEASE-1.0-EVIDENCE.md](RELEASE-1.0-EVIDENCE.md).

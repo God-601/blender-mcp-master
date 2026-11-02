@@ -70,13 +70,13 @@ Neither command provides Blender scene-control tools.
 
 <p align="center"><img src="assets/workflow.svg" width="100%" alt="Clarify, plan, build, inspect and correct workflow diagram"></p>
 
-**1.0 preparation:** See the [evidence ledger](docs/RELEASE-1.0-EVIDENCE.md)
-and [release readiness roadmap](docs/ROADMAP-1.0.md). The current public
-version is still `v0.2.0-beta.1`; the integrated review branch adds
-crash-safe protected-object snapshots, manual quality gates and a
-**nonpublishing** preflight ZIP. A successful CI run is not a verified
-game-engine import or multi-client artistic benchmark. The T10 real-agent
-exercise is intentionally not required for 1.0.
+**1.0 preparation:** The work from PRs #29–#32 is now integrated into
+`main`; #28's UV implementation was incorporated by #32. The latest public
+tag remains `v0.2.0-beta.1`. The [1.0 release roadmap](docs/ROADMAP-1.0.md)
+defines the remaining isolated clean-install and publication steps.
+See the [evidence ledger](docs/RELEASE-1.0-EVIDENCE.md) for known limitations.
+A successful package smoke test does **not** verify real Codex/Claude
+discovery, Blender-control MCP connectivity, engine imports or visual quality.
 
 ## Workflow
 
