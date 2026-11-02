@@ -15,8 +15,9 @@ A portable Agent Skill for AI-driven Blender modeling. It is **not a Blender-con
 4. **Small reversible operations.** Prefer duplicate-first mesh edits and modifiers, a single logical code operation per step, and concise actual observations. Ask permission for destructive/in-place edits, overwrites and paid operations.
 5. **Visual checkpoints.** Inspect actual front/side/three-quarter views after blockout and major geometry or material changes; no visual tool means visual quality is NOT VERIFIED.
 6. **Measured technical checks and proper fit.** Validate evaluated geometry, UVs, mating surfaces, object contact, nonintentional interpenetration, material assignments and budgets for the real destination. Use `references/component-fit-and-joints.md` for G2; avoid a piece merely sinking into another instead of a planned joint. No broad scene-wide fallback on missing targets.
-7. **Diagnose defects first.** Capture actual evidence, isolate the cause, fix only the affected owned copy, recheck original and nearby geometry. After two failed attempts, change method or seek a critical reference.
-8. **Honest delivery.** State PASS / ISSUE / N/A / NOT VERIFIED for relevant acceptance criteria, exact file paths actually confirmed, measured results and remaining limitations. A passing Python test is not a professional art-quality certificate.
+7. **Readable editable faces.** Prefer intentional clean quads on flat hard-surface panels. Four coplanar triangles making an unnecessary X-like face are a REVIEW candidate, not automatic failure. Distinguish native faces from GPU/glTF triangles; use `references/clean-editable-topology.md` and `scripts/topology_face_diagnostics.py` on named meshes when relevant.
+8. **Diagnose defects first.** Capture actual evidence, isolate the cause, fix only the affected owned copy, recheck original and nearby geometry. After two failed attempts, change method or seek a critical reference.
+9. **Honest delivery.** State PASS / ISSUE / N/A / NOT VERIFIED for relevant acceptance criteria, exact file paths actually confirmed, measured results and remaining limitations. A passing Python test is not a professional art-quality certificate.
 
 **Avoid global orphan purges.** Do not globally delete objects, overwrite user files or apply modifiers to someone else's mesh. Use `references/professional-modeling-standards.md` and `references/quality-checklist.md` for substantial assets. Distinguish real image evidence from mere geometry metrics.
 
@@ -55,6 +56,7 @@ For nontrivial assets read `references/modeling-quality-loop.md`, `references/mo
 | Game asset optimization and export | `references/game-asset-optimization.md`, `references/p1-production-pipeline.md`, `references/game-ready-export.md` |
 | Measured 3D geometry/material/texture cost | `references/model-performance-strategy.md`, `scripts/asset_performance_audit.py` |
 | Check intentional joints versus accidental penetration | `references/component-fit-and-joints.md`, `scripts/inspect_component_fit.py` |
+| Unnecessary planar X triangulation or editable face cleanup | `references/clean-editable-topology.md`, `scripts/topology_face_diagnostics.py` |
 | Token/context and tool efficiency | `references/token-efficient-agent-execution.md` |
 | Version-dependent Blender API or MCP mismatch | `references/official-blender-documentation.md`, `references/capability-mapping.md` |
 | Local reusable records / reviewers | `references/technique-registry.md`, `scripts/technique_registry.py`, `scripts/visual_review_report.py` |
@@ -115,6 +117,8 @@ Select a guide by the route above. The names below make scripts and specialist m
 `references/voxel-atlas-recipe.md` · `references/workflow-director.md`
 
 ### Available scripts (Blender bpy unless documented otherwise)
+
+`scripts/topology_face_diagnostics.py` — read-only planar four-triangle X fan candidates in editable base meshes; preserves intentional triangles and reports REVIEW only.
 
 `scripts/inspect_component_fit.py` — optional read-only explicit-pair AABB/BVH candidates; real visual joint correctness is NOT VERIFIED until inspected.
 
