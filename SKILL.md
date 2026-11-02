@@ -156,4 +156,4 @@ Select a guide by the route above. The names below make scripts and specialist m
 
 `scripts/validate_uvs.py` · `scripts/vehicle_proportion_example.py` · `scripts/visual_review_report.py` · `scripts/voxel_atlas_example.py`
 
-Release gates are tracked in `docs/ROADMAP-1.0.md`. Installed skills, code execution and CI alone cannot prove live Blender MCP connectivity or final artistic quality.
+Release scope and follow-ups are tracked in `docs/ROADMAP-NEXT.md`. Installed skills, code execution and CI alone cannot prove live Blender MCP connectivity or final artistic quality.
