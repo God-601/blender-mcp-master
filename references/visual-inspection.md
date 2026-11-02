@@ -1,5 +1,10 @@
 # Visual inspection and correction
 
+## Evidence receipts and defect triage
+
+After the agent has actually captured and inspected Blender screenshots, it can write structured receipt metadata into `scripts/visual_review_report.py` (asset name, front/side/three-quarter artifacts, reviewer and observed defects) to create a no-mutation report. Without the three actual reviewed views, the result is `NOT VERIFIED`. With unresolved defects it is `ISSUE`; even with all metadata present it reports `REVIEW_RECORDED`, **not artistic PASS**. The tool cannot see image pixels or verify that screenshots correspond to the object. Correct the defects using explicit owned copies and recheck actual views.
+
+
 ## Purpose
 
 Visual inspection evaluates the actual visible model. It complements mesh diagnostics; neither replaces
