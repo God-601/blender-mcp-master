@@ -91,6 +91,7 @@ Guard version-specific code with `bpy.app.version >= (x, y, z)` or `hasattr`. If
 | Mapping different MCP tools to common functions | Capability discovery | `references/capability-mapping.md` |
 | Decomposing complex objects and choosing modeling techniques | Modeling intelligence | `references/modeling-intelligence.md` |
 | Visual inspection and localized corrections | Visual review | `references/visual-inspection.md`, `scripts/inspection_report.py`, `scripts/localized_correction.py` |
+| Record reviewed view evidence and actionable visual defects | Visual evidence contract | `scripts/visual_review_report.py`, `references/visual-inspection.md` |
 | Cross-agent support evidence | Agent compatibility | `references/agent-compatibility.md` |
 | Store tested technique executions in the current .blend | Technique history | `scripts/technique_history.py` |
 | Share manually reviewed techniques across local projects (opt-in only) | Local technique registry | `references/technique-registry.md`, `scripts/technique_registry.py` |
