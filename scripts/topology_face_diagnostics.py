@@ -43,6 +43,8 @@ def inspect(obj):
     bm = bmesh.new()
     try:
         bm.from_mesh(mesh)
+        bm.verts.index_update()
+        bm.faces.index_update()
         bm.normal_update()
         vertices = list(bm.verts)
         tris = sum(max(0, len(f.verts) - 2) for f in bm.faces)
