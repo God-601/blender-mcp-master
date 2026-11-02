@@ -14,9 +14,9 @@ Definitions:
 | P0-01 | Resolve docs/readme regressions, ensure accurate architecture + install paths | CI verified on PR #29; merge pending | GitHub Actions logs for PR #29; requires review and integration |
 | P0-02 | Correct UV test API and verify overlap/density diagnostics | CI verified on PR #28; integration pending | Tests on bpy matrix, including missing UV layer |
 | P0-03 | General kickoff, guided retopology, reviewed registry, visual evidence receipts | CI verified on PR #30; real behavior still pending | Python/bpy/npm checks on exact PR head; actual agent behavior not verified |
-| P0-04 | Remove unnecessary Bash usage/context loading in resource navigation | Implemented in this branch; CI pending | MCP bounded excerpt/outline integration tests; no invented token reduction |
-| P0-05 | Read-only evaluated mesh, materials and texture workload audit | Implemented in this branch; CI pending | Real bpy tests: evaluated geometry, duplicated datablocks, material warning, read-only behavior |
-| P0-06 | Preserve safety + clarify versioned setup and token-conscious workflow | Implemented in this branch; CI pending | Mandatory kickoff + P0 integrity behavior not weakened |
+| P0-04 | Minimize unnecessary Bash usage/context loading in resource navigation | Implemented in PR #31; Python/bpy CI green, npm rerun pending | MCP bounded excerpt/outline integration tests; no invented token reduction |
+| P0-05 | Read-only evaluated mesh, materials and texture workload audit | Implemented in PR #31; Python/bpy CI green | Real bpy tests: evaluated geometry, duplicated datablocks, material warning, read-only behavior |
+| P0-06 | Preserve safety + clarify versioned setup and token-conscious workflow | Implemented in PR #31; Python/bpy CI green | Mandatory kickoff + P0 integrity behavior not weakened |
 | P0-07 | Real end-to-end Blender MCP project on at least 2 supported clients | **NOT VERIFIED**; external | Exact agents/MCP/Blender versions, full logs, output .blend, views; follow Issue #19 |
 | P0-08 | Real engine import/export with one intended target | **NOT VERIFIED**; external | Open exported file in intended engine; verify scale, UV, materials, pivots and geometry; Issue #18 |
 | P0-09 | Independent artistic review, controlled with/without-skill comparison | **NOT VERIFIED**; external | At least chair, sword, house, organic and mechanical/character assets, same conditions; Issue #20 |
