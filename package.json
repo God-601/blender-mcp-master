@@ -1,6 +1,6 @@
 {
   "name": "blender-mcp-master",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Blender Agent Skill and read-only MCP resource server for modeling, evidence and safety",
   "type": "module",
   "license": "MIT",

@@ -1,5 +1,25 @@
 # Changelog
 
+## 1.1.0 — safer geometric review and evidence (2026-11-02)
+
+- Detect edge/corner/diagonal-only AABB proximity that cannot support a
+  face-area surface joint; keep plausible face contact as REVIEW rather
+  than inventing solid-intersection proof.
+- Flag UV seams, material boundaries and shape keys in coplanar editable
+  four-triangle X-fan candidates; do not auto-dissolve.
+- Compare evaluated front/side/top/three-quarter convex-hull silhouette
+  proxies on explicit original/optimized pairs before accepting polygon
+  reductions; detail/artistic quality still needs inspected images.
+- Verify the presence, names, formats and SHA-256 of real PNG/JPEG evidence
+  files; never confuse image receipt checks with pixel analysis.
+- Verify the expected saved .blend checkpoint and protected object names
+  after reconnecting, before comparing archived protected property hashes.
+- Add regression fixtures and expanded route documentation.
+
+**Limitations:** no comprehensive 3D Boolean intersection solver,
+automatic retopology repair, artistic/pixel inspection or certification
+of Blender 3.x/engine imports. See `docs/RELEASE-1.1-EVIDENCE.md`.
+
 ## 1.0.0 — first stable release (2026-11-02)
 
 - Integrated CI-tested UV diagnostics, copy-first guided retopology,

@@ -32,6 +32,20 @@ class ReleaseReadinessStaticTests(unittest.TestCase):
         self.assertIn("gh release create", source)
         self.assertIn("Tag exists at a DIFFERENT SHA", source)
 
+    def test_stable_v11_has_exact_sha_ci_and_clean_zip_gates(self):
+        source = (ROOT / ".github/workflows/release-stable-1.1.yml").read_text(encoding="utf-8")
+        self.assertIn("workflow_run:", source)
+        self.assertIn("github.event.workflow_run.conclusion == 'success'", source)
+        self.assertIn('MAIN_SHA', source)
+        self.assertIn('RELEASE_SHA', source)
+        self.assertIn('p.version !== "1.1.0"', source)
+        self.assertIn("Release readiness preflight (NO RELEASE)", source)
+        self.assertIn("npm package checks", source)
+        self.assertIn("for retry in $(seq 1 18)", source)
+        self.assertIn("scripts/clean_install_smoke.py", source)
+        self.assertIn("docs/release-notes-1.1.md", source)
+        self.assertIn("Tag exists at a DIFFERENT SHA", source)
+
     def test_release_evidence_does_not_fabricate_agent_or_engine_pass(self):
         evidence = (ROOT / "docs/RELEASE-1.0-EVIDENCE.md").read_text(encoding="utf-8")
         self.assertIn("T08", evidence)
