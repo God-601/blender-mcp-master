@@ -3,8 +3,8 @@ name: Publish v1.1.0 stable (one-time gated)
 # Explicitly approved v1.1.0 launch. Trigger ONLY after Static checks
 # has finished successfully on a push to main; the workflow independently
 # requires the npm and clean-install preflight workflows to have passed on
-# that exact commit. After publication, pin the allowed commit SHA to avoid
-# another attempt on later main commits.
+# that exact commit. One-time release commit SHA is pinned after publication, so
+# later main commits cannot restart this release workflow.
 on:
   workflow_run:
     workflows: ["Static checks"]
@@ -25,7 +25,8 @@ jobs:
     if: >-
       github.repository == 'God-601/blender-mcp-master' &&
       github.event.workflow_run.event == 'push' &&
-      github.event.workflow_run.conclusion == 'success'
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_sha == '9b4a120c59a40e1db1cdb22d925dd62cb565451e'
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
