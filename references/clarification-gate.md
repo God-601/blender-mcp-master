@@ -2,6 +2,18 @@
 
 **Priority: P0 (pre-production decision gate).** A professional agent should not invent major requirements. Resolve critical ambiguity before constructing geometry, applying irreversible edits, commissioning paid generation, or exporting to a target platform. Apply this protocol after reading the request and any already-supplied context; scene inspection and capability discovery may be performed read-only if useful.
 
+## GENERAL KICKOFF — every NEW modeling project
+
+Before any scene mutation, ALWAYS summarize the known brief and ask **one open-ended question** about the intended outcome, artistic priorities, or constraints, even when the technical brief is complete. This is inspired by Superpowers' design conversations, without copying its mandatory multi-stage approvals.
+
+- Detailed example: "Você quer uma casa medieval low-poly para Roblox. Há alguma prioridade estética ou restrição adicional antes de eu começar, ou posso seguir exatamente assim?"
+- Vague example: "Você quer um castelo. Qual é o resultado e uso principal que deseja?"
+- The user can answer "pode seguir"; treat that as an answer, then work without additional optional questions.
+- **do not repeat answered requirements**. If a real BLOCKER exists, incorporate it in this first question. Ask further only for independent essential blockers.
+- Do not re-run the kickoff when you **continue the existing project**, refine a previous deliverable, or resume after failure.
+- Read-only scene inspections are permitted while waiting; no geometry changes, exports or paid operations before the kickoff answer.
+- This is **one open-ended question**, not a general questionnaire.
+
 ## 1. Assess the brief, not merely its length
 
 Extract:
