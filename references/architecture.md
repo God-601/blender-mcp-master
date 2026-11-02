@@ -41,6 +41,7 @@ The architecture must improve real modeling outcomes, not merely increase docume
 - Geometry capabilities create or modify Blender data; they must not decide artistic acceptance alone.
 - Visual inspection and technical validation provide evidence to the planner.
 - Knowledge stores tested techniques and limitations; unverified claims remain marked unverified.
+- A new optional local JSON registry can share only explicitly reviewed technique records across user-authorized projects; this is not automatic learning or general-purpose retrieval.
 - Export and optimization are downstream concerns, not substitutes for modeling capability.
 
 ## Core workflow
