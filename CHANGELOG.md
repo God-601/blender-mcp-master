@@ -1,5 +1,28 @@
 # Changelog
 
+## Unreleased — 1.0 preparation (PR #32, not on main)
+
+- Integrated CI-tested UV diagnostics, copy-first guided retopology,
+  mandatory new-project kickoff and conservative material/geometry audits.
+- Added explicit-pair fit/penetration candidate checks and contact-plane
+  guidance; AABB/BVH cannot alone prove a correct mechanical joint.
+- Added a narrow read-only coplanar X-fan diagnostic (experimental;
+  T10 intentionally not a 1.0 release gate).
+- Added protected-object scene fingerprints and read-only before/after
+  comparison; saved-scene checkpoint and Blender crash-recovery guidance.
+- Invalidated paired token/efficiency claims when scene-preservation evidence
+  is missing or the run is interrupted or reconstructed.
+- Clarified glTF reimport seam splits vs real topology loss, and tri-budget
+  reductions that visibly damage stylized assets.
+- Prepared nonpublishing release-readiness ZIP checks and disabled
+  automatic legacy beta publishing on `main/package.json` changes.
+- Tracked T01–T09 evidence and outstanding 1.0 manual acceptance gates.
+
+**Still not a 1.0 release:** independent second-agent acceptance, target
+engine import, artistic approval, clean release install, protected branch
+integration and authorization to publish remain outstanding.
+
+
 ## 0.2.0-beta.1 — first public beta
 
 - Cross-agent Blender skill with focused model-type and workflow routing.
