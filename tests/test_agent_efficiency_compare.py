@@ -39,7 +39,7 @@ class PairedEfficiencyTests(unittest.TestCase):
         self.assertEqual(result["token_usage"]["baseline"], 225)
         self.assertEqual(result["token_usage"]["candidate"], 125)
         self.assertEqual(result["token_usage"]["delta"], -100)
-        self.assertAlmostEqual(result["token_usage"]["percent_change"], -100 / 225 * 100)
+        self.assertEqual(result["token_usage"]["percent_change"], round(-100 / 225 * 100, 3))
         self.assertEqual(result["quality_claim"], "NOT VERIFIED")
 
     def test_missing_or_negative_tokens_never_produce_savings_claim(self):
