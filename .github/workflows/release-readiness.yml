@@ -64,7 +64,7 @@ jobs:
               assert all(not x.startswith("/") and ".." not in x.split("/") for x in names), "Unsafe ZIP entry"
               assert archive.testzip() is None, "Corrupt ZIP"
               readme = archive.read("blender-mcp-master/README.md").decode("utf-8")
-              links = re.findall(r'(?:\\]\\(|href="|src=")([^")]+)', readme)
+              links = re.findall(r'\]\(([^)]+)\)', readme) + re.findall(r'(?:href|src)="([^"]+)"', readme)
               local = [link.split("#", 1)[0] for link in links
                        if not link.startswith(("http://", "https://", "#", "mailto:", "data:"))]
               missing = [link for link in local
