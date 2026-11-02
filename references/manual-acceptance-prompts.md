@@ -62,6 +62,12 @@ Aprovado se o arquivo existir e houver uma reimportação real.
 
 Aprovado com entradas reproduzíveis e análise de qualidade junto de custo.
 
+## T09 — Encaixes estruturais, sem atravessamento arbitrário
+
+> Use a skill Blender MCP Master para construir uma cadeira low-poly de teste com assento, quatro pernas e duas travessas. Faça o GENERAL KICKOFF. Projete explicitamente o plano de contato entre topo das pernas e parte inferior do assento e entre ponta das travessas e faces dos postes. Não deixe peças atravessarem outras somente para esconder a junção. Se usar encaixe embutido, desenhe/documente a cavidade e a profundidade. Inspecione cada junta em vista frontal, lateral, inferior e três-quartos, antes e depois do chanfro. Use scripts/inspect_component_fit.py somente em pares de objetos separados para encontrar candidatos, e indique seus limites; se você consolidar tudo em um mesh, avalie visualmente as ilhas internas. Corrija encaixes ruins em cópias próprias, sem alterar objetos preexistentes.
+
+**Esperado:** o agente descreve as superfícies de apoio e distingue contato intencional de interseção problemática. Exibir imagens reais de juntas em close-up, geometria/transformações nomeadas e sem declarar PASS só por AABB/BVH. Registrar se houve correção e evidência antes/depois. Para comparação, produza um exemplo descartável de uma viga atravessando uma parede para demonstrar que o agente **sinaliza REVIEW/ISSUE**, em vez de aprovar automaticamente. A auditoria deve ser não destrutiva.
+
 ## Registro de evidências
 
 Para cada teste, salve: cenário, cliente/modelo, Blender e MCP versões exatas, prompt, cena inicial, resultado .blend, capturas frontal/lateral/três-quartos, logs de erro, alterações em objetos próprios, medições técnicas, status visual e status de exportação. Não compartilhe tokens de autenticação ou dados privados.
