@@ -1,11 +1,12 @@
-# 1.0 candidate evidence ledger (NOT A RELEASE)
+# Blender MCP Master v1.0.0 — evidence and limitations
 
 **Last updated:** 2026-11-02. This document distinguishes measured,
 agent-reported and missing evidence for the pre-1.0 acceptance decision.
-It does NOT announce Blender MCP Master v1.0. The published version remains
-`v0.2.0-beta.1`. PRs #29–#32 are merged into `main`; PR #28 was closed as
-superseded because its UV implementation was included exactly in #32.
-No stable tag, npm publish or GitHub Release is authorized by this ledger.
+This is the v1.0.0 release evidence ledger, not a claim that every capability
+is production-verified. PRs #29–#33 are integrated into `main`; #28 was
+closed as superseded because its UV implementation was included in #32.
+The maintainer authorized the stable release; actual publication state must
+be confirmed from the GitHub Releases page.
 
 ## Real modeling exercises reported by a Codex user
 
@@ -67,8 +68,8 @@ and helper behavior, **not actual Codex/Claude discovery or live Blender**.
 | --- | --- |
 | PR integration | **PASS**: #29, #30, #31, #32 merged. #28 closed as fully incorporated via #32 |
 | Integrated CI | **PASS**: [main Python + Blender](https://github.com/God-601/blender-mcp-master/actions/runs/41493641047) and [main npm](https://github.com/God-601/blender-mcp-master/actions/runs/41493641037) |
-| Fresh standalone ZIP installation | **PASS on PR #33** ([CI evidence](https://github.com/God-601/blender-mcp-master/actions/runs/41495964213)): SHA256, fresh installed skills root, 39 scripts parsed, 26 README links checked, protected scene comparator PASS. Automated main rerun scheduled by workflow trigger |
-| User release approval | **PENDING**, separate authorization required before tagging/publishing |
+| Fresh standalone ZIP installation | **PASS on main** ([CI evidence](https://github.com/God-601/blender-mcp-master/actions/runs/41496817023)): SHA256, fresh installed skills root, 39 scripts parsed, 26 README links checked, protected scene comparator PASS |
+| User release approval | **APPROVED 2026-11-02**; guarded workflow requires exact-main CI green before tagging/publishing; npm separately conditional on publish credentials |
 | Blender 3.1.2 CI and live Codex/Claude discovery | **NOT VERIFIED**; optional after 1.0 and not claimed |
 | Real second-agent end-to-end modeling | **NOT VERIFIED**; optional after 1.0 |
 | Engine import | **NOT VERIFIED**; optional after 1.0; do not advertise compatibility as tested |
@@ -85,8 +86,9 @@ omitted tests passed**. Future users must see the known limitations.
 2. Check the produced clean-install JSON and existing CI matrix on that commit.
 3. Verify accurate draft release notes, current package version and install
    links before any final release.
-4. Obtain explicit authorization to tag or publish. Do not automatically
-   publish npm or GitHub releases.
+4. Authorization for the one-time stable launch was provided. The publish
+   workflow remains guarded by exact commit, version and green CI, with
+   optional npm publication only when authenticated.
 
 ## References
 
