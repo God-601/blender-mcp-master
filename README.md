@@ -1,96 +1,138 @@
-# Blender MCP Master
+<h1 align="center">Blender MCP Master</h1>
 
 <p align="center">
-  <img src="assets/banner.svg" width="100%" alt="Concept illustration: Blender MCP Master, with a precisely aligned isometric mesh; not a generated Blender asset">
+  <strong>Model with intent. Verify with evidence.</strong><br>
+  An open-source Agent Skill for Blender workflows.
 </p>
 
 <p align="center">
-  <a href="#quick-start">English</a> · <a href="#português">Português</a> · <a href="SKILL.md">Skill</a> · <a href="references/quality-checklist.md">Quality checklist</a>
+  <a href="https://github.com/God-601/blender-mcp-master/releases"><img alt="Latest release" src="https://img.shields.io/github/v/release/God-601/blender-mcp-master?include_prereleases&style=flat-square&label=release"></a>
+  <a href="LICENSE"><img alt="MIT license" src="https://img.shields.io/badge/license-MIT-21262d?style=flat-square"></a>
+  <a href=".github/workflows/static-checks.yml"><img alt="GitHub Actions" src="https://img.shields.io/badge/CI-GitHub_Actions-21262d?style=flat-square"></a>
 </p>
-
-**Better decisions. Better meshes.** An open-source agent skill for Blender.
-
-Plan the shape. Model in stages. Catch defects. Protect the scene. Explain what was actually verified.
 
 <p align="center">
-  <img src="assets/workflow.svg" width="100%" alt="Visual process: clarify, block out, refine, inspect, deliver; inspection loops back to corrections">
+  <a href="#get-started">Get started</a> ·
+  <a href="#workflow">Workflow</a> ·
+  <a href="#documentation">Documentation</a> ·
+  <a href="#portugues">Português</a>
 </p>
 
-## Quick start
+---
+
+### Better decisions. Better meshes.
+
+Blender MCP Master helps AI agents **plan, model, inspect, and validate** Blender assets using task-specific instructions, scripts, and evidence-based quality checks.
+
+> **Important:** This skill does **not** control Blender by itself. Live editing needs a separate **Blender-control MCP server and Blender addon**. The optional MCP resource server here is *read-only*.
+
+| Define | Build | Inspect | Deliver |
+| :--- | :--- | :--- | :--- |
+| Establish style, purpose, proportions, and constraints. | Block out primary forms, then refine in reversible stages. | Verify actual mesh data and visual references. | Disclose measured results and what remains unverified. |
+
+## Get started
+
+**1. Install the skill using the CLI**
 
 ```bash
-npx skills add God-601/blender-mcp-master
+npx skills add God-601/blender-mcp-master -g
 ```
 
-**Beta ZIP:** [v0.2.0-beta.1 Release](https://github.com/God-601/blender-mcp-master/releases/tag/v0.2.0-beta.1) · [Windows and agent installation](docs/QUICKSTART.md).
+**Or download the release ZIP**
 
-**Optional npm resource server (if published):** `npx -y blender-mcp-master@0.2.0-beta.1`. It serves documentation and script templates over MCP, **not** the Blender connection.
+**[Download v0.2.0-beta.1 · Installable ZIP](https://github.com/God-601/blender-mcp-master/releases/download/v0.2.0-beta.1/blender-mcp-master-0.2.0-beta.1.zip)**
 
-You also need a **separate Blender-control MCP** server and its Blender addon. This skill guides the agent; it does **not** connect to Blender by itself.
+Get [SHA256SUMS.txt](https://github.com/God-601/blender-mcp-master/releases/download/v0.2.0-beta.1/SHA256SUMS.txt) from the same release, verify the hash, extract the ZIP and copy its inner `blender-mcp-master` folder to your agent's skills directory. Full [Windows and agent setup instructions](docs/QUICKSTART.md).
 
-Without Skills CLI: copy `SKILL.md`, `references/`, and `scripts/` into your agent's skills folder.
+**2. Set up Blender control separately**
 
-**Alternative (GitHub source):** `npx -y github:God-601/blender-mcp-master` starts the same read-only resource server without waiting for npm publication.
+Connect a compatible Blender-control MCP and its addon; discover the actual tool names and Blender version. Start in a scratch or backed-up scene. The skill supplies guidance, **not** a live Blender connection.
 
-## Under the hood
+<details>
+<summary><strong>Optional: read-only MCP resource server</strong></summary>
 
-<p align="center">
-  <img src="assets/architecture.svg" width="100%" alt="Agent reads this skill, calls a separate Blender-control MCP server and operates a live Blender scene">
-</p>
+If published to npm, the package can expose text references and script templates over stdio:
 
-| | What you get |
-|---|---|
-| **Ask first** | Clarifies missing requirements; doesn't interrogate a complete brief. |
-| **Build deliberately** | Hard-surface, organic, stylized, architecture, UVs and game assets. |
-| **Review the result** | Evaluated mesh checks, visual checkpoints and targeted corrections. |
-| **Keep control** | Explicit targets, cautious edits and honest verification statuses. |
+```bash
+npx -y blender-mcp-master@0.2.0-beta.1
+```
 
-**Project guides:** [Quickstart](docs/QUICKSTART.md) · [Changelog](CHANGELOG.md) · [Skill ecosystem comparison](docs/ECOSYSTEM-COMPARISON.md) · [Contributing](CONTRIBUTING.md)
+Without an npm publication, the GitHub source can be used instead:
 
-**Start here:** [SKILL.md](SKILL.md) · [Modeling standards](references/professional-modeling-standards.md) · [Clarification gate](references/clarification-gate.md) · [Examples](references/production-recipes.md) · [Compatibility](references/agent-compatibility.md)
+```bash
+npx -y github:God-601/blender-mcp-master
+```
 
-## Test it
+Neither command provides Blender scene-control tools.
+</details>
+
+## Workflow
+
+```text
+USER BRIEF + REFERENCE
+          |
+          v
+  BLENDER MCP MASTER  [Agent Skill]
+  Clarify -> Plan -> Blockout -> Refine -> Verify
+          |                              ^
+          v                              |
+  BLENDER-CONTROL MCP ------------------+
+          |
+       Blender scene
+```
+
+The agent must **inspect before it claims success**. Geometry checks, screenshots, and target-format checks answer different questions; missing evidence is **NOT VERIFIED**, not a pass.
+
+| Focus | What changes |
+| :--- | :--- |
+| **Scene safety** | Explicit targets, owned collections, backup-first changes |
+| **Modeling quality** | Proportion checks before unnecessary micro-detail |
+| **Technical validity** | Evaluated topology, modifiers, UVs, materials, and budgets |
+| **Visual validation** | Real viewport views before judging appearance |
+| **Delivery** | `PASS / ISSUE / N/A / NOT VERIFIED` plus known limitations |
+
+Supported workflows include hard-surface props, organic modeling, stylized and low-poly assets, architecture, environments, characters, UV/baking, materials, and game-ready exports. Available features depend on the actual Blender installation and connected MCP tools.
+
+## Documentation
+
+| Resource | Purpose |
+| :--- | :--- |
+| [Quickstart](docs/QUICKSTART.md) | Installation, Windows paths, checksums, and MCP setup |
+| [SKILL.md](SKILL.md) | Main instruction entrypoint for agents |
+| [Official Blender documentation](references/official-blender-documentation.md) | Curated modeling, modifiers, UV, Geometry Nodes, Python API, export references |
+| [Evidence-first workflow](references/evidence-first-workflow.md) | Stage gates, independent review, defect diagnosis, and stop conditions |
+| [Modeling standards](references/professional-modeling-standards.md) | Production requirements and quality evidence |
+| [Production recipes](references/production-recipes.md) | Concrete modeling examples |
+| [Skill comparisons](docs/ECOSYSTEM-COMPARISON.md) | Reference patterns, including Superpowers |
+
+<details>
+<summary><strong>Tests and contribution</strong></summary>
 
 ```bash
 python -m unittest discover -s tests -v
 ```
 
-Blender runtime tests need a compatible `bpy` installation. Passing tests does **not** prove artistic quality or live MCP compatibility. Verify models and exports in their target environments.
+Some tests require a compatible `bpy` runtime. Passing tests is not proof of artistic quality or live MCP and downstream export compatibility.
 
-[MIT License](LICENSE) · [Issues](https://github.com/God-601/blender-mcp-master/issues)
+[Quality checklist](references/quality-checklist.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md)
+</details>
 
 ---
 
-# Português
+<a id="portugues"></a>
+## Português
 
-**Modelagem com método, não no improviso.** Uma skill aberta para agentes que trabalham com Blender por MCP.
+**Uma skill para agentes de IA modelarem no Blender com método e evidências.** Ela orienta o agente; não instala nem substitui o Blender-control MCP.
 
-O agente pergunta quando falta informação, planeja, modela em etapas, inspeciona a geometria e informa o que realmente conseguiu verificar.
+- **Instalar:** `npx skills add God-601/blender-mcp-master -g` ou [baixar o ZIP da Release](https://github.com/God-601/blender-mcp-master/releases/download/v0.2.0-beta.1/blender-mcp-master-0.2.0-beta.1.zip).
+- **Configurar:** conectar separadamente um Blender-control MCP. Veja o [guia para Windows e agentes](docs/QUICKSTART.md).
+- **Fluxo:** esclarecer → planejar → modelar → inspecionar → corrigir → relatar o que foi verificado.
+- **Aprofundar:** [documentação oficial](references/official-blender-documentation.md) · [verificação e recuperação](references/evidence-first-workflow.md) · [padrões profissionais](references/professional-modeling-standards.md).
 
-## Comece aqui
+**Beta pública.** Nenhum teste automatizado substitui inspeção visual real ou validação no destino.
 
-```bash
-npx skills add God-601/blender-mcp-master
-```
-
-**ZIP beta:** [Release v0.2.0-beta.1](https://github.com/God-601/blender-mcp-master/releases/tag/v0.2.0-beta.1) · [Instalação no Windows](docs/QUICKSTART.md).
-
-**npm opcional (se já publicado):** `npx -y blender-mcp-master@0.2.0-beta.1`. É um servidor MCP de leitura de documentação, não controla o Blender.
-
-É necessário configurar **separadamente o Blender-control MCP** e o addon no Blender. A skill orienta o agente; ela não controla o Blender sozinha.
-
-Sem Skills CLI: copie `SKILL.md`, `references/` e `scripts/` para a pasta de skills do seu agente.
-
-**Alternativa sem npm:** `npx -y github:God-601/blender-mcp-master` executa o servidor de recursos diretamente pelo GitHub.
-
-[Comparação com outras skills](docs/ECOSYSTEM-COMPARISON.md) · [Changelog](CHANGELOG.md)
-
-## O que inclui
-
-**Briefing inteligente** · **Modelagem orientada por referências** · **Inspeção técnica e visual** · **Correção controlada** · **Proteção da cena**
-
-[Manual da skill](SKILL.md) · [Padrões profissionais](references/professional-modeling-standards.md) · [Quando perguntar](references/clarification-gate.md) · [Receitas de modelagem](references/production-recipes.md) · [Checklist de qualidade](references/quality-checklist.md)
-
-**Testes:** `python -m unittest discover -s tests -v` — a execução com Blender exige `bpy` compatível. Testes técnicos não substituem uma revisão artística.
-
-[Licença MIT](LICENSE)
+<p align="center">
+  <a href="LICENSE">MIT License</a> ·
+  <a href="https://github.com/God-601/blender-mcp-master/issues">Feedback</a> ·
+  <a href="https://github.com/God-601/blender-mcp-master/releases">Releases</a>
+</p>
