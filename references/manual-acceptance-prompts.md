@@ -68,6 +68,12 @@ Aprovado com entradas reproduzíveis e análise de qualidade junto de custo.
 
 **Esperado:** o agente descreve as superfícies de apoio e distingue contato intencional de interseção problemática. Exibir imagens reais de juntas em close-up, geometria/transformações nomeadas e sem declarar PASS só por AABB/BVH. Registrar se houve correção e evidência antes/depois. Para comparação, produza um exemplo descartável de uma viga atravessando uma parede para demonstrar que o agente **sinaliza REVIEW/ISSUE**, em vez de aprovar automaticamente. A auditoria deve ser não destrutiva.
 
+## T10 — Excessive editable face triangulation / X across flat panels
+
+> Use Blender MCP Master. After GENERAL KICKOFF, create three separate named editable mesh tests: A one completely planar quad face; B two planar triangles sharing one diagonal that make the same quad; C one planar quad-shaped patch split by a center vertex into four triangles making an X. Run `scripts/topology_face_diagnostics.py` with explicit `TARGETS` for all three. Report native Blender face count and render triangle count separately. Demonstrate that A and B have two render triangles, C has four; C should yield a REVIEW candidate while B is not an X fan. Inspect the C patch in Edit Mode, and on an owned COPY only, remove the redundant center vertex/edges if UVs, normals and shape remain safe. Validate before/after UV and shading. Do not edit the original or treat every triangulation/glTF vertex split as a defect.
+
+**Esperado:** A one quad/two render tris, B two triangular faces/two render tris, C four triangular faces/four render tris. Analyzer marks C REVIEW but never auto-modifies. Correction on a copy is visually and technically verified, or stays NOT VERIFIED with a reason. Check Blender version before executing the new script.
+
 ## Registro de evidências
 
 Para cada teste, salve: cenário, cliente/modelo, Blender e MCP versões exatas, prompt, cena inicial, resultado .blend, capturas frontal/lateral/três-quartos, logs de erro, alterações em objetos próprios, medições técnicas, status visual e status de exportação. Não compartilhe tokens de autenticação ou dados privados.
