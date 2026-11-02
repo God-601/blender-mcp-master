@@ -24,6 +24,39 @@ Definitions:
 
 **No merge, version bump, npm publish or stable-release announcement should occur simply because this backlog exists.**
 
+## November 2 field-test integration — 1.0 readiness, excluding T10
+
+The actual user-reported T01–T09 modeling sessions are indexed in
+[RELEASE-1.0-EVIDENCE.md](RELEASE-1.0-EVIDENCE.md). Those sessions provide
+useful practical observations but do **not** establish a clean 2-agent,
+engine-ready or controlled-token efficiency comparison. T08's crash and
+lost unsaved scene invalidate its paired efficiency claim. Real token counts
+remain NOT VERIFIED.
+
+**New P0 safety fixes on PR #32:** opt-in read-only protected-object snapshots,
+pure Python before/after comparison, saved-scene checkpoints, crash recovery,
+and gating matched efficiency data when preservation is incomplete. CI must
+pass on the exact updated head before these can be considered verified.
+
+**New release packaging guard:** `.github/workflows/release-readiness.yml`
+builds an explicitly **nonpublishing** 1.0 preflight ZIP with checksum.
+The old beta release workflow no longer runs automatically on a change to
+`main/package.json`. A real release requires a new, reviewed version/tag
+process and explicit user approval.
+
+**T10 is out of scope for this release decision**, per maintainer direction.
+The optional editable X-fan detector remains narrow/experimental and cannot
+be called an auto-topology repair system. Its real-agent exercise may be run
+after 1.0; it is not a release blocker.
+
+**Outstanding stable-release gates remain:** dependency-safe PR integration,
+clean install smoke test from final candidate ZIP, second client behavior
+evidence, actual target-engine import, independent artistic acceptance, a
+repeatable crash-free matched benchmark if performance improvements are
+claimed, and user release authorization.
+
+
+
 ## P1 — improve reliability and quality
 
 - [ ] Replace the oversized root \`SKILL.md\` with a shorter progressive-disclosure entrypoint without losing safety/routing or breaking tests. Keep all supported workflows accessible through focused references; benchmark real loaded context and outcome quality.
