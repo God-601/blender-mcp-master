@@ -1,5 +1,7 @@
 # Performance (Blender, scripts and model)
 
+For an explicit, read-only evaluated triangle/material/texture baseline use `scripts/asset_performance_audit.py` and `references/model-performance-strategy.md`. Neither tool measures real FPS or draw calls. For reducing the AI agent's own tool/context overhead, use `references/token-efficient-agent-execution.md`.
+
 ## Make scripts fast
 - **Bulk geometry via bmesh / from_pydata**, never create thousands of objects with `bpy.ops.mesh.primitive_*`. One mesh built by `bmesh` with thousands of faces takes milliseconds; thousands of objects take seconds to minutes.
 - Large arrays: `mesh.vertices.foreach_set("co", flat_list)` / `foreach_get` + numpy when available.

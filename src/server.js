@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
+import { excerptLines, markdownOutline } from "./resource-excerpts.js";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const PACKAGE_VERSION = JSON.parse(readFileSync(resolve(ROOT, "package.json"), "utf8")).version;
@@ -58,6 +59,39 @@ server.tool(
   async ({ name }) => ({
     content: [{ type: "text", text: readAllowedFile(REFERENCE_DIR, references, name) }]
   })
+);
+
+server.tool(
+  "get_blender_reference_outline",
+  "List only section headings and their line numbers from one guide. Low-context alternative to reading the full document.",
+  { name: z.string().describe("Exact .md guide filename") },
+  async ({ name }) => {
+    const outline = markdownOutline(readAllowedFile(REFERENCE_DIR, references, name));
+    const lines = outline.headings.map(h => h.line + ": " + "#".repeat(h.level) + " " + h.title);
+    return { content: [{ type: "text", text:
+      "SOURCE references/" + name + " (" + outline.totalLines + " lines)\n" +
+      lines.join("\n") + (outline.truncatedHeadings ? "\nMORE HEADINGS OMITTED" : "")
+    }] };
+  }
+);
+
+server.tool(
+  "get_blender_reference_excerpt",
+  "Read only a bounded line window from a reference. Returns continuation line; use before requesting full text.",
+  {
+    name: z.string().describe("Exact .md guide filename"),
+    startLine: z.number().int().min(1).describe("One-based first line"),
+    maxLines: z.number().int().min(1).max(80).optional().describe("Maximum returned lines; default 40")
+  },
+  async ({ name, startLine, maxLines }) => {
+    const result = excerptLines(readAllowedFile(REFERENCE_DIR, references, name),
+                                {startLine, maxLines: maxLines ?? 40});
+    const heading = "SOURCE references/" + name + " lines " + result.startLine + "-" +
+                    result.endLine + "/" + result.totalLines;
+    const footer = "\nNEXT_LINE=" + (result.nextLine ?? "NONE") +
+                   "\nTRUNCATED_CHARS=" + result.truncatedChars;
+    return { content: [{ type: "text", text: heading + "\n" + result.text + footer }] };
+  }
 );
 
 server.tool(

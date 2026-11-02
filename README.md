@@ -110,6 +110,10 @@ Supported workflows include hard-surface props, organic modeling, stylized and l
 | [Modeling standards](references/professional-modeling-standards.md) | Production requirements and quality evidence |
 | [Production recipes](references/production-recipes.md) | Concrete modeling examples |
 | [Skill comparisons](docs/ECOSYSTEM-COMPARISON.md) | Reference patterns, including Superpowers |
+| [1.0 release roadmap](docs/ROADMAP-1.0.md) | Verified implementation status and remaining real Blender/agent tests |
+| [Agent efficiency](references/token-efficient-agent-execution.md) | Tool-first, bounded reads and progressive context loading |
+| [3D model optimization](references/model-performance-strategy.md) | Evaluated triangle, material, texture and Geometry Nodes guidance |
+| [Paired token benchmark](docs/EFFICIENCY-BENCHMARK.md) | Reproducible with/without skill comparison protocol |
 
 <details>
 <summary><strong>Tests and contribution</strong></summary>
