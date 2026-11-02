@@ -81,6 +81,38 @@ class RuntimeFaceAuditTests(unittest.TestCase):
         self.assertEqual([tuple(v.co) for v in obj.data.vertices], original_vertices)
         self.assertEqual([tuple(p.vertices) for p in obj.data.polygons], original_faces)
 
+    def test_material_boundary_flags_preserve_until_review(self):
+        obj = self.make("MaterialFan")
+        m1 = bpy.data.materials.new("One")
+        m2 = bpy.data.materials.new("Two")
+        obj.data.materials.append(m1)
+        obj.data.materials.append(m2)
+        obj.data.polygons[0].material_index = 1
+        report = run_audit(["MaterialFan"])["targets"][0]
+        self.assertEqual(report["coplanar_four_triangle_fan_candidates"], 1)
+        example = report["candidate_examples"][0]
+        self.assertTrue(example["material_boundary"])
+        self.assertEqual(example["recommendation"], "PRESERVE_UNTIL_REVIEW")
+
+    def test_uv_split_flags_seam_and_no_auto_dissolve(self):
+        obj = self.make("UVFan")
+        uv = obj.data.uv_layers.new(name="UVMap")
+        for index, loop in enumerate(obj.data.loops):
+            uv.data[index].uv = (0.25, 0.25)
+        # The same center vertex occupies multiple loops; alter exactly one.
+        for poly in obj.data.polygons:
+            for loop_index in poly.loop_indices:
+                if obj.data.loops[loop_index].vertex_index == 4:
+                    uv.data[loop_index].uv = (0.0, 1.0)
+                    break
+            break
+        original = [tuple(v.co) for v in obj.data.vertices]
+        report = run_audit(["UVFan"])["targets"][0]
+        example = report["candidate_examples"][0]
+        self.assertTrue(example["uv_seam_candidate"])
+        self.assertEqual(example["recommendation"], "PRESERVE_UNTIL_REVIEW")
+        self.assertEqual(original, [tuple(v.co) for v in obj.data.vertices])
+
     def test_single_quad_not_flagged(self):
         self.make("Quad", kind="quad")
         report = run_audit(["Quad"])["targets"][0]
