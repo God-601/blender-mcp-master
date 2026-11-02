@@ -38,7 +38,12 @@ collision. Treat joint design as a modeling operation, not decoration.
    ```
 
    `surface_joint`: a definite world-space AABB gap beyond `max_gap`
-   is ISSUE; overlapping/nearby boxes are only REVIEW, not a verified seam.
+   is ISSUE. **New in 1.1:** if there are fewer than two axes with
+   positive AABB overlap, an edge-only, corner-only or diagonal-near
+   joint is also ISSUE: these bounds cannot support a face-area mating
+   patch. Two overlapping axes plus a touching/near third axis are
+   classified `face_plane_candidate` and remain REVIEW, **not** proof
+   that the actual surfaces touch. Full 3D AABB overlap remains REVIEW.
 
    `no_penetration`: no positive AABB volume overlap is PASS for *that
    limited check*. An overlapping AABB gives REVIEW and optional BVH
@@ -46,6 +51,10 @@ collision. Treat joint design as a modeling operation, not decoration.
 
    `intentional_embed`: always REVIEW with a required documented reason;
    never excuse an unexamined intersection automatically.
+
+   Results include `aabb_contact_case`, `aabb_face_support_axes` and
+   `aabb_separation_by_axis` so false joints can be located without
+   changing geometry. This is only a necessary bounding-box condition.
 
    The script is read-only; it checks evaluated object meshes and always
    leaves visual quality and collision-engine verification NOT VERIFIED.
