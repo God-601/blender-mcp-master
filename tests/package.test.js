@@ -58,6 +58,8 @@ test("MCP server starts over stdio and exposes the expected tools", async () => 
     assert.deepEqual(names.sort(), [
       "get_blender_mcp_setup",
       "get_blender_reference",
+      "get_blender_reference_excerpt",
+      "get_blender_reference_outline",
       "get_blender_script",
       "get_blender_skill",
       "list_blender_resources"
