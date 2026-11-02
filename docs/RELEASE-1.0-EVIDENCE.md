@@ -67,7 +67,7 @@ and helper behavior, **not actual Codex/Claude discovery or live Blender**.
 | --- | --- |
 | PR integration | **PASS**: #29, #30, #31, #32 merged. #28 closed as fully incorporated via #32 |
 | Integrated CI | **PASS**: [main Python + Blender](https://github.com/God-601/blender-mcp-master/actions/runs/41493641047) and [main npm](https://github.com/God-601/blender-mcp-master/actions/runs/41493641037) |
-| Fresh standalone ZIP installation | **PENDING CI smoke** on the new candidate; requires clean-home install, hash validation, resource checks and JSON evidence |
+| Fresh standalone ZIP installation | **PASS on PR #33** ([CI evidence](https://github.com/God-601/blender-mcp-master/actions/runs/41495964213)): SHA256, fresh installed skills root, 39 scripts parsed, 26 README links checked, protected scene comparator PASS. Automated main rerun scheduled by workflow trigger |
 | User release approval | **PENDING**, separate authorization required before tagging/publishing |
 | Blender 3.1.2 CI and live Codex/Claude discovery | **NOT VERIFIED**; optional after 1.0 and not claimed |
 | Real second-agent end-to-end modeling | **NOT VERIFIED**; optional after 1.0 |
