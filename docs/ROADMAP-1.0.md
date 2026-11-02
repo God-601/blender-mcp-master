@@ -14,9 +14,9 @@ Definitions:
 | P0-01 | Resolve docs/readme regressions, ensure accurate architecture + install paths | CI verified on PR #29; merge pending | GitHub Actions logs for PR #29; requires review and integration |
 | P0-02 | Correct UV test API and verify overlap/density diagnostics | CI verified on PR #28; integration pending | Tests on bpy matrix, including missing UV layer |
 | P0-03 | General kickoff, guided retopology, reviewed registry, visual evidence receipts | CI verified on PR #30; real behavior still pending | Python/bpy/npm checks on exact PR head; actual agent behavior not verified |
-| P0-04 | Minimize unnecessary Bash usage/context loading in resource navigation | Implemented in PR #31; Python/bpy CI green, npm rerun pending | MCP bounded excerpt/outline integration tests; no invented token reduction |
-| P0-05 | Read-only evaluated mesh, materials and texture workload audit | Implemented in PR #31; Python/bpy CI green | Real bpy tests: evaluated geometry, duplicated datablocks, material warning, read-only behavior |
-| P0-06 | Preserve safety + clarify versioned setup and token-conscious workflow | Implemented in PR #31; Python/bpy CI green | Mandatory kickoff + P0 integrity behavior not weakened |
+| P0-04 | Minimize unnecessary Bash usage/context loading in resource navigation | CI verified in PR #31: Python/bpy 4.2/4.5/5.0/5.1/5.2 and Node 18/20/22 | MCP bounded excerpt/outline integration tests; no invented token reduction |
+| P0-05 | Read-only evaluated mesh, materials and texture workload audit | CI verified in PR #31: Python/bpy 4.2/4.5/5.0/5.1/5.2 and Node 18/20/22 | Real bpy tests: evaluated geometry, duplicated datablocks, material warning, read-only behavior |
+| P0-06 | Preserve safety + clarify versioned setup and token-conscious workflow | CI verified in PR #31: Python/bpy 4.2/4.5/5.0/5.1/5.2 and Node 18/20/22 | Mandatory kickoff + P0 integrity behavior not weakened |
 | P0-07 | Real end-to-end Blender MCP project on at least 2 supported clients | **NOT VERIFIED**; external | Exact agents/MCP/Blender versions, full logs, output .blend, views; follow Issue #19 |
 | P0-08 | Real engine import/export with one intended target | **NOT VERIFIED**; external | Open exported file in intended engine; verify scale, UV, materials, pivots and geometry; Issue #18 |
 | P0-09 | Independent artistic review, controlled with/without-skill comparison | **NOT VERIFIED**; external | At least chair, sword, house, organic and mechanical/character assets, same conditions; Issue #20 |
@@ -27,7 +27,7 @@ Definitions:
 ## P1 — improve reliability and quality
 
 - [ ] Replace the oversized root \`SKILL.md\` with a shorter progressive-disclosure entrypoint without losing safety/routing or breaking tests. Keep all supported workflows accessible through focused references; benchmark real loaded context and outcome quality.
-- [ ] Introduce deterministic benchmarks of token use where the agent exposes token metrics; otherwise report reference bytes and tool calls only, not "saved tokens".
+- [x] Add reproducible, deterministic comparison of matched agent runs with `scripts/agent_efficiency_compare.py` and `docs/EFFICIENCY-BENCHMARK.md`; both implemented and CI verified in PR #31. **Actual token savings remain NOT VERIFIED** until recorded agent runs.
 - [ ] Extend guided retopology with semantic boundary extraction, topology repairs, deformation-aware edge flow and pose-tested results; reject arbitrary automatic quad-remesh claims.
 - [ ] Implement actual image analysis loop only in clients that support visual inspection; capture before/after and preserve sources. A metadata receipt does not analyze an image.
 - [ ] Improve UV density/overlap, baking maps, LOD/material checks and downstream export tests for real target engines.
@@ -52,3 +52,8 @@ Definitions:
 - [Agent behavior evaluation](../references/skill-evaluation-protocol.md)
 - [Release launch plan](LAUNCH-PLAN.md)
 - [Issues #18–#20](https://github.com/God-601/blender-mcp-master/issues)
+
+## Automated verification record
+
+- PR #31 head `5de719ba`: [Python static + bpy matrix passed](https://github.com/God-601/blender-mcp-master/actions/runs/41453735620) and [npm Node 18/20/22 passed](https://github.com/God-601/blender-mcp-master/actions/runs/41453735697).
+- These checks validate implementation mechanics and regression contracts. They do **not** measure actual token billing, artistic quality, FPS, export into a game engine, or client-to-Blender MCP interaction.
