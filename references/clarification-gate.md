@@ -5,7 +5,7 @@ irreversible changes, or paid generation, determine what the user actually
 wants the model to look like. The goal is a **useful multi-question design
 conversation**, NOT a perfunctory "can I proceed?" permission request.
 Read the complete user brief, references and already-answered constraints first.
-Read-only discovery of Blender and existing scenes is allowed at any point.
+Read-only discovery of Blender and existing scenes is allowed at any point. **Before any scene mutation**, collect the necessary answers. Always **do not repeat answered requirements** from the user's brief or prior discussion.
 
 ## GENERAL KICKOFF — several useful questions on every NEW project
 
@@ -53,7 +53,7 @@ editable assumptions, critical unknowns and acceptance evidence. Ask a
 new ambiguity**. For non-blocking omitted items, choose safe editable defaults
 and state them; do not restart an interview just to fill every field.
 
-**Continue an existing project:** do NOT run the interview again for a
+**When you continue the existing project:** do NOT run the interview again for a
 requested correction, export retry, post-crash recovery, or follow-up on
 previously approved asset; reuse established decisions and ask only genuinely
 new high-impact questions.
