@@ -54,6 +54,8 @@ For nontrivial assets read `references/modeling-quality-loop.md`, `references/mo
 | Geometry Nodes and procedural generation | `references/geometry-engine.md`, `references/parametric-geometry-nodes.md` |
 | UV, textures, baking, materials | `references/uv-baking.md`, `references/materials.md`, `references/shading-recipes.md`, `scripts/uv_diagnostics.py` |
 | Game asset optimization and export | `references/game-asset-optimization.md`, `references/p1-production-pipeline.md`, `references/game-ready-export.md` |
+| Read-only game asset import readiness | `references/game-ready-export.md`, `scripts/game_asset_preflight.py` |
+| UV island gutter candidates for texture baking | `references/uv-baking.md`, `scripts/uv_island_gutter_audit.py` |
 | Measured 3D geometry/material/texture cost | `references/model-performance-strategy.md`, `scripts/asset_performance_audit.py` |
 | Check intentional joints versus accidental penetration | `references/component-fit-and-joints.md`, `scripts/inspect_component_fit.py` |
 | Compare optimization silhouette proxies | `references/model-performance-strategy.md`, `scripts/compare_asset_silhouettes.py` |
@@ -127,6 +129,10 @@ Select a guide by the route above. The names below make scripts and specialist m
 `scripts/inspect_component_fit.py` — optional read-only explicit-pair AABB/BVH candidates; real visual joint correctness is NOT VERIFIED until inspected.
 
 `scripts/uv_diagnostics.py` — optional read-only base-mesh UV overlap and texel-density inspection with explicit targets; engine/padding remain NOT VERIFIED.
+
+`scripts/uv_island_gutter_audit.py` — read-only per-island UV bounds lower-bound distances; baking/engine mip quality remains NOT VERIFIED.
+
+`scripts/game_asset_preflight.py` — read-only game target budgets, evaluated static mesh, pivots, UV, material and linked texture checks; in-engine import NOT VERIFIED.
 
 `scripts/scene_baseline_snapshot.py` — read-only protected-object selected-property snapshot; `scripts/compare_scene_baselines.py` — pure-Python before/after fingerprint comparison. Neither substitutes for a saved .blend backup.
 
