@@ -13,8 +13,8 @@ class CompactSkillEntrypointTests(unittest.TestCase):
         for text in (
             "name: blender-mcp-master",
             "GENERAL KICKOFF",
-            "even when the technical brief is complete",
-            "do not repeat answered requirements",
+            "multi-question design interview",
+            "Do not repeat answered requirements",
             "CLARIFY ->",
             "Clarify before you build",
             "Avoid global orphan purges",
