@@ -81,6 +81,8 @@ com arquivos, capturas, critérios de PASS/ISSUE e limites documentados.
 
 ## v1.3.0 — Autonomia de agentes e eficiência mensurada
 
+**Implementação candidata (2026-11-04):** política de autonomia por níveis de risco, estado curto da sessão, tratamento de falhas e matriz de aceitação A13-01–A13-10 documentadas em `references/autonomous-execution-policy.md` e `docs/AGENT-1.3-EVALUATION.md`. Os benchmarks externos continuam pendentes: nenhuma economia de tokens ou compatibilidade real foi comprovada.
+
 **Foco:** reduzir retrabalho e aumentar consistência, não apenas comprimir
 o texto da skill.
 
