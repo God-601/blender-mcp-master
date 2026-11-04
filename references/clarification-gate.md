@@ -1,85 +1,119 @@
-# Clarification gate — ask before modeling when information is insufficient
+# Design interview — understand the model before creating it
 
-**Priority: P0 (pre-production decision gate).** A professional agent should not invent major requirements. Resolve critical ambiguity before constructing geometry, applying irreversible edits, commissioning paid generation, or exporting to a target platform. Apply this protocol after reading the request and any already-supplied context; scene inspection and capability discovery may be performed read-only if useful.
+**P0 new-project decision gate.** Before substantial geometry, exporting,
+irreversible changes, or paid generation, determine what the user actually
+wants the model to look like. The goal is a **useful multi-question design
+conversation**, NOT a perfunctory "can I proceed?" permission request.
+Read the complete user brief, references and already-answered constraints first.
+Read-only discovery of Blender and existing scenes is allowed at any point.
 
-## GENERAL KICKOFF — every NEW modeling project
+## GENERAL KICKOFF — several useful questions on every NEW project
 
-Before any scene mutation, ALWAYS summarize the known brief and ask **one open-ended question** about the intended outcome, artistic priorities, or constraints, even when the technical brief is complete. This is inspired by Superpowers' design conversations, without copying its mandatory multi-stage approvals.
+For a genuinely NEW modeling assignment, summarize the known requirements in
+two lines, then ask **multiple specific, independent design questions in a
+conversational numbered or compact grouped format**. Default to **4–6**
+questions for a moderately complex asset; **2–3** for a simple prop and
+**5–8 across one or two rounds** for characters, architecture, hero assets
+and multi-part scenes. Do not send 20 mechanical questions in a single wall
+of text. Questions must improve the expected 3D result, not just fill a quota.
 
-- Detailed example: "Você quer uma casa medieval low-poly para Roblox. Há alguma prioridade estética ou restrição adicional antes de eu começar, ou posso seguir exatamente assim?"
-- Vague example: "Você quer um castelo. Qual é o resultado e uso principal que deseja?"
-- The user can answer "pode seguir"; treat that as an answer, then work without additional optional questions.
-- **do not repeat answered requirements**. If a real BLOCKER exists, incorporate it in this first question. Ask further only for independent essential blockers.
-- Do not re-run the kickoff when you **continue the existing project**, refine a previous deliverable, or resume after failure.
-- Read-only scene inspections are permitted while waiting; no geometry changes, exports or paid operations before the kickoff answer.
-- This is **one open-ended question**, not a general questionnaire.
+Choose the most important *unanswered* dimensions:
+1. **Purpose and target:** gameplay/Roblox/other engine, animation, static
+   prop, cinematic render, 3D print; camera distance, file deliverables.
+2. **Visual style and references:** realistic, stylized, low-poly, exact
+   game/franchise *style attributes*; ask for reference images or descriptions,
+   and what elements to emulate, not copy protected assets.
+3. **Silhouette and proportions:** overall shape, approximate dimensions,
+   dominant masses, symmetry/asymmetry, distinctive parts or variant.
+4. **Materials and colors:** wood/metal/fabric/weathering, texture resolution,
+   hand-painted/PBR, intended palette, details and visual complexity.
+5. **Construction and technical limits:** polygon budget, separate parts,
+   UVs, rigging, LOD, pivot, scale, collision, constraints of a destination.
+6. **Priority/tradeoffs:** accuracy vs performance, silhouette vs details,
+   hero object vs background, must-have/must-avoid visual traits.
 
-## 1. Assess the brief, not merely its length
+**No duplicate questions:** remove any category already answered. A brief
+can be complete on engine, dimensions and triangle budget but still have
+unanswered color, material and silhouette preferences. Ask the *remaining*
+artistic questions rather than repeating specs. If truly every meaningful
+choice is covered, or the user explicitly says "choose everything / surprise
+me / no questions", make a brief editable plan and proceed. A new project
+does not require pointless questions to satisfy a number.
 
-Extract:
-- **Asset/subject and scope:** what to build, which components/variants, whether it is a prop, scene, character or technical part.
-- **Intended use and deliverables:** game/engine, animation, still render, 3D printing, CAD, or concept; file types.
-- **Visual direction:** style, key references, silhouette, theme, expected detail/quality, important colors/materials.
-- **Constraints:** dimensions/units, geometry budget, UVs/LOD, rigging/deformation, pivots, exact fit, target Blender/version if relevant.
-- **Authority:** references and decisions from the current task, previous instructions and existing scene; user-specified values override defaults.
+**Never ask "posso seguir?", "pode prosseguir?", "is that OK?" or equivalent
+as the sole design question.** The user's replies to the actual questions
+are the design input, not an administrative approval ritual. If they say
+"you choose", propose a coherent choice and move on. Do not repeatedly
+ask for permission to start after the design details are known.
 
-A request may be short but sufficient (e.g. "low-poly pine tree for a still render, around 3 m, choose a palette"). A request may be long but contradictory. Do **not** ask about facts the user already supplied.
+Wait for answers to the initial meaningful questions before scene mutation.
+Then update a compact **Design Brief**: known values, user choices, agent
+editable assumptions, critical unknowns and acceptance evidence. Ask a
+**second short round (1–3 questions) only when replies expose a consequential
+new ambiguity**. For non-blocking omitted items, choose safe editable defaults
+and state them; do not restart an interview just to fill every field.
 
-## 2. Classify missing information
+**Continue an existing project:** do NOT run the interview again for a
+requested correction, export retry, post-crash recovery, or follow-up on
+previously approved asset; reuse established decisions and ask only genuinely
+new high-impact questions.
 
-| Level | Signals | Action before modeling |
-|---|---|---|
-| **BLOCKER** | Subject/scope unclear; conflicting requirements; essential mechanical dimensions, fits, rig/engine compatibility or irreversible operation undecided; cost or overwrite needs approval | **Stop and ask** the smallest focused question that resolves the blocker. Do not silently assume. |
-| **QUALITY-RISK** | Complex/hero asset with no visual style/reference, key proportions or intended use, where alternatives would create materially different models | **Prefer a brief question** before substantial work. If the request explicitly delegates creative direction, select and state an art direction rather than questioning. |
-| **OPTIONAL** | Minor palette, bevel thickness, camera angle, decorative details, modest budgets for exploratory assets | Choose a safe editable default, disclose it, proceed; offer refinement later. |
+## How to tailor the conversation
 
-A reference image can answer style/proportion questions. When available, inspect it first and ask only about what is still unresolved. Reference retrieval is not a reason to ignore user-provided constraints.
+| Missing requirement | Ask | Why |
+| --- | --- | --- |
+| Concept/subject unclear | "Que tipo de árvore é — pinheiro, carvalho ou algo fantástico? Qual referência visual devo seguir?" | Species changes silhouette and branching |
+| Low-poly game prop, style missing | "Qual visual você prefere: blocado, facetas suaves ou pintado à mão? Tem uma referência?" | Topology and materials change |
+| Realtime target, purpose unclear | "Vai aparecer de perto ou como cenário? Precisa de colisão ou animação?" | Determines scale/detail/pivots |
+| Mechanical prop without dimensions | "Quais medidas e folgas precisam ser exatas?" | Prevents fictional fits |
+| Character | "Qual anatomia/silhueta, roupa, expressão e pose? Vai animar?" | Shape + topology + rig |
+| Full brief, one visual choice missing | "O metal deve parecer novo, pintado ou envelhecido? Qual cor predomina?" | Genuine user preference |
+| Delegation | No new question if meaningful choices explicitly delegated | Respect user autonomy |
 
-## 3. Ask better questions
+### Example — low-poly Roblox tree
 
-- **Ask before building** when critical information is missing; do not complete a speculative asset first.
-- Default to **one focused question** addressing the highest-impact uncertainty. If several *independent, essential* choices are missing, ask a short grouped set (usually 2–3), allowing partial answers. Never send a long questionnaire for a simple request.
-- Present concrete, non-leading options or a recommended default when that helps the user decide; allow "choose for me".
-- Explain the impact in a short clause (for example, game-ready topology differs from a cinematic render).
-- Avoid asking the user to specify implementation details the agent should know (exact modifier settings, loop counts, normal workflow) unless the user demands them.
-- Never ask the same question twice if it has already been answered in the request or connected project context.
-- **After the answer**, update the production brief and acceptance gates; do not restart the interview. If no reply exists, do not claim the scene was built.
+Already known: 2,000 evaluated triangles max, light PBR texture, Roblox.
+A useful kickoff is:
 
-## 4. Example prompts
+> Para a árvore, me diga só algumas coisas sobre o visual:
+> 1. Qual espécie ou formato de copa você imagina?
+> 2. O tronco deve ser mais reto ou retorcido? Copa densa ou com espaços?
+> 3. Prefere tons mais realistas ou um visual levemente estilizado?
+> 4. Tem alguma imagem ou jogo de referência para eu seguir?
 
-**Too vague:** "Make a realistic car."
+Notice that none of these repeats the triangle budget, engine or texture style.
+Do not finish with "posso começar?" — take the answers into the plan.
 
-Ask: "Is this car for a real-time game or a close-up render? That changes polygon density, UV work and detail." If the use is clear but the design isn't: "Do you have a model/reference or should I create an original design?"
+### Example — high-detail sword
 
-**Character:** "Make a character."
+> 1. A espada deve parecer histórica, fantasia ou sci-fi?
+> 2. Como você imagina a lâmina (reta, curva, larga, fina) e o comprimento?
+> 3. Quais materiais/cores e nível de desgaste?
+> 4. O detalhe mais importante é lâmina, guarda, cabo ou ornamentos?
+> 5. Ela será vista de perto em jogo ou usada em render?
 
-Ask: "Will this character need to be animated, and what style should it follow (realistic, stylized or low-poly)?" For a stylized static bust request with style specified, proceed without extra questions.
+## Severity and permissions
 
-**Technically constrained:** "Model this mechanical mount for 3D printing."
+| Class | Meaning | Action |
+| --- | --- | --- |
+| **BLOCKER** | Contradictory scope, required fit/tolerances, unknown export target that changes deliverable, paid cost or overwrite | Stop. Ask focused questions, record answers. |
+| **QUALITY-RISK** | Missing reference, silhouette, material or priority that would produce materially different assets | Include in the multi-question design interview. |
+| **OPTIONAL** | Small decorative/bevel/camera details after core brief resolved | Use editable defaults and report them. |
 
-Ask for dimensioned drawing or critical mounting dimensions/tolerances **before** building a production part; never invent load-bearing fits.
+Explicit approval is **still required for destructive edits, overwrites,
+paid operations or replacing user-owned data**. That separate safety
+authorization is never substituted by answered artistic questions.
 
-**Sufficient:** "Create a 3 m low-poly pine tree for a game; green palette; 800 triangles max; Blender file."
+## Acceptance
 
-Proceed directly. Optional leaf layout, branch count and bevel sizes are agent decisions; validate evaluated triangles.
+- A new ambiguous 3D project elicits several specific, nonredundant design
+  questions before mutation, rather than one generic permission question.
+- If the user has answered an element already, it does not reappear.
+- Responses change a written design plan and modeling choices.
+- Repeat instructions/follow-ups use the existing brief without resetting it.
+- Missing real blockers stop edits; delegated minor details do not cause loops.
+- Logs/snapshots/visual and engine validations still remain independent of
+  whether the questions were answered.
 
-**Delegated choices:** "Surprise me with a detailed fantasy house and choose the art style."
-
-Proceed with a declared design direction, inspect silhouette and follow the professional quality loop.
-
-## 5. Expected agent response format
-
-When blocked, ask conversationally:
-
-```text
-To model this for [use/goal], I need [one decision]:
-[focused question, optionally with examples / choose-for-me]
-```
-
-When proceeding with assumptions, include one concise sentence:
-
-```text
-I'll use [stated assumptions] for [reason]; they remain editable.
-```
-
-This gate is separate from **visual verification**. Even with an excellent brief, a successful tool call does not make visual quality PASS. See `references/professional-modeling-standards.md` and `references/modeling-quality-loop.md`.
+See `references/modeling-quality-loop.md`, `references/p0-integrity.md`,
+and `references/visual-inspection.md` for the downstream quality gates.
