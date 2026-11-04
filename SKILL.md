@@ -18,9 +18,9 @@ Agent Skill for Blender modeling; **not a Blender-control MCP server or addon**.
 7. **Readable editable faces.** Prefer intentional clean quads on flat hard-surface panels. Four coplanar triangles making an unnecessary X-like face are a REVIEW candidate, not automatic failure. Distinguish native faces from GPU/glTF triangles; use `references/clean-editable-topology.md` and `scripts/topology_face_diagnostics.py` on named meshes when relevant.
 8. **Diagnose defects first.** Capture actual evidence, isolate the cause, fix only the affected owned copy, recheck original and nearby geometry. After two failed attempts, change method or seek a critical reference.
 9. **Risk-based autonomy.** Follow `references/autonomous-execution-policy.md`: proceed with read-only and checkpointed reversible owned edits; ask before destructive/unowned changes; stop if scene recovery is uncertain.
-10. **Honest delivery.** State PASS / ISSUE / N/A / NOT VERIFIED for relevant acceptance criteria, exact file paths actually confirmed, measured results and remaining limitations. Python tests do not certify artistic quality.
+10. **Honest delivery.** Report PASS / ISSUE / N/A / NOT VERIFIED, confirmed paths, measurements and limitations. Python tests do not certify artistic quality.
 
-**Avoid global orphan purges.** Do not globally delete objects, overwrite user files or apply modifiers to someone else's mesh. Use `references/professional-modeling-standards.md` and `references/quality-checklist.md` for substantial assets. Distinguish real image evidence from mere geometry metrics.
+**Avoid global orphan purges.** Never delete unrelated objects or overwrite files. See `references/professional-modeling-standards.md` and `references/quality-checklist.md`; geometry metrics are not visual evidence.
 
 ### GENERAL KICKOFF — multi-question design interview for NEW projects
 
