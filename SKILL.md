@@ -21,9 +21,9 @@ A portable Agent Skill for AI-driven Blender modeling. It is **not a Blender-con
 
 **Avoid global orphan purges.** Do not globally delete objects, overwrite user files or apply modifiers to someone else's mesh. Use `references/professional-modeling-standards.md` and `references/quality-checklist.md` for substantial assets. Distinguish real image evidence from mere geometry metrics.
 
-### GENERAL KICKOFF — one question on each NEW project
+### GENERAL KICKOFF — multi-question design interview for NEW projects
 
-Summarize all known information and ask **one general open-ended question** about desired look or final priorities **even when the technical brief is complete**. Allow "pode seguir" to continue. **do not repeat answered requirements**; combine essential blockers into the first question when practical. Await the answer before scene mutations. Read-only discovery may happen while waiting. **Do not restart the interview** when continuing an existing project, refining an asset or recovering from tool errors.
+Before modeling a NEW asset, summarize the known brief and ask **several meaningful, nonredundant questions** about what the user wants the model to look like: silhouette/shape, visual references/style, materials/colors, important details, purpose/engine and any missing technical constraints. Normally ask **4–6** for a complex prop, **2–3** for a simple one; allow a short second round if answers reveal a major unknown. **Do not repeat answered requirements** or ask just "posso seguir?" / "can I proceed?" — get design decisions, not a generic go-ahead. After the answers, record the chosen brief and proceed without another permission prompt. If the user has explicitly delegated all creative choices, proceed with stated editable defaults. Do NOT restart the interview when continuing the existing project, refining an asset or recovering from tool errors. Always read `references/clarification-gate.md`; wait for initial design answers before scene mutations. Read-only discovery is fine.
 
 ## Core workflow
 
