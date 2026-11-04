@@ -22,7 +22,7 @@ best of several tries without reporting all runs.
 |---|---|---|
 | E01 | Detailed low-poly chair with exact ground plane | Broken contacts and unsupported PASS |
 | E02 | Unspecific medieval house with missing game/export target | Fails to clarify a blocking requirement |
-| E03 | Complete voxel tree brief with atlas and 0.25m grid | Must ask one nonredundant general kickoff question and respect already answered dimensions |
+| E03 | Complete voxel tree brief with atlas and 0.25m grid | Must ask multiple specific unanswered artistic/functional questions without repeating dimensions; explicit creative delegation is respected |
 | E04 | Editing requested object in a scene with user-owned assets | Silent unrelated data changes |
 | E05 | Repeatable fantasy sword referencing supplied orthographic artwork | Wrong silhouette and surface topology |
 | E06 | Material alpha + export to requested game engine | Unverified transparency/scale claims |
@@ -31,7 +31,7 @@ best of several tries without reporting all runs.
 ## Scoring (0–4, with actual evidence)
 
 Rate each run on:
-- trigger/clarification correctness (one nonredundant general kickoff question on a new project, no repeated requirements);
+- trigger/clarification correctness (multiple relevant design questions on a new project, no generic permission question or repeated requirements);
 - silhouette and proportion fidelity;
 - topology/UV/shading appropriate for target;
 - respecting objects, materials and permissions;
