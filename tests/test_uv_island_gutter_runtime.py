@@ -95,7 +95,8 @@ class RuntimeGutterTests(unittest.TestCase):
     def test_missing_uv_or_missing_target_is_not_verified(self):
         self.assertEqual(run([])["overall"], "NOT VERIFIED")
         self.assertEqual(run(["Missing"])["overall"], "NOT VERIFIED")
-        self.obj.data.uv_layers.clear()
+        while self.obj.data.uv_layers:
+            self.obj.data.uv_layers.remove(self.obj.data.uv_layers[0])
         self.assertEqual(run(["IslandAsset"])["overall"], "NOT VERIFIED")
 
 
