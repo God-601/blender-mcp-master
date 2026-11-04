@@ -19,6 +19,40 @@ Choose the required format, units, forward/up axes, triangle budget, material co
 9. Run scripts/validate_asset.py and investigate warnings in context.
 10. Export to a new path unless the user explicitly requested overwriting; verify the file exists and, where possible, reopen or import it.
 
+## v1.2 — Measurable preflight before delivering a game asset
+
+Use `scripts/game_asset_preflight.py` with **explicit `TARGETS`**, the chosen
+`ENGINE` and project-specific triangle/material budgets. It measures
+**evaluated** triangles, static mesh world bounds, world origin, UV presence,
+material slots, image texture references and missing linked files. `MEASURED`
+means only those configured technical checks passed: imported appearance,
+collision, normals and engine compatibility remain **NOT VERIFIED**.
+
+If the asset uses a baked texture atlas, also run
+`scripts/uv_island_gutter_audit.py` on the **base mesh** after setting
+`TEXTURE_WIDTH`, `TEXTURE_HEIGHT` and `DESIRED_PADDING_PX`. The tool finds
+UV-continuous polygon islands via shared mesh edges, then measures lower
+bounds between their 2D bounding boxes. A small bound is **REVIEW**, not
+proof of texture bleed; a large bound is **MEASURED**, not a guarantee that
+mipmaps or baked normals are correct. Check actual bake and island borders
+at the target resolution.
+
+For `GLB`, there is an automated **Blender export → Blender reimport**
+round-trip test checking parsed geometry, world bounds, origin, UV map and
+material presence. This is real Blender evidence, **not** a game engine
+import test. `FBX` importer behaviors, tangent-space normals and actual
+Roblox/Unity/Godot/Unreal settings must be tested in the target engine;
+never invent a PASS for unavailable tools.
+
+### Human-engine acceptance checklist
+
+After importing the real file into the destination, verify: object count
+and names, dimensions and units, pivot/origin, UV channel(s), color/normal
+textures, material roughness/transparency, face normal direction and tangent
+seams, shading, collision, intended LOD switching, and visual quality
+from target camera distances. Record engine/app version, file path,
+capture evidence and exact outcomes `PASS / ISSUE / NOT VERIFIED`.
+
 ## 3. LOD and scene performance
 
 - Build LOD levels from the silhouette and screen-space role of the asset, not from a ratio alone.
