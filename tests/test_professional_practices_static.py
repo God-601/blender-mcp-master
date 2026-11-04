@@ -26,9 +26,10 @@ class ProfessionalPracticesStaticTests(unittest.TestCase):
         self.assertIn("references/clarification-gate.md", skill)
         self.assertIn("CLARIFY ->", skill)
         self.assertIn("Clarify before you build", skill)
-        self.assertIn("Priority: P0", gate)
-        for term in ("BLOCKER", "QUALITY-RISK", "OPTIONAL", "before modeling",
-                     "already supplied", "one focused question", "choose for me"):
+        self.assertIn("P0 new-project decision gate", gate)
+        for term in ("BLOCKER", "QUALITY-RISK", "OPTIONAL", "before any scene mutation",
+                     "already-answered", "multiple specific", "you choose",
+                     "no duplicate questions"):
             self.assertIn(term.lower(), gate.lower())
         self.assertIn("Clarify (P0)", playbook)
         self.assertIn("P0 clarification gate", standards)
