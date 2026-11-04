@@ -47,6 +47,17 @@ class ReleaseReadinessStaticTests(unittest.TestCase):
         self.assertIn("docs/release-notes-1.1.md", source)
         self.assertIn("Tag exists at a DIFFERENT SHA", source)
 
+    def test_stable_v12_release_requires_exact_main_ci_and_zip_smoke(self):
+        workflow = (ROOT / ".github/workflows/release-stable-1.2.yml").read_text(encoding="utf-8")
+        for item in ("workflow_run:", "github.event.workflow_run.conclusion == 'success'",
+                     "RELEASE_SHA", "MAIN_SHA", 'p.version !== "1.2.0"',
+                     "l.version !== \"1.2.0\"", "npm package checks",
+                     "Release readiness preflight (NO RELEASE)", "for retry in $(seq 1 18)",
+                     "scripts/clean_install_smoke.py", "docs/release-notes-1.2.md",
+                     "docs/RELEASE-1.2-EVIDENCE.md", "gh release create",
+                     "Tag exists at a DIFFERENT SHA"):
+            self.assertIn(item, workflow)
+
     def test_release_evidence_does_not_fabricate_agent_or_engine_pass(self):
         evidence = (ROOT / "docs/RELEASE-1.0-EVIDENCE.md").read_text(encoding="utf-8")
         self.assertIn("T08", evidence)
