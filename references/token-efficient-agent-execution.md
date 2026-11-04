@@ -4,7 +4,7 @@
 
 ## Preferred workflow
 
-1. **GENERAL KICKOFF stays mandatory once per NEW modeling project.** Reuse the user's known brief and ask one nonredundant open question. Do not restart the interview for refinements or retries.
+1. **GENERAL KICKOFF stays mandatory once per NEW modeling project.** Reuse the known brief and ask a concise **group of meaningful nonredundant design questions** (normally 2–6, scaled to complexity). A useful design interview saves rework; a generic 'may I proceed?' does not. Do not restart it for refinements or retries.
 2. **Discover once per client/session:** Blender version, MCP tools/schema, scene state and ownership. Repeat discovery only after a relevant environment change.
 3. **Route before reading:** choose only the relevant modeling discipline and one cross-cutting validation/safety guide. Don't load all of `references/` or unrelated Blender manuals.
 4. **Prefer semantic tools to generic Bash:**

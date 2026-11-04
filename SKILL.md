@@ -21,9 +21,9 @@ A portable Agent Skill for AI-driven Blender modeling. It is **not a Blender-con
 
 **Avoid global orphan purges.** Do not globally delete objects, overwrite user files or apply modifiers to someone else's mesh. Use `references/professional-modeling-standards.md` and `references/quality-checklist.md` for substantial assets. Distinguish real image evidence from mere geometry metrics.
 
-### GENERAL KICKOFF — one question on each NEW project
+### GENERAL KICKOFF — multi-question design interview for NEW projects
 
-Summarize all known information and ask **one general open-ended question** about desired look or final priorities **even when the technical brief is complete**. Allow "pode seguir" to continue. **do not repeat answered requirements**; combine essential blockers into the first question when practical. Await the answer before scene mutations. Read-only discovery may happen while waiting. **Do not restart the interview** when continuing an existing project, refining an asset or recovering from tool errors.
+Before modeling a NEW asset, summarize the known brief and ask **several meaningful, nonredundant questions** about what the user wants the model to look like: silhouette/shape, visual references/style, materials/colors, important details, purpose/engine and any missing technical constraints. Normally ask **4–6** for a complex prop, **2–3** for a simple one; allow a short second round if answers reveal a major unknown. **Do not repeat answered requirements** or ask just "posso seguir?" / "can I proceed?" — get design decisions, not a generic go-ahead. After the answers, record the chosen brief and proceed without another permission prompt. If the user has explicitly delegated all creative choices, proceed with stated editable defaults. Do NOT restart the interview when continuing the existing project, refining an asset or recovering from tool errors. Always read `references/clarification-gate.md`; wait for initial design answers before scene mutations. Read-only discovery is fine.
 
 ## Core workflow
 
@@ -54,6 +54,8 @@ For nontrivial assets read `references/modeling-quality-loop.md`, `references/mo
 | Geometry Nodes and procedural generation | `references/geometry-engine.md`, `references/parametric-geometry-nodes.md` |
 | UV, textures, baking, materials | `references/uv-baking.md`, `references/materials.md`, `references/shading-recipes.md`, `scripts/uv_diagnostics.py` |
 | Game asset optimization and export | `references/game-asset-optimization.md`, `references/p1-production-pipeline.md`, `references/game-ready-export.md` |
+| Read-only game asset import readiness | `references/game-ready-export.md`, `scripts/game_asset_preflight.py` |
+| UV island gutter candidates for texture baking | `references/uv-baking.md`, `scripts/uv_island_gutter_audit.py` |
 | Measured 3D geometry/material/texture cost | `references/model-performance-strategy.md`, `scripts/asset_performance_audit.py` |
 | Check intentional joints versus accidental penetration | `references/component-fit-and-joints.md`, `scripts/inspect_component_fit.py` |
 | Compare optimization silhouette proxies | `references/model-performance-strategy.md`, `scripts/compare_asset_silhouettes.py` |
@@ -127,6 +129,10 @@ Select a guide by the route above. The names below make scripts and specialist m
 `scripts/inspect_component_fit.py` — optional read-only explicit-pair AABB/BVH candidates; real visual joint correctness is NOT VERIFIED until inspected.
 
 `scripts/uv_diagnostics.py` — optional read-only base-mesh UV overlap and texel-density inspection with explicit targets; engine/padding remain NOT VERIFIED.
+
+`scripts/uv_island_gutter_audit.py` — read-only per-island UV bounds lower-bound distances; baking/engine mip quality remains NOT VERIFIED.
+
+`scripts/game_asset_preflight.py` — read-only game target budgets, evaluated static mesh, pivots, UV, material and linked texture checks; in-engine import NOT VERIFIED.
 
 `scripts/scene_baseline_snapshot.py` — read-only protected-object selected-property snapshot; `scripts/compare_scene_baselines.py` — pure-Python before/after fingerprint comparison. Neither substitutes for a saved .blend backup.
 

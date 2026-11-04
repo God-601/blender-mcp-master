@@ -6,15 +6,15 @@ Esta é uma **prévia de teste**, não a release 1.0. Faça backup dos projetos;
 
 **Preflight (sempre em sessão nova)**
 
-> Ative a Blender MCP Master. Informe sua versão real do Blender, as ferramentas do Blender-control MCP disponíveis e os objetos existentes. Inspecione somente por leitura. Para um projeto NOVO, faça uma pergunta geral útil de GENERAL KICKOFF antes de alterar a cena, mesmo com briefing completo, sem repetir informações já dadas.
+> Ative a Blender MCP Master. Informe sua versão real do Blender, as ferramentas do Blender-control MCP disponíveis e os objetos existentes. Inspecione somente por leitura. Para um projeto NOVO, faça várias perguntas úteis sobre estilo, forma, materiais, detalhes e uso final antes de alterar a cena. Não repita os dados já informados nem pergunte apenas se pode continuar.
 
-**Aprovação:** a IA não inventa uma conexão MCP e não muda nada antes de receber a resposta do kickoff.
+**Aprovação:** a IA não inventa uma conexão MCP e não muda nada antes de receber as respostas às perguntas relevantes.
 
 ## T01 — Cadeira low-poly e briefing completo
 
 > Crie uma cadeira medieval low-poly para jogos, com quatro pernas, assento a 0,45 m, largura 0,5 m, encosto, material de madeira e limite de 1.500 triângulos. Entrega em .blend. Preserve os objetos existentes. Primeiro execute o GENERAL KICKOFF exigido pela skill.
 
-Aprovado se fizer somente uma pergunta geral não redundante, aguardar "pode seguir", criar uma cadeira completa e mostrar medições e capturas reais.
+Aprovado se fizer várias perguntas de design não redundantes (ex.: encosto, acabamento da madeira, proporções visuais), esperar as respostas e usar essas escolhas na cadeira; não basta perguntar "pode seguir?".
 
 ## T02 — Castelo e inspeção artística
 

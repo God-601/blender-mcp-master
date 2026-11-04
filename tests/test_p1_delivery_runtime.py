@@ -86,6 +86,51 @@ class P1DeliveryRuntimeTests(unittest.TestCase):
             self.assertGreaterEqual(total_polygons, 12)
             self.assertTrue(all(len(o.data.vertices) > 0 for o in meshes))
 
+    def test_GLTF_roundtrip_preserves_static_asset_bounds_uv_and_material_presence(self):
+        """Blender-to-Blender GLB contract, NOT a Roblox/Godot/Unity import test."""
+        from mathutils import Vector
+        obj = self.cube("GameReadyCrate")
+        obj.location = (1.25, -0.75, 2.5)
+        if not obj.data.uv_layers:
+            obj.data.uv_layers.new(name="UVMap")
+        material = bpy.data.materials.new("CratePaint")
+        material.use_nodes = True
+        obj.data.materials.append(material)
+        bpy.context.view_layer.update()
+
+        def world_bounds(mesh_object):
+            points = [mesh_object.matrix_world @ Vector(corner) for corner in mesh_object.bound_box]
+            return [(min(float(v[i]) for v in points), max(float(v[i]) for v in points))
+                    for i in range(3)]
+
+        expected_bounds = world_bounds(obj)
+        expected_origin = tuple(float(x) for x in obj.matrix_world.translation)
+        before_coords = tuple(tuple(v.co) for v in obj.data.vertices)
+        with tempfile.TemporaryDirectory() as folder:
+            path = str(Path(folder) / "crate_roundtrip.glb")
+            out, err = run_script("export_asset.py", OBJECTS=["GameReadyCrate"],
+                                  PATH=path, FORMAT="GLB", TRIANGULATE=True,
+                                  ENGINE="GODOT")
+            self.assertIsNone(err, out)
+            self.assertTrue(Path(path).is_file())
+            self.assertEqual(before_coords, tuple(tuple(v.co) for v in obj.data.vertices))
+            bpy.ops.wm.read_factory_settings(use_empty=True)
+            result = bpy.ops.import_scene.gltf(filepath=path)
+            self.assertIn("FINISHED", result)
+            meshes = [o for o in bpy.context.scene.objects if o.type == "MESH"]
+            self.assertEqual(len(meshes), 1)
+            imported = meshes[0]
+            imported_bounds = world_bounds(imported)
+            for original_pair, imported_pair in zip(expected_bounds, imported_bounds):
+                for expected, actual in zip(original_pair, imported_pair):
+                    self.assertAlmostEqual(expected, actual, delta=0.001)
+            for expected, actual in zip(expected_origin, imported.matrix_world.translation):
+                self.assertAlmostEqual(expected, float(actual), delta=0.001)
+            self.assertGreater(len(imported.data.uv_layers), 0)
+            self.assertGreater(sum(s.material is not None for s in imported.material_slots), 0)
+            imported.data.calc_loop_triangles()
+            self.assertEqual(len(imported.data.loop_triangles), 12)
+
     def test_benchmark_missing_target_does_not_claim_measured(self):
         out, err = execute_script("scripts/benchmark_report.py", {
             "TARGET_NAMES": ["MissingCube"]})
