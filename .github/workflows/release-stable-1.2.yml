@@ -1,0 +1,156 @@
+name: Publish v1.2.0 stable (one-time gated)
+
+# Explicitly approved v1.2.0 launch. Trigger ONLY after Static checks
+# has finished successfully on a push to main; the workflow independently
+# requires the npm and clean-install preflight workflows to have passed on
+# that exact commit. Once the tag is published, pin its commit SHA in this trigger so
+# later main commits cannot restart the one-time release.
+on:
+  workflow_run:
+    workflows: ["Static checks"]
+    branches: [main]
+    types: [completed]
+
+permissions:
+  actions: read
+  contents: write
+  id-token: write
+
+concurrency:
+  group: blender-mcp-master-v1.2.0-once
+  cancel-in-progress: false
+
+jobs:
+  publish-v12:
+    if: >-
+      github.repository == 'God-601/blender-mcp-master' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      RELEASE_SHA: ${{ github.event.workflow_run.head_sha }}
+      NPM_TOKEN_SET: ${{ secrets.NPM_TOKEN != '' }}
+      VERSION: '1.2.0'
+      TAG: 'v1.2.0'
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: '22'
+          registry-url: 'https://registry.npmjs.org'
+          package-manager-cache: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.11'
+      - name: Check exact-main SHA, version, permissions and workflow evidence
+        shell: bash
+        run: |
+          set -euo pipefail
+          MAIN_SHA="$(gh api "repos/${GH_REPO}/branches/main" --jq '.commit.sha')"
+          test "$MAIN_SHA" = "$RELEASE_SHA" || { echo "::error::main changed after CI ($MAIN_SHA vs $RELEASE_SHA)"; exit 1; }
+          test "$(git rev-parse HEAD)" = "$RELEASE_SHA"
+          node - <<'JS'
+          const p = require("./package.json");
+          const l = require("./package-lock.json");
+          if (p.version !== "1.2.0" || l.version !== "1.2.0" ||
+              l.packages[""].version !== "1.2.0")
+            throw new Error("Not the explicitly authorized 1.2.0 package+lock");
+          JS
+          test -f docs/release-notes-1.2.md
+          test -f docs/ROADMAP-NEXT.md
+          test -f docs/RELEASE-1.2-EVIDENCE.md
+          # Static checks can finish BEFORE npm/preflight. Require both
+          # results on this exact SHA, and never treat "in progress" as pass.
+          for retry in $(seq 1 18); do
+            runs="$(gh api "repos/${GH_REPO}/actions/runs?head_sha=${RELEASE_SHA}&per_page=100")"
+            missing=0
+            for name in "npm package checks" "Release readiness preflight (NO RELEASE)"; do
+              passed="$(printf '%s' "$runs" | jq -r --arg name "$name" '
+                [.workflow_runs[] | select(.name == $name and .event == "push" and .status == "completed" and .conclusion == "success")] | length
+              ')"
+              failures="$(printf '%s' "$runs" | jq -r --arg name "$name" '
+                [.workflow_runs[] | select(.name == $name and .event == "push" and .status == "completed" and .conclusion != "success")] | length
+              ')"
+              if test "$failures" -gt 0; then
+                echo "::error::Required CI $name failed on $RELEASE_SHA"; exit 1
+              fi
+              if test "$passed" -lt 1; then
+                missing=$((missing+1))
+              else
+                echo "Verified CI: $name"
+              fi
+            done
+            if test "$missing" -eq 0; then break; fi
+            if test "$retry" -eq 18; then
+              echo "::error::Required CI did not complete successfully on $RELEASE_SHA"; exit 1
+            fi
+            sleep 10
+          done
+      - name: Validate package and scripts on release SHA
+        run: |
+          set -euo pipefail
+          python -m unittest discover -s tests -v
+          npm ci --ignore-scripts --no-fund
+          npm audit --omit=dev --audit-level=high
+          npm test
+          npm pack --dry-run --ignore-scripts
+      - name: Create versioned ZIP, npm tarball and checksums
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist/blender-mcp-master
+          cp -R SKILL.md README.md LICENSE CHANGELOG.md CONTRIBUTING.md references scripts assets docs dist/blender-mcp-master/
+          (cd dist && zip -q -r "blender-mcp-master-${VERSION}.zip" blender-mcp-master)
+          npm pack --ignore-scripts --pack-destination dist
+          (cd dist && sha256sum "blender-mcp-master-${VERSION}.zip" "blender-mcp-master-${VERSION}.tgz" > SHA256SUMS.txt)
+          python scripts/clean_install_smoke.py \
+            "dist/blender-mcp-master-${VERSION}.zip" \
+            dist/SHA256SUMS.txt \
+            --report dist/clean-install-report.json
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("dist/clean-install-report.json").read_text(encoding="utf-8"))
+          assert d["result"]=="PASS",d
+          assert d["actual_agent_discovery"]=="NOT VERIFIED"
+          PY
+      - name: Create public stable GitHub Release at the verified SHA
+        shell: bash
+        run: |
+          set -euo pipefail
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            REF_SHA="$(gh api "repos/${GH_REPO}/git/ref/tags/${TAG}" --jq '.object.sha')"
+            test "$REF_SHA" = "$RELEASE_SHA" || { echo "::error::Tag exists at a DIFFERENT SHA"; exit 1; }
+            echo "Release $TAG exists at verified SHA; no replacement/overwrite."
+          else
+            gh release create "$TAG" \
+              "dist/blender-mcp-master-${VERSION}.zip" \
+              "dist/blender-mcp-master-${VERSION}.tgz" \
+              "dist/SHA256SUMS.txt" \
+              "dist/clean-install-report.json" \
+              --target "$RELEASE_SHA" \
+              --title "Blender MCP Master v1.2.0" \
+              --notes-file docs/release-notes-1.2.md \
+              --latest
+          fi
+          gh release view "$TAG" --json url,tagName,isPrerelease --jq '{url,tagName,isPrerelease}'
+      - name: Publish optional npm stable package when authorized credentials exist
+        if: env.NPM_TOKEN_SET == 'true'
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if npm view "blender-mcp-master@${VERSION}" version --json >/dev/null 2>&1; then
+            echo "npm version ${VERSION} already exists; not republishing immutable package."
+          else
+            npm publish --access public --provenance --tag latest
+          fi
+      - name: Explicitly report absent npm publishing credentials
+        if: env.NPM_TOKEN_SET != 'true'
+        run: echo "::warning::GitHub v1.2.0 stable Release completed; npm publish skipped because NPM_TOKEN is not configured. The ZIP and GitHub Skills CLI work independently."
