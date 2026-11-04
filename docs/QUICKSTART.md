@@ -94,10 +94,7 @@ The Release ZIP and GitHub skill installs are usable independently of npm.
 - "Make a voxel tree with my project grid unit of 0.25 m and an 8-color
   palette. Check exposed faces, UV island layout and export warnings."
 
-For a NEW modeling project, the agent must ask one general, nonredundant kickoff
-question before changing the scene, even if the technical brief is complete.
-It must not repeat already supplied requirements or restart the interview
-when refining the same project; essential new blockers may still require clarification.
+For a NEW modeling project, the agent asks **several useful, specific design questions** (usually 2–6 depending on complexity) about any missing style, reference, silhouette, materials, details, or end use before changing the scene. It must not just ask permission to proceed, repeat requirements already given, or restart the interview on refinements. If every meaningful choice was delegated, it may pick and disclose editable defaults.
 Read-only discovery is allowed before the kickoff answer.
 
 ## What counts as success?
