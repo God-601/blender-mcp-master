@@ -75,3 +75,17 @@ A cage used for a Selected-to-Active bake must correspond to the target mesh's t
 - Confirm material assignments, UV maps, map naming, dimensions, color spaces, and packing.
 - Test the exported asset in the target application when possible. If it was not tested in-engine, report that limitation explicitly.
 - Record intentional overlap, tiling, UDIMs, or missing maps that are not required by the destination.
+
+## v1.2 — Conservative UV-island gutter audit
+
+For atlas/baked-texture game assets, run
+`scripts/uv_island_gutter_audit.py` on explicitly named source meshes.
+It groups polygons by mesh edges whose UV endpoints match, then measures
+the **lower bound** of pixel distances between island AABBs. Customize
+texture width/height and desired padding based on the chosen project
+resolution and anticipated mip levels. For close pairs the report is REVIEW;
+for pairs with adequate AABB separation it is MEASURED **only for that
+lower-bound check**. It never edits UVs, bakes images or predicts shader
+sampling, and it cannot certify final padding/bleed in the target engine.
+Run `scripts/uv_diagnostics.py` separately for positive-area overlap and
+texel density, and inspect the actual bake at game scale.
