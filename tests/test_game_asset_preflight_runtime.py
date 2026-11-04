@@ -75,7 +75,8 @@ class RuntimeGamePreflightTests(unittest.TestCase):
         self.assertEqual(len(self.obj.modifiers), 1)
 
     def test_missing_uv_and_texture_file_are_reported(self):
-        self.obj.data.uv_layers.clear()
+        while self.obj.data.uv_layers:
+            self.obj.data.uv_layers.remove(self.obj.data.uv_layers[0])
         mat = bpy.data.materials.new("Wood")
         mat.use_nodes = True
         tex = mat.node_tree.nodes.new("ShaderNodeTexImage")
