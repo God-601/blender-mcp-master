@@ -13,7 +13,7 @@ class GeneralKickoffContractTests(unittest.TestCase):
         self.assertIn("several meaningful, nonredundant questions", skill)
         self.assertIn("Do not repeat answered requirements", skill)
         self.assertIn("posso seguir?", skill)
-        self.assertIn("do not repeat answered requirements", skill)
+        self.assertIn("Do not repeat answered requirements", skill)
 
     def test_clarification_gate_has_real_questions_not_permission_prompt(self):
         gate = (ROOT / "references" / "clarification-gate.md").read_text(encoding="utf-8")
