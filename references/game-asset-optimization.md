@@ -100,3 +100,19 @@ Accept only when the asset still meets its visual and functional requirements. I
 Use `scripts/optimize_mesh.py` as a configurable template. It is dry-run by default. Set explicit `TARGETS`, inspect the report, then deliberately set `APPLY = True`. It creates a hidden backup collection before editing. It skips shape-key meshes, shared mesh datablocks, linked data and unsupported dependency cases by default. The script performs cleanup only; it does not guess which faces are internal. Optional Decimate is added as a non-destructive modifier and must be visually reviewed.
 
 Run `scripts/validate_asset.py` before and after. Runtime-test the script in the Blender versions supported by this repository before relying on it in production.
+
+## v1.2 — Copy-first quality guard for LOD and delivery
+
+Before approving LODs, run read-only `scripts/asset_performance_audit.py`
+for the project triangle/material/texture budget and
+`scripts/compare_asset_silhouettes.py` on explicitly named base/LOD
+pairs. Hull differences above a user-authored tolerance are ISSUE; a
+hull match remains REVIEW since small details, holes, shading and normals
+may have disappeared. Keep source meshes and image-based quality evidence.
+Then check `scripts/game_asset_preflight.py` for selected exported objects
+and `scripts/uv_island_gutter_audit.py` when using atlases.
+
+A GLB Blender round-trip verifies some imported data but does not certify
+Roblox, Godot, Unreal or Unity. Only an actual importer in the destination
+can change `engine_import` from NOT VERIFIED. Do not quote FPS, real draw
+calls, collision fidelity or normal-map correctness from these scripts.
