@@ -1,5 +1,23 @@
 # Changelog
 
+## 1.2.0 — game assets and design interviews (2026-11-04)
+
+- Replaced the generic single-question modeling kickoff with an adaptive
+  multi-question design interview, usually 2–6 relevant questions about
+  missing visual style, silhouette, reference, materials and intended use.
+  Never repeat specified constraints or restart on follow-up edits.
+- Added read-only game asset preflight for evaluated triangles, scene-scale
+  bounds, origin/pivot, UVs, material slots and missing texture files.
+- Added conservative per-UV-island AABB gutter distance estimates in
+  authored texture pixels with explicit REVIEW instead of claiming bakes pass.
+- Expanded Blender GLB roundtrip tests to verify geometry dimensions,
+  origin, UV channel and material presence without claiming game-engine import.
+- Updated game export/UV/LOD guidance and added regression suites.
+
+**Limitations:** game-engine import, normals/tangents in target, collision,
+true texture baking and live-agent question behavior remain NOT VERIFIED.
+See `docs/RELEASE-1.2-EVIDENCE.md`.
+
 ## 1.1.0 — safer geometric review and evidence (2026-11-02)
 
 - Detect edge/corner/diagonal-only AABB proximity that cannot support a

@@ -51,13 +51,13 @@ pixels ou benchmark comprovado em outro agente/engine. Esses são
 objetivos futuros, não resultados da versão 1.1.
 Veja [evidências v1.1](RELEASE-1.1-EVIDENCE.md).
 
-## v1.2.0 — Pipeline de assets para jogos e entrevista de design
+## v1.2.0 — Pipeline de assets para jogos e entrevista de design (implementada; veja evidências)
 
 Além do fluxo de exportação, a v1.2 introduz uma mudança no primeiro contato com o usuário: **várias perguntas específicas**, proporcionais à complexidade do modelo, sobre referência, forma, materiais e finalidade. O agente não deve simplesmente perguntar se pode começar. Reutiliza respostas já dadas e permite delegar escolhas criativas.
 
 O escopo automatizado da fase inicial inclui auditoria read-only de UV gutter por ilha, preflight de assets estáticos para jogo e round-trip GLB no Blender. **Importação real no Roblox/Unity/Godot/Unreal continua NOT VERIFIED até haver execução naquele ambiente**, sem contar Blender reimport como aprovação de engine.
 
-### Expansões que exigem testes externos
+### Expansões futuras que exigem testes externos
 
 - Testar GLB/FBX em um destino real escolhido, preservando dados, imagens e pivôs.
 - Exercitar LOD com casos reais, margens de câmera e normais/tangentes.
