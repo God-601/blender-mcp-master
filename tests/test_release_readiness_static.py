@@ -57,6 +57,7 @@ class ReleaseReadinessStaticTests(unittest.TestCase):
                      "docs/RELEASE-1.2-EVIDENCE.md", "gh release create",
                      "Tag exists at a DIFFERENT SHA"):
             self.assertIn(item, workflow)
+        self.assertIn("github.event.workflow_run.head_sha == 'dae006042b5274de8dce83268cb66870dae868bf'", workflow)
 
     def test_release_evidence_does_not_fabricate_agent_or_engine_pass(self):
         evidence = (ROOT / "docs/RELEASE-1.0-EVIDENCE.md").read_text(encoding="utf-8")
