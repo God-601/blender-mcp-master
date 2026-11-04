@@ -5,7 +5,7 @@ description: Use when an agent plans, creates, inspects, textures, shades, light
 
 # Blender MCP Master
 
-A portable Agent Skill for AI-driven Blender modeling. It is **not a Blender-control MCP server or addon**. To modify a live Blender scene, connect an independent Blender-control MCP. The optional MCP resource server in this repo serves read-only documentation and script templates. Scripts using `bpy` run inside a compatible Blender runtime, not generic host Python.
+Agent Skill for Blender modeling; **not a Blender-control MCP server or addon**. Live scene edits require a separate Blender-control MCP. The optional resource server serves read-only references. `bpy` scripts require Blender Python.
 
 ## Core rules — always apply
 
@@ -17,8 +17,8 @@ A portable Agent Skill for AI-driven Blender modeling. It is **not a Blender-con
 6. **Measured technical checks and proper fit.** Validate evaluated geometry, UVs, mating surfaces, object contact, nonintentional interpenetration, material assignments and budgets for the real destination. Use `references/component-fit-and-joints.md` for G2; avoid a piece merely sinking into another instead of a planned joint. No broad scene-wide fallback on missing targets.
 7. **Readable editable faces.** Prefer intentional clean quads on flat hard-surface panels. Four coplanar triangles making an unnecessary X-like face are a REVIEW candidate, not automatic failure. Distinguish native faces from GPU/glTF triangles; use `references/clean-editable-topology.md` and `scripts/topology_face_diagnostics.py` on named meshes when relevant.
 8. **Diagnose defects first.** Capture actual evidence, isolate the cause, fix only the affected owned copy, recheck original and nearby geometry. After two failed attempts, change method or seek a critical reference.
-9. **Autonomy by risk, not by tool count.** Read `references/autonomous-execution-policy.md` before meaningful scene edits. Read-only and owned reversible work can proceed after design clarification and checkpoint; ask for destructive/unowned changes, and stop on ambiguous scene recovery.
-10. **Honest delivery.** State PASS / ISSUE / N/A / NOT VERIFIED for relevant acceptance criteria, exact file paths actually confirmed, measured results and remaining limitations. A passing Python test is not a professional art-quality certificate.
+9. **Risk-based autonomy.** Follow `references/autonomous-execution-policy.md`: proceed with read-only and checkpointed reversible owned edits; ask before destructive/unowned changes; stop if scene recovery is uncertain.
+10. **Honest delivery.** State PASS / ISSUE / N/A / NOT VERIFIED for relevant acceptance criteria, exact file paths actually confirmed, measured results and remaining limitations. Python tests do not certify artistic quality.
 
 **Avoid global orphan purges.** Do not globally delete objects, overwrite user files or apply modifiers to someone else's mesh. Use `references/professional-modeling-standards.md` and `references/quality-checklist.md` for substantial assets. Distinguish real image evidence from mere geometry metrics.
 
