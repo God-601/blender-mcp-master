@@ -5,6 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { excerptLines, markdownOutline } from "./resource-excerpts.js";
+import { planWorkflow, PRIMARY, OPTIONAL } from "./workflow-routing.js";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const PACKAGE_VERSION = JSON.parse(readFileSync(resolve(ROOT, "package.json"), "utf8")).version;
@@ -118,6 +119,21 @@ server.tool(
         "Review scripts before execution, and use a disposable or backed-up scene for destructive operations."
       ].join("\n")
     }]
+  })
+);
+
+server.tool(
+  "plan_blender_workflow",
+  "Recommend minimal on-demand guides and unanswered design topics without touching Blender.",
+  {
+    category: z.enum(Object.keys(PRIMARY)),
+    needs: z.array(z.enum(Object.keys(OPTIONAL))).max(8).default([]),
+    known: z.array(z.enum(["reference", "silhouette", "materials", "purpose", "technical"])).max(5).default([]),
+    delegated: z.array(z.enum(["reference", "silhouette", "materials", "purpose", "technical"])).max(5).default([]),
+    continuation: z.boolean().default(false)
+  },
+  async (args) => ({
+    content: [{ type: "text", text: JSON.stringify(planWorkflow(args)) }]
   })
 );
 

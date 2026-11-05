@@ -56,6 +56,7 @@ test("MCP server starts over stdio and exposes the expected tools", async () => 
     const result = await client.listTools();
     const names = result.tools.map((tool) => tool.name);
     assert.deepEqual(names.sort(), [
+      "plan_blender_workflow",
       "get_blender_mcp_setup",
       "get_blender_reference",
       "get_blender_reference_excerpt",
@@ -86,6 +87,32 @@ async function withClient(run) {
     await client.close();
   }
 }
+
+test("advisory MCP route chooses only relevant guides and skips repeat questions", async () => {
+  await withClient(async (client) => {
+    const response = await client.callTool({
+      name: "plan_blender_workflow",
+      arguments: { category: "game_asset", needs: ["export", "visual", "fit"],
+                   known: ["purpose"], delegated: ["materials"], continuation: false }
+    });
+    assert.ok(!response.isError);
+    const plan = JSON.parse(response.content[0].text);
+    assert.equal(plan.primary, "references/game-ready-export.md");
+    assert.deepEqual(plan.optional, ["references/visual-inspection.md", "references/component-fit-and-joints.md"]);
+    assert.deepEqual(plan.questions_to_consider, ["reference", "silhouette", "technical"]);
+    assert.equal(plan.read_only, true);
+    const repeated = await client.callTool({
+      name: "plan_blender_workflow",
+      arguments: { category: "organic", continuation: true }
+    });
+    assert.deepEqual(JSON.parse(repeated.content[0].text).questions_to_consider, []);
+    const invalid = await client.callTool({
+      name: "plan_blender_workflow",
+      arguments: { category: "unrecognized_category" }
+    });
+    assert.equal(invalid.isError, true);
+  });
+});
 
 test("MCP server reports the package.json version", async () => {
   await withClient(async (client) => {
@@ -156,7 +183,7 @@ test("npm pack contains the skill content and excludes tests and dependencies", 
   });
   assert.equal(result.status, 0, result.stderr);
   const files = JSON.parse(result.stdout)[0].files.map((file) => file.path);
-  for (const required of ["SKILL.md", "README.md", "LICENSE", "package.json", "bin/blender-mcp-master.js", "src/server.js", "scripts/validate_asset.py", "references/modeling-quality-loop.md", "assets/banner.svg", "assets/workflow.svg", "assets/architecture.svg"]) {
+  for (const required of ["SKILL.md", "README.md", "LICENSE", "package.json", "bin/blender-mcp-master.js", "src/server.js", "scripts/validate_asset.py", "references/modeling-quality-loop.md", "assets/banner.svg", "assets/workflow.svg", "assets/architecture.svg", "integrations/godot/gltf_import_probe.gd", "integrations/godot/project.godot"]) {
     assert.ok(files.includes(required), `missing from package: ${required}`);
   }
   assert.ok(!files.some((path) => path.startsWith("tests/") || path.startsWith("node_modules/") || path.startsWith(".github/")), "package must not ship tests, deps or CI files");
