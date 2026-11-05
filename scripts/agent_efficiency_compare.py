@@ -13,7 +13,8 @@ COMPARABLE_FIELDS = (
     "agent", "model", "blender_version", "mcp_version",
 )
 USAGE_FIELDS = ("input_tokens", "output_tokens")
-METRICS_FIELDS = ("bash_calls", "mcp_calls", "reference_bytes")
+METRICS_FIELDS = ("bash_calls", "mcp_calls", "reference_bytes", "full_script_bytes",
+                  "repeated_reference_reads", "visual_captures", "failed_tool_calls")
 
 
 def _nonnegative_int(value):
@@ -85,6 +86,12 @@ def compare(baseline, with_skill):
             "delta": change,
             "percent_change": round(change * 100.0 / left_tokens, 3),
         }
+    # Raw source-reported quality states are displayed side-by-side, never
+    # converted into model-quality superiority by this metrics-only script.
+    result["reported_checks"] = {
+        "baseline": baseline.get("checks", {}),
+        "candidate": with_skill.get("checks", {}),
+    }
     b_metrics = baseline.get("metrics", {})
     c_metrics = with_skill.get("metrics", {})
     if not isinstance(b_metrics, dict) or not isinstance(c_metrics, dict):
