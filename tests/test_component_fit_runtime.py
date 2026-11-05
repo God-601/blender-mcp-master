@@ -85,6 +85,24 @@ class ComponentFitRuntimeTests(unittest.TestCase):
         self.assertEqual(before, tuple(tuple(v.co) for v in a.data.vertices))
         self.assertEqual(b.name, "B")
 
+    def test_sampled_surface_distance_is_measured_but_not_contact_certification(self):
+        self.cube("A", 0)
+        self.cube("B", 2)
+        pair = run_checks([{"a": "A", "b": "B", "expectation": "surface_joint",
+                            "max_gap": 0.01}])["pairs"][0]
+        self.assertEqual(pair["status"], "ISSUE")
+        self.assertGreaterEqual(pair["sampled_surface_distance_min"], 0.999)
+        self.assertGreater(pair["sampled_surface_points"][0], 0)
+        self.assertEqual(pair["actual_joint_quality"], "NOT VERIFIED")
+
+    def test_sampled_probe_preserves_source_geometry(self):
+        a = self.cube("A", 0)
+        self.cube("B", 1)
+        before = tuple(tuple(v.co) for v in a.data.vertices)
+        pair = run_checks([{"a": "A", "b": "B", "expectation": "surface_joint"}])["pairs"][0]
+        self.assertAlmostEqual(pair["sampled_surface_distance_min"], 0.0, places=5)
+        self.assertEqual(before, tuple(tuple(v.co) for v in a.data.vertices))
+
     def test_touching_joint_not_misclassified_as_penetration_issue(self):
         self.cube("A", 0)
         self.cube("B", 1)

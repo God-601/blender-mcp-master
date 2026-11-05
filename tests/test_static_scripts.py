@@ -51,12 +51,13 @@ class RepositoryStaticChecks(unittest.TestCase):
             "handpaint-recipes.md",
             "shading-recipes.md",
         )
+        catalog = (ROOT / "references" / "resource-catalog.md").read_text(encoding="utf-8")
         for guide in guides:
             with self.subTest(guide=guide):
                 path = ROOT / "references" / guide
                 self.assertTrue(path.is_file(), f"Missing guide: {guide}")
                 self.assertGreater(len(path.read_text(encoding="utf-8")), 1500)
-                self.assertIn(f"references/{guide}", skill)
+                self.assertIn(f"references/{guide}", skill + catalog)
 
     def test_materials_reference_does_not_recommend_global_orphan_cleanup(self):
         materials = (ROOT / "references" / "materials.md").read_text(encoding="utf-8").lower()

@@ -29,13 +29,15 @@ class ExtendedArchitectureStaticTests(unittest.TestCase):
                 ast.parse(source, filename=str(path))
 
     def test_every_new_script_is_routed_from_skill(self):
-        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        skill = ((ROOT / "SKILL.md").read_text(encoding="utf-8") + "\n" +
+                 (ROOT / "references" / "resource-catalog.md").read_text(encoding="utf-8"))
         for filename in SCRIPTS:
             with self.subTest(script=filename):
                 self.assertIn(filename, skill)
 
     def test_new_reference_modules_exist_and_are_routed(self):
-        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        skill = ((ROOT / "SKILL.md").read_text(encoding="utf-8") + "\n" +
+                 (ROOT / "references" / "resource-catalog.md").read_text(encoding="utf-8"))
         for filename in ("agent-compatibility.md", "benchmark-prompts.md"):
             with self.subTest(reference=filename):
                 self.assertTrue((ROOT / "references" / filename).is_file())

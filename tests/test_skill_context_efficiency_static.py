@@ -9,7 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class CompactSkillEntrypointTests(unittest.TestCase):
     def test_root_skill_remains_bounded_without_dropping_core_guards(self):
         source = (ROOT / "SKILL.md").read_text(encoding="utf-8")
-        self.assertLessEqual(len(source.encode("utf-8")), 16000, "Root instructions should route; don't inline specialist manuals")
+        self.assertLessEqual(len(source.encode("utf-8")), 7000, "Compact root instructions must route; do not grow the eager context budget")
         for text in (
             "name: blender-mcp-master",
             "GENERAL KICKOFF",
@@ -32,7 +32,8 @@ class CompactSkillEntrypointTests(unittest.TestCase):
         self.assertNotIn("bpy.data.orphans_purge", source)
 
     def test_all_reference_and_script_names_remain_discoverable(self):
-        source = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        source = ((ROOT / "SKILL.md").read_text(encoding="utf-8") + "\n" +
+                  (ROOT / "references" / "resource-catalog.md").read_text(encoding="utf-8"))
         for folder, ext in (("references", "*.md"), ("scripts", "*.py")):
             paths = sorted((ROOT / folder).glob(ext))
             for path in paths:

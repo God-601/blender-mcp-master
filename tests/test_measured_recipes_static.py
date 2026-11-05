@@ -7,7 +7,8 @@ ROOT = Path(__file__).resolve().parents[1]
 
 class MeasuredRecipeStaticTests(unittest.TestCase):
     def test_example_code_and_document_routes(self):
-        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        skill = ((ROOT / "SKILL.md").read_text(encoding="utf-8") + "\n" +
+                 (ROOT / "references" / "resource-catalog.md").read_text(encoding="utf-8"))
         docs = ("references/measured-proportion-recipes.md",
                 "references/voxel-atlas-recipe.md")
         files = ("vehicle_proportion_example.py", "voxel_atlas_example.py",

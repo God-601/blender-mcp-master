@@ -58,6 +58,23 @@ def _approved(record):
         return False
     if not isinstance(record.get("parameters", {}), dict):
         return False
+    if record.get("kind", "technique") not in ("technique", "defect_resolution"):
+        return False
+    if record.get("kind") == "defect_resolution":
+        for field in ("defect_id", "symptom", "root_cause", "correction"):
+            if not isinstance(record.get(field), str) or not record[field].strip():
+                return False
+        affected = record.get("affected_objects")
+        if not isinstance(affected, list) or not affected or any(
+                not isinstance(name, str) or not name.strip() for name in affected):
+            return False
+        # A corrected issue needs evidence of both states and a human/agent
+        # review record, not a spontaneous 'self-learning' claim.
+        for field in ("before_evidence", "after_evidence"):
+            refs = record.get(field)
+            if not isinstance(refs, list) or not refs or any(
+                    not isinstance(item, str) or not item.strip() for item in refs):
+                return False
     try:
         json.dumps(record, ensure_ascii=False, allow_nan=False)
     except (ValueError, TypeError):
@@ -67,6 +84,9 @@ def _approved(record):
 
 def _fingerprint(record):
     keys = ("task", "technique", "parameters", "blender_version", "evidence")
+    if record.get("kind") == "defect_resolution":
+        keys += ("kind", "defect_id", "symptom", "root_cause", "correction",
+                 "affected_objects", "before_evidence", "after_evidence")
     stable = {k: record.get(k) for k in keys}
     raw = json.dumps(stable, sort_keys=True, ensure_ascii=False, allow_nan=False).encode("utf-8")
     return hashlib.sha256(raw).hexdigest()
