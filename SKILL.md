@@ -65,7 +65,7 @@ For nontrivial assets read `references/modeling-quality-loop.md`, `references/mo
 | Version-dependent Blender API or MCP mismatch | `references/official-blender-documentation.md`, `references/capability-mapping.md` |
 | Safe checkpoints and protected-object comparisons | `references/crash-recovery-and-baselines.md`, `scripts/scene_baseline_snapshot.py`, `scripts/compare_scene_baselines.py` |
 | Verify re-opened checkpoint identity after crash | `references/crash-recovery-and-baselines.md`, `scripts/scene_recovery_probe.py` |
-| Local reusable records / reviewers | `references/technique-registry.md`, `scripts/technique_registry.py`, `scripts/visual_review_report.py` |
+| Local reusable records / reviewers | `references/technique-registry.md`, `scripts/technique_registry.py`, `scripts/visual_review_report.py`, `scripts/modeling_scorecard.py` |
 
 **Tool-first:** Prefer the connected Blender MCP's structured tools and the agent's native file-search/read/edit tools over generic Bash when available. Bash is valid if it better serves a reproducible task. The optional read-only resource MCP supports `get_blender_reference_outline` and `get_blender_reference_excerpt` to fetch small source-backed sections; use full-document reads only when actually necessary. Always inspect the whole script and safety configuration before executing a mutating Blender script. Save concise checkpoints rather than repeating logs. Do not trade away safety or the mandatory kickoff for fewer tokens.
 
