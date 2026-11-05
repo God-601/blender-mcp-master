@@ -37,6 +37,8 @@ CLARIFY -> PROBE -> PLAN -> BLOCK -> LOOK -> REFINE -> VERIFY -> CORRECT -> DELI
 | Game optimization / export | `references/game-ready-export.md` | `references/model-performance-strategy.md` |
 | Bug / unknown API | `references/troubleshooting.md` | `references/capability-mapping.md` |
 
+For measured A/B experiments use `references/skill-evaluation-protocol.md`; defer test procedures unless running a benchmark.
+
 **Context-saving behavior:** discover MCP capabilities once while session identity remains stable. Prefer native tool responses, bounded summaries, read-only batching and targeted excerpts (`get_blender_reference_outline` / `get_blender_reference_excerpt`) over full-document reads. Reuse already-read state and answers. Do not resend long script bodies when the active MCP supports running an inspected, pinned script by reference with explicit arguments; otherwise inspect the full mutating script before execution. Keep mutation scopes small. Never skip safety/evidence to save tokens.
 
 **Read-only core:** `scripts/inspect_geometry.py`, `scripts/asset_performance_audit.py`, `scripts/validate_asset.py`, `scripts/validate_uvs.py`, `scripts/inspect_component_fit.py`, `scripts/modeling_scorecard.py` (evidence-only), `scripts/reference_silhouette_compare.py` (real RGBA PNG alpha-mask IoU; not artistic PASS), and `scripts/workflow_router.py` (pure-Python advisory routing).
