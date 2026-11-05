@@ -83,9 +83,10 @@ def _approved(record):
 
 
 def _fingerprint(record):
-    keys = ("task", "technique", "parameters", "blender_version", "evidence",
-            "kind", "defect_id", "symptom", "root_cause", "correction", "affected_objects",
-            "before_evidence", "after_evidence")
+    keys = ("task", "technique", "parameters", "blender_version", "evidence")
+    if record.get("kind") == "defect_resolution":
+        keys += ("kind", "defect_id", "symptom", "root_cause", "correction",
+                 "affected_objects", "before_evidence", "after_evidence")
     stable = {k: record.get(k) for k in keys}
     raw = json.dumps(stable, sort_keys=True, ensure_ascii=False, allow_nan=False).encode("utf-8")
     return hashlib.sha256(raw).hexdigest()
