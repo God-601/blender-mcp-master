@@ -98,6 +98,25 @@ o texto da skill.
 **Critério:** múltiplas execuções com logs auditáveis, qualidade aferida
 e ganhos somente declarados se forem estatisticamente/tecnicamente sustentados.
 
+## v1.4.0 — Modelagem inteligente (em desenvolvimento)
+
+A auditoria antes da v1.4.0 foi convertida em tarefas rastreáveis:
+- [#43](https://github.com/God-601/blender-mcp-master/issues/43): **P0** validar agentes reais e recuperação da v1.3.x antes de publicar promessas de autonomia;
+- [#44](https://github.com/God-601/blender-mcp-master/issues/44): **P1** comparar capturas reais com referências, registrar defeitos, corrigir e reinspecionar;
+- [#45](https://github.com/God-601/blender-mcp-master/issues/45): **P1** melhorar geometria, encaixes, interseções e topologia, com testes positivos/negativos;
+- [#46](https://github.com/God-601/blender-mcp-master/issues/46): **P2** workflow adaptativo, perguntas não redundantes e contratos de resultado;
+- [#47](https://github.com/God-601/blender-mcp-master/issues/47): **P2** scorecard com evidências, memória de defeitos opt-in e benchmarks A/B;
+- [#48](https://github.com/God-601/blender-mcp-master/issues/48): pesquisa de padrões externos e manutenção do roadmap.
+
+Planejamento detalhado, limitações e critérios de aceitação: [docs/V1.4-IMPLEMENTATION.md](V1.4-IMPLEMENTATION.md). A implementação parcial do scorecard e dos guards de exportação não demonstra, por si só, qualidade artística, importação real na engine ou compatibilidade em clientes externos.
+
+## v1.5.0–v1.7.0 — Pacotes incrementais propostos
+
+- **1.5.0:** texturas PBR, atlas/trim sheets, UVs e baking com resultados conferidos.
+- **1.6.0:** game-ready, otimização/LOD, colisão, pivôs e testes em engines reais.
+- **1.7.0:** orquestração de especialistas, revisão independente e benchmarks.
+- **2.0.0:** integração de produção 3D, retopologia avançada, rig, cenas e revisão visual.
+
 ## v2.0.0 — Revisão visual e workflows avançados
 
 **Hipótese de versão maior, condicionada a capacidade e evidência reais.**
