@@ -1,167 +1,63 @@
 ---
 name: blender-mcp-master
-description: Use when an agent plans, creates, inspects, textures, shades, lights, rigs, optimizes, validates, or exports any kind of 3D asset in Blender through MCP. Covers hard-surface, organic, characters, hand-painted, stylized/fantasy, low-poly/retro, PBR/procedural/toon materials, environments, architecture, CAD, sculpting, UVs/baking, retopology, game-ready assets, LODs, and rendering. Requires task-first planning, evidence-based quality checks, safe scene edits, and transparent delivery.
+description: Use for planning, creating, editing, inspecting, texturing, rigging, optimizing or exporting 3D assets through Blender and a connected Blender-control MCP. Handles hard-surface, organic, low-poly, architecture, characters, materials/UV and game-ready delivery; prioritizes preserved scenes, design clarification and evidence-backed checks.
 ---
 
 # Blender MCP Master
 
-Agent Skill for Blender modeling; **not a Blender-control MCP server or addon**. Live scene edits require a separate Blender-control MCP. The optional resource server serves read-only references. `bpy` scripts require Blender Python.
+Agent Skill for Blender workflows; **not** a Blender-control MCP server. Execute bpy only in a compatible Blender runtime. The optional MCP resource server is read-only. **Load task-specific guides on demand**, not the whole index.
 
-## Core rules — always apply
+## Non-negotiable gates
 
-1. **Clarify before you build.** New-project GENERAL KICKOFF is mandatory; read `references/clarification-gate.md` before changing the scene.
-2. **Protect existing work and recover from crashes.** Discover objects, ownership, settings, actual tool schemas and Blender version. Create or request a non-overwriting saved checkpoint before substantial edits/renders if the scene is unsaved. For protected objects record read-only baselines, edit only named owned targets and recheck after. Never interpret rebuilt default objects after a Blender crash as proof the original scene survived. Follow `references/p0-integrity.md` and `references/crash-recovery-and-baselines.md`.
-3. **Plan by destination.** State asset purpose, visual reference, scale/units, component structure, technical constraints, triangle/material/texture budgets and how quality will be verified. Do not invent platform limits.
-4. **Small reversible operations.** Prefer duplicate-first mesh edits and modifiers, a single logical code operation per step, and concise actual observations. Ask permission for destructive/in-place edits, overwrites and paid operations.
-5. **Visual checkpoints.** Inspect actual front/side/three-quarter views after blockout and major geometry or material changes; no visual tool means visual quality is NOT VERIFIED.
-6. **Measured technical checks and proper fit.** Validate evaluated geometry, UVs, mating surfaces, object contact, nonintentional interpenetration, material assignments and budgets for the real destination. Use `references/component-fit-and-joints.md` for G2; avoid a piece merely sinking into another instead of a planned joint. No broad scene-wide fallback on missing targets.
-7. **Readable editable faces.** Prefer intentional clean quads on flat hard-surface panels. Four coplanar triangles making an unnecessary X-like face are a REVIEW candidate, not automatic failure. Distinguish native faces from GPU/glTF triangles; use `references/clean-editable-topology.md` and `scripts/topology_face_diagnostics.py` on named meshes when relevant.
-8. **Diagnose defects first.** Capture actual evidence, isolate the cause, fix only the affected owned copy, recheck original and nearby geometry. After two failed attempts, change method or seek a critical reference.
-9. **Risk-based autonomy.** Follow `references/autonomous-execution-policy.md`: proceed with read-only and checkpointed reversible owned edits; ask before destructive/unowned changes; stop if scene recovery is uncertain.
-10. **Honest delivery.** Report PASS / ISSUE / N/A / NOT VERIFIED, confirmed paths, measurements and limitations. Python tests do not certify artistic quality.
+1. **Clarify before you build.** Use the GENERAL KICKOFF **multi-question design interview** once for new projects: 2–3 relevant questions for a simple prop, typically 4–6 for complex assets, about genuinely unknown appearance, reference, shape, materials, use and technical constraints. **Do not repeat answered requirements.** Honor explicitly delegated artistic choices and never replace design questions with “may I proceed?”. See `references/clarification-gate.md`.
+2. **Protect the scene.** Inspect actual tool schemas, Blender version, existing objects, scene ownership and checkpoint identity before scene edits. Never alter unrelated/protected objects. Request approval for destructive edits, global changes, overwrites or paid actions. If recovery after a crash is uncertain, STOP. See `references/p0-integrity.md` and `references/crash-recovery-and-baselines.md`.
+3. **Plan to the destination.** Define silhouette, proportions, owned collection, technique, units, evaluated triangle/material/texture budgets, reference and acceptance evidence. Do not invent engine limits.
+4. **Edit reversibly.** Use named targets and owned/duplicated geometry; avoid scene-wide fallback, shared-mesh surprises, blind booleans and unsafe cleanup. **Avoid global orphan purges.** Follow `references/autonomous-execution-policy.md`: AUTO for read-only/reversible owned work, ASK for consequential or unowned edits, STOP when scene identity is uncertain.
+5. **Inspect at meaningful gates.** Check blockout silhouette and proportions before detail; inspect actual front, side, three-quarter views after substantial shape/shading changes. No images means visual result NOT VERIFIED. Use `references/modeling-quality-loop.md` and `references/visual-inspection.md`.
+6. **Prove technical facts.** Inspect evaluated geometry, real intended fit, normals, UV, shading and export budgets with scoped scripts. AABB/BVH candidate is not proof of exact penetration; convex-hull silhouette proxies are not artistic PASS. Review scene integrity after edits.
+7. **Correct with evidence.** Record defect → source/view → hypothesis → minimal owned correction → same check. After two ineffective attempts change method rather than looping.
+8. **Report truthfully.** Technical/visual/export: **PASS / ISSUE / N/A / NOT VERIFIED**, supported by actual observations and paths. Blender round-trip is not real engine import. See `references/quality-checklist.md`.
 
-**Avoid global orphan purges.** Never delete unrelated objects or overwrite files. See `references/professional-modeling-standards.md` and `references/quality-checklist.md`; geometry metrics are not visual evidence.
+## Fast execution route
 
-### GENERAL KICKOFF — multi-question design interview for NEW projects
+```text
+CLARIFY -> PROBE -> PLAN -> BLOCK -> LOOK -> REFINE -> VERIFY -> CORRECT -> DELIVER
+```
 
-Before modeling a NEW asset, summarize the known brief and ask **several meaningful, nonredundant questions** about what the user wants the model to look like: silhouette/shape, visual references/style, materials/colors, important details, purpose/engine and any missing technical constraints. Normally ask **4–6** for a complex prop, **2–3** for a simple one; allow a short second round if answers reveal a major unknown. **Do not repeat answered requirements** or ask just "posso seguir?" / "can I proceed?" — get design decisions, not a generic go-ahead. After the answers, record the chosen brief and proceed without another permission prompt. If the user has explicitly delegated all creative choices, proceed with stated editable defaults. Do NOT restart the interview when continuing the existing project, refining an asset or recovering from tool errors. Always read `references/clarification-gate.md`; wait for initial design answers before scene mutations. Read-only discovery is fine.
+**Minimal load:** read `SKILL.md` once; use **one** primary discipline guide and the smallest relevant safety or inspection excerpt. For complex assets, add `references/modeling-decision-framework.md`, `references/evidence-first-workflow.md` or `references/workflow-director.md` **only when that choice is needed**, not automatically together. Read `references/token-efficient-agent-execution.md` when optimizing an agent/session.
 
-## Core workflow
+| Task | First guide | Add only if necessary |
+| --- | --- | --- |
+| Measured props / machinery | `references/hard-surface.md` | `references/measured-proportion-recipes.md` |
+| Organic / vegetation | `references/organic.md` | `references/sculpting-highpoly.md` |
+| Stylized / voxel | `references/stylized-lowpoly.md` | `references/voxel-atlas-recipe.md` |
+| Architecture / modular | `references/modular-modeling.md` | `references/architecture-interiors.md` |
+| Character / deformation | `references/character-rig.md` | `references/advanced-retopology.md` |
+| UV / materials | `references/uv-baking.md` | `references/materials.md` |
+| Game optimization / export | `references/game-ready-export.md` | `references/model-performance-strategy.md` |
+| Bug / unknown API | `references/troubleshooting.md` | `references/capability-mapping.md` |
 
-~~~text
-CLARIFY -> GENERAL KICKOFF, blockers, priorities and reference
-PROBE   -> MCP tool/schema discovery; Blender version, units and existing scene
-PLAN    -> task-specific technique, owner collection, budget and acceptance
-BLOCK   -> named primary parts, accurate proportions, grounded geometry
-LOOK    -> actual views; front/side/three-quarter and reference comparison
-REFINE  -> reversible operations, measured data, targeted detail
-DELIVER -> UV/material/lighting/LOD/export only where relevant
-VERIFY  -> technical + visual + destination evidence, source protection
-CORRECT -> one minimal change, same check repeated; then report
-~~~
+**Context-saving behavior:** discover MCP capabilities once while session identity remains stable. Prefer native tool responses, bounded summaries, read-only batching and targeted excerpts (`get_blender_reference_outline` / `get_blender_reference_excerpt`) over full-document reads. Reuse already-read state and answers. Do not resend long script bodies when the active MCP supports running an inspected, pinned script by reference with explicit arguments; otherwise inspect the full mutating script before execution. Keep mutation scopes small. Never skip safety/evidence to save tokens.
 
-For nontrivial assets read `references/modeling-quality-loop.md`, `references/modeling-decision-framework.md`, `references/evidence-first-workflow.md`. A simple prop needs only a concise plan; a complex multi-specialist project also loads `references/workflow-director.md`. Never claim a visual PASS without actual inspected images, nor an engine PASS without a real importer/test.
+**Read-only core:** `scripts/inspect_geometry.py`, `scripts/asset_performance_audit.py`, `scripts/validate_asset.py`, `scripts/validate_uvs.py`, `scripts/inspect_component_fit.py`, `scripts/modeling_scorecard.py` (scorecard checks supplied evidence, not pixels).
 
-## Route by task — load only relevant files
+## Delivery receipt
 
-| Work | Load on demand |
-| --- | --- |
-| Hard-surface props or measured vehicles | `references/hard-surface.md`, `references/mesh-operations.md`, `references/measured-proportion-recipes.md` |
-| Characters and animation | `references/character-rig.md`, `references/topology-retopology.md` |
-| Guided retopology edits | `references/advanced-retopology.md`, `scripts/retopology_advanced.py` |
-| Organic, sculpt, trees and rocks | `references/organic.md`, `references/sculpting-highpoly.md` |
-| Low-poly, voxel, hand-painted | `references/stylized-lowpoly.md`, `references/voxel-atlas-recipe.md`, `references/hand-painted-pipeline.md` |
-| Architecture, CAD and modular scenes | `references/architecture-interiors.md`, `references/cad-technical.md`, `references/modular-modeling.md` |
-| Geometry Nodes and procedural generation | `references/geometry-engine.md`, `references/parametric-geometry-nodes.md` |
-| UV, textures, baking, materials | `references/uv-baking.md`, `references/materials.md`, `references/shading-recipes.md`, `scripts/uv_diagnostics.py` |
-| Game asset optimization and export | `references/game-asset-optimization.md`, `references/p1-production-pipeline.md`, `references/game-ready-export.md` |
-| Read-only game asset import readiness | `references/game-ready-export.md`, `scripts/game_asset_preflight.py` |
-| UV island gutter candidates for texture baking | `references/uv-baking.md`, `scripts/uv_island_gutter_audit.py` |
-| Measured 3D geometry/material/texture cost | `references/model-performance-strategy.md`, `scripts/asset_performance_audit.py` |
-| Check intentional joints versus accidental penetration | `references/component-fit-and-joints.md`, `scripts/inspect_component_fit.py` |
-| Compare optimization silhouette proxies | `references/model-performance-strategy.md`, `scripts/compare_asset_silhouettes.py` |
-| Hash real visual evidence files for review | `references/visual-inspection.md`, `scripts/visual_evidence_manifest.py` |
-| Unnecessary planar X triangulation or editable face cleanup | `references/clean-editable-topology.md`, `scripts/topology_face_diagnostics.py` |
-| Safe autonomous decisions and failure recovery | `references/autonomous-execution-policy.md`, `docs/AGENT-1.3-EVALUATION.md` |
-| Token/context and tool efficiency | `references/token-efficient-agent-execution.md` |
-| Version-dependent Blender API or MCP mismatch | `references/official-blender-documentation.md`, `references/capability-mapping.md` |
-| Safe checkpoints and protected-object comparisons | `references/crash-recovery-and-baselines.md`, `scripts/scene_baseline_snapshot.py`, `scripts/compare_scene_baselines.py` |
-| Verify re-opened checkpoint identity after crash | `references/crash-recovery-and-baselines.md`, `scripts/scene_recovery_probe.py` |
-| Local reusable records / reviewers | `references/technique-registry.md`, `scripts/technique_registry.py`, `scripts/visual_review_report.py` |
+```text
+Asset / Blender + MCP versions / destination:
+Original objects preserved / owned changes:
+Measured geometry, UV/materials and budgets:
+Actual inspected image views:
+Technical | Visual | Engine: PASS / ISSUE / N/A / NOT VERIFIED
+Confirmed output paths, open defects and uncertainty:
+```
 
-**Tool-first:** Prefer the connected Blender MCP's structured tools and the agent's native file-search/read/edit tools over generic Bash when available. Bash is valid if it better serves a reproducible task. The optional read-only resource MCP supports `get_blender_reference_outline` and `get_blender_reference_excerpt` to fetch small source-backed sections; use full-document reads only when actually necessary. Always inspect the whole script and safety configuration before executing a mutating Blender script. Save concise checkpoints rather than repeating logs. Do not trade away safety or the mandatory kickoff for fewer tokens.
+## Lazy index — names only; do not read unless routed
 
-Use `scripts/inspect_geometry.py`, `scripts/validate_asset.py`, `scripts/validate_uvs.py` for read-only checks. Note that material slots are not exact draw calls; texture dimensions do not prove VRAM and Blender audits do not measure game FPS. Guided retopology is not a universal automatic quad remesher. The visual review receipt is not an image classifier. Cross-agent compatibility, artistic quality and performance improvements must have real test evidence: `references/benchmarking.md`, `references/benchmark-prompts.md`, `references/skill-evaluation-protocol.md`.
+### References
 
-## Delivery template
+`references/advanced-retopology.md` · `references/agent-compatibility.md` · `references/architecture-interiors.md` · `references/architecture.md` · `references/autonomous-execution-policy.md` · `references/benchmark-prompts.md` · `references/benchmarking.md` · `references/budgets.md` · `references/cad-technical.md` · `references/capability-mapping.md` · `references/character-rig.md` · `references/clarification-gate.md` · `references/clean-editable-topology.md` · `references/component-fit-and-joints.md` · `references/crash-recovery-and-baselines.md` · `references/environment.md` · `references/evidence-first-workflow.md` · `references/game-asset-optimization.md` · `references/game-ready-export.md` · `references/geometry-engine.md` · `references/hand-painted-pipeline.md` · `references/handpaint-recipes.md` · `references/hard-surface.md` · `references/inspection-policies.md` · `references/lighting-render.md` · `references/manual-acceptance-prompts.md` · `references/materials.md` · `references/measured-proportion-recipes.md` · `references/mesh-operations.md` · `references/model-performance-strategy.md` · `references/modeling-decision-framework.md` · `references/modeling-foundations.md` · `references/modeling-intelligence.md` · `references/modeling-quality-loop.md` · `references/modular-modeling.md` · `references/module-contracts.md` · `references/mutation-testing.md` · `references/official-blender-documentation.md` · `references/organic.md` · `references/p0-integrity.md` · `references/p1-production-pipeline.md` · `references/parametric-geometry-nodes.md` · `references/performance.md` · `references/production-recipes.md` · `references/professional-agent-playbook.md` · `references/professional-modeling-standards.md` · `references/quality-checklist.md` · `references/sculpting-highpoly.md` · `references/shading-recipes.md` · `references/skill-evaluation-protocol.md` · `references/stylized-lowpoly.md` · `references/technique-registry.md` · `references/token-efficient-agent-execution.md` · `references/topology-retopology.md` · `references/troubleshooting.md` · `references/uv-baking.md` · `references/visual-inspection.md` · `references/voxel-atlas-recipe.md` · `references/workflow-director.md`
 
-~~~text
-Asset, destination, Blender + MCP versions:
-Objects created or edited / originals preserved:
-Measured dimensions, evaluated triangles, material/UV facts:
-Screenshot views actually inspected:
-Technical quality: PASS / ISSUE / N/A / NOT VERIFIED
-Visual quality: PASS / ISSUE / N/A / NOT VERIFIED
-Engine/export: PASS / ISSUE / N/A / NOT VERIFIED
-Actual output files and paths:
-Known defects and unresolved verification:
-~~~
+### Scripts
 
-For real-client acceptance prompts, load `references/manual-acceptance-prompts.md` only when running test scenarios.
-
-## Full path index — discover, do NOT load everything
-
-Select a guide by the route above. The names below make scripts and specialist manuals discoverable even when not used in the current task.
-
-
-### Additional references
-
-`references/advanced-retopology.md` · `references/agent-compatibility.md` · `references/architecture-interiors.md` · `references/architecture.md`
-
-`references/benchmark-prompts.md` · `references/benchmarking.md` · `references/budgets.md` · `references/cad-technical.md`
-
-`references/capability-mapping.md` · `references/character-rig.md` · `references/clarification-gate.md` · `references/crash-recovery-and-baselines.md` · `references/environment.md`
-
-`references/evidence-first-workflow.md` · `references/game-asset-optimization.md` · `references/game-ready-export.md` · `references/geometry-engine.md`
-
-`references/hand-painted-pipeline.md` · `references/handpaint-recipes.md` · `references/hard-surface.md` · `references/inspection-policies.md`
-
-`references/lighting-render.md` · `references/materials.md` · `references/measured-proportion-recipes.md` · `references/mesh-operations.md`
-
-`references/model-performance-strategy.md` · `references/modeling-decision-framework.md` · `references/modeling-foundations.md` · `references/modeling-intelligence.md`
-
-`references/modeling-quality-loop.md` · `references/modular-modeling.md` · `references/module-contracts.md` · `references/mutation-testing.md`
-
-`references/official-blender-documentation.md` · `references/organic.md` · `references/p0-integrity.md` · `references/p1-production-pipeline.md`
-
-`references/parametric-geometry-nodes.md` · `references/performance.md` · `references/production-recipes.md` · `references/professional-agent-playbook.md`
-
-`references/professional-modeling-standards.md` · `references/quality-checklist.md` · `references/sculpting-highpoly.md` · `references/shading-recipes.md`
-
-`references/skill-evaluation-protocol.md` · `references/stylized-lowpoly.md` · `references/technique-registry.md` · `references/token-efficient-agent-execution.md`
-
-`references/topology-retopology.md` · `references/troubleshooting.md` · `references/uv-baking.md` · `references/visual-inspection.md`
-
-`references/voxel-atlas-recipe.md` · `references/workflow-director.md`
-
-### Available scripts (Blender bpy unless documented otherwise)
-
-`scripts/topology_face_diagnostics.py` — read-only planar four-triangle X fan candidates, with material-boundary/UV-seam/shape-key warnings; reports REVIEW, never auto-dissolves.
-
-`scripts/inspect_component_fit.py` — optional read-only explicit-pair AABB/BVH candidates; real visual joint correctness is NOT VERIFIED until inspected.
-
-`scripts/uv_diagnostics.py` — optional read-only base-mesh UV overlap and texel-density inspection with explicit targets; engine/padding remain NOT VERIFIED.
-
-`scripts/uv_island_gutter_audit.py` — read-only per-island UV bounds lower-bound distances; baking/engine mip quality remains NOT VERIFIED.
-
-`scripts/game_asset_preflight.py` — read-only game target budgets, evaluated static mesh, pivots, UV, material and linked texture checks; in-engine import NOT VERIFIED.
-
-`scripts/scene_baseline_snapshot.py` — read-only protected-object selected-property snapshot; `scripts/compare_scene_baselines.py` — pure-Python before/after fingerprint comparison. Neither substitutes for a saved .blend backup.
-
-`scripts/clean_install_smoke.py` — pure-Python isolated ZIP install and checksum smoke test; does not claim live agent discovery.
-
-`scripts/compare_asset_silhouettes.py` — read-only before/after evaluated convex-hull projection differences; never certifies appearance.
-
-`scripts/visual_evidence_manifest.py` — hash explicitly named real screenshot files with no visual pixel analysis.
-
-`scripts/scene_recovery_probe.py` — read-only verification of saved checkpoint path and protected object identity after reconnect; baseline comparison still required.
-
-`scripts/agent_efficiency_compare.py` — pure-Python read-only comparison of matching run metrics; no billed-token or artistic-quality claims without source evidence.
-
-`scripts/apply_and_origin.py` · `scripts/asset_performance_audit.py` · `scripts/benchmark_report.py` · `scripts/bevel_and_shade.py`
-
-`scripts/capability_probe.py` · `scripts/cleanup_mesh.py` · `scripts/export_asset.py` · `scripts/geometry_builder.py`
-
-`scripts/geometry_nodes_builder.py` · `scripts/hard_surface_builder.py` · `scripts/inspect_geometry.py` · `scripts/inspection_report.py`
-
-`scripts/localized_correction.py` · `scripts/make_lods.py` · `scripts/mesh_operations.py` · `scripts/modular_builder.py`
-
-`scripts/optimize_mesh.py` · `scripts/organic_rock_builder.py` · `scripts/organic_tree_builder.py` · `scripts/pbr_material.py`
-
-`scripts/prop_proportion_example.py` · `scripts/retopology_advanced.py` · `scripts/setup_scene.py` · `scripts/technique_feedback.py`
-
-`scripts/technique_history.py` · `scripts/technique_history_query.py` · `scripts/technique_registry.py` · `scripts/validate_asset.py`
-
-`scripts/validate_uvs.py` · `scripts/vehicle_proportion_example.py` · `scripts/visual_review_report.py` · `scripts/voxel_atlas_example.py`
-
-Release scope and follow-ups are tracked in `docs/ROADMAP-NEXT.md`. Installed skills, code execution and CI alone cannot prove live Blender MCP connectivity or final artistic quality.
+`scripts/agent_efficiency_compare.py` · `scripts/apply_and_origin.py` · `scripts/asset_performance_audit.py` · `scripts/benchmark_report.py` · `scripts/bevel_and_shade.py` · `scripts/capability_probe.py` · `scripts/clean_install_smoke.py` · `scripts/cleanup_mesh.py` · `scripts/compare_asset_silhouettes.py` · `scripts/compare_scene_baselines.py` · `scripts/export_asset.py` · `scripts/game_asset_preflight.py` · `scripts/geometry_builder.py` · `scripts/geometry_nodes_builder.py` · `scripts/hard_surface_builder.py` · `scripts/inspect_component_fit.py` · `scripts/inspect_geometry.py` · `scripts/inspection_report.py` · `scripts/localized_correction.py` · `scripts/make_lods.py` · `scripts/mesh_operations.py` · `scripts/modeling_scorecard.py` · `scripts/modular_builder.py` · `scripts/optimize_mesh.py` · `scripts/organic_rock_builder.py` · `scripts/organic_tree_builder.py` · `scripts/pbr_material.py` · `scripts/prop_proportion_example.py` · `scripts/retopology_advanced.py` · `scripts/scene_baseline_snapshot.py` · `scripts/scene_recovery_probe.py` · `scripts/setup_scene.py` · `scripts/technique_feedback.py` · `scripts/technique_history.py` · `scripts/technique_history_query.py` · `scripts/technique_registry.py` · `scripts/topology_face_diagnostics.py` · `scripts/uv_diagnostics.py` · `scripts/uv_island_gutter_audit.py` · `scripts/validate_asset.py` · `scripts/validate_uvs.py` · `scripts/vehicle_proportion_example.py` · `scripts/visual_evidence_manifest.py` · `scripts/visual_review_report.py` · `scripts/voxel_atlas_example.py`
