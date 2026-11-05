@@ -19,7 +19,8 @@ class ProfessionalPracticesStaticTests(unittest.TestCase):
 
 
     def test_clarification_is_p0_and_avoids_reasking_known_details(self):
-        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        skill = ((ROOT / "SKILL.md").read_text(encoding="utf-8") + "\n" +
+                 (ROOT / "references" / "resource-catalog.md").read_text(encoding="utf-8"))
         gate = (ROOT / "references" / "clarification-gate.md").read_text(encoding="utf-8")
         playbook = (ROOT / "references" / "professional-agent-playbook.md").read_text(encoding="utf-8")
         standards = (ROOT / "references" / "professional-modeling-standards.md").read_text(encoding="utf-8")
@@ -35,7 +36,8 @@ class ProfessionalPracticesStaticTests(unittest.TestCase):
         self.assertIn("P0 clarification gate", standards)
 
     def test_professional_guides_are_routed_and_truthful(self):
-        skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+        skill = ((ROOT / "SKILL.md").read_text(encoding="utf-8") + "\n" +
+                 (ROOT / "references" / "resource-catalog.md").read_text(encoding="utf-8"))
         for guide in ("professional-modeling-standards.md",
                       "modeling-decision-framework.md",
                       "professional-agent-playbook.md",
