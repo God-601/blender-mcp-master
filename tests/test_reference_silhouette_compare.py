@@ -49,6 +49,25 @@ class SilhouetteTests(unittest.TestCase):
             r = module().compare_masks(root, [{"reference": "a.png", "render": "b.png", "view": "side"}])
             self.assertEqual(r["results"][0]["silhouette_iou"], 0.5)
 
+    def test_shape_proxy_finds_shifted_pixel_bounds(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            png(root / "a.png", [255, 0, 0, 0])
+            png(root / "b.png", [0, 255, 0, 0])
+            item = module().compare_masks(root, [
+                {"reference": "a.png", "render": "b.png", "view": "front"}
+            ])["results"][0]
+            self.assertEqual(item["silhouette_iou"], 0)
+            details = item["shape_difference"]
+            self.assertEqual(details["centroid_shift_px"], [1.0, 0.0])
+            self.assertEqual(details["bbox_differences_px"], [1, 0, 1, 0])
+            self.assertEqual(details["disagreement_fraction"], 0.5)
+            self.assertEqual(item["artistic_quality"], "NOT VERIFIED")
+
+    def test_empty_foreground_masks_remain_unverified(self):
+        detail = module()._shape_difference(bytearray([0]*4), bytearray([0]*4), (2,2))
+        self.assertEqual(detail["status"], "NOT VERIFIED")
+
     def test_opaque_input_or_bad_chunk_refused(self):
         m = module()
         with tempfile.TemporaryDirectory() as folder:
