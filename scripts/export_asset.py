@@ -30,8 +30,10 @@ if ENGINE not in ("UNITY", "UNREAL", "ROBLOX", "GODOT", "GENERIC"):
     raise ValueError("Unknown ENGINE policy: " + str(ENGINE))
 if not PATH or not str(PATH).strip():
     raise ValueError("Export PATH must be explicitly configured.")
-if not OBJECTS:
-    raise RuntimeError("No named export targets. Configure OBJECTS.")
+if (not isinstance(OBJECTS, (list, tuple)) or not OBJECTS or
+        any(not isinstance(name, str) or not name.strip() for name in OBJECTS) or
+        len(set(OBJECTS)) != len(OBJECTS)):
+    raise ValueError("OBJECTS must contain unique non-empty mesh object names.")
 for name in OBJECTS:
     target = bpy.data.objects.get(name)
     if target is None or target.type != "MESH":
@@ -41,12 +43,15 @@ for name in OBJECTS:
         raise ValueError("Rigged/shape-key mesh requires a dedicated animation export workflow: " + name)
 
 out_path = os.path.abspath(bpy.path.abspath(PATH))
+expected_extension = {"FBX": ".fbx", "GLB": ".glb", "OBJ": ".obj"}[FORMAT]
+if os.path.splitext(out_path)[1].lower() != expected_extension:
+    raise ValueError("Export PATH must end in " + expected_extension + " for FORMAT=" + FORMAT)
 if os.path.exists(out_path) and not OVERWRITE:
     raise FileExistsError(f"Refusing to overwrite existing export: {out_path}. Set OVERWRITE=True to replace it.")
 if FORMAT == "OBJ" and os.path.exists(os.path.splitext(out_path)[0] + ".mtl") and not OVERWRITE:
     raise FileExistsError(f"Refusing to overwrite existing OBJ material file: {os.path.splitext(out_path)[0] + '.mtl'}. Set OVERWRITE=True to replace it.")
 os.makedirs(os.path.dirname(out_path), exist_ok=True)
-extension = os.path.splitext(out_path)[1] or (".glb" if FORMAT == "GLB" else "." + FORMAT.lower())
+extension = expected_extension
 fd, temp_path = tempfile.mkstemp(prefix="._blender_mcp_export_", suffix=extension, dir=os.path.dirname(out_path))
 os.close(fd)
 os.remove(temp_path)
