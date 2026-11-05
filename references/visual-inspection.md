@@ -91,3 +91,8 @@ silhouette, surface, topology, or composition.
 - A render does not prove topology correctness.
 - If visual tools are unavailable, report visual inspection as NOT VERIFIED. `inspection_report.py` is technical evidence, not a substitute for visual capture.
 - Keep before/after views consistent when comparing iterations.
+
+
+## Image-capable agent review
+
+When user reference images exist and the connected agent can inspect pixels from actual Blender captures, follow `references/multimodal-reference-review.md`. Explicitly compare shape landmarks, explain camera/framing uncertainty and recapture after corrections. Do not infer aesthetic quality from a file hash or mask overlap.
