@@ -183,7 +183,7 @@ test("npm pack contains the skill content and excludes tests and dependencies", 
   });
   assert.equal(result.status, 0, result.stderr);
   const files = JSON.parse(result.stdout)[0].files.map((file) => file.path);
-  for (const required of ["SKILL.md", "README.md", "LICENSE", "package.json", "bin/blender-mcp-master.js", "src/server.js", "scripts/validate_asset.py", "references/modeling-quality-loop.md", "assets/banner.svg", "assets/workflow.svg", "assets/architecture.svg"]) {
+  for (const required of ["SKILL.md", "README.md", "LICENSE", "package.json", "bin/blender-mcp-master.js", "src/server.js", "scripts/validate_asset.py", "references/modeling-quality-loop.md", "assets/banner.svg", "assets/workflow.svg", "assets/architecture.svg", "integrations/godot/gltf_import_probe.gd", "integrations/godot/project.godot"]) {
     assert.ok(files.includes(required), `missing from package: ${required}`);
   }
   assert.ok(!files.some((path) => path.startsWith("tests/") || path.startsWith("node_modules/") || path.startsWith(".github/")), "package must not ship tests, deps or CI files");
