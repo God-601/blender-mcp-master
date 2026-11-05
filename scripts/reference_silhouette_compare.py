@@ -120,6 +120,45 @@ def _secure_path(root, relative):
     return path
 
 
+def _shape_features(mask, size):
+    """Pixel-space shape measurements, useful only for matching camera framing."""
+    width, height = size
+    foreground = [i for i, value in enumerate(mask) if value]
+    if not foreground:
+        return None
+    xs = [i % width for i in foreground]
+    ys = [i // width for i in foreground]
+    return {
+        "bbox_xyxy": [min(xs), min(ys), max(xs), max(ys)],
+        "centroid_xy": [round(sum(xs) / len(xs), 4),
+                        round(sum(ys) / len(ys), 4)],
+        "fill_fraction": round(len(foreground) / (width * height), 6),
+    }
+
+
+def _shape_difference(reference_mask, render_mask, size):
+    reference = _shape_features(reference_mask, size)
+    rendered = _shape_features(render_mask, size)
+    if reference is None or rendered is None:
+        return {"status": "NOT VERIFIED", "reason": "Empty foreground mask"}
+    xor = sum(a != b for a, b in zip(reference_mask, render_mask))
+    return {
+        "status": "MEASURED",
+        "reference": reference,
+        "render": rendered,
+        "disagreement_fraction": round(xor / len(reference_mask), 6),
+        "centroid_shift_px": [
+            round(rendered["centroid_xy"][i] - reference["centroid_xy"][i], 4)
+            for i in range(2)
+        ],
+        "bbox_differences_px": [
+            rendered["bbox_xyxy"][i] - reference["bbox_xyxy"][i]
+            for i in range(4)
+        ],
+        "interpretation": "Pixel-space proxies. Differences may arise solely from camera/framing misalignment.",
+    }
+
+
 def compare_masks(root, pairs):
     if not isinstance(root, (str, Path)) or not str(root).strip():
         raise ValueError("EVIDENCE_ROOT is required")
@@ -149,6 +188,7 @@ def compare_masks(root, pairs):
             "foreground_reference": sum(ref_mask), "foreground_render": sum(out_mask),
             "resolution": list(ref_size), "reference_sha256": ref_sha,
             "render_sha256": out_sha, "artistic_quality": "NOT VERIFIED",
+            "shape_difference": _shape_difference(ref_mask, out_mask, ref_size),
         })
     return {
         "results": results, "artistic_quality": "NOT VERIFIED",
