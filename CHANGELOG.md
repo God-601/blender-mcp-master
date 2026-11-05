@@ -1,5 +1,14 @@
 # Changelog
 
+## 1.3.0 — autonomous agent policy and measurable evaluation (candidate, 2026-11-04)
+
+- Added tiered autonomous decision rules: safe read-only and owned reversible work, explicit approval for destructive/unowned edits, and stop conditions after ambiguous crashes or MCP tool failures.
+- Added a compact session state ledger, schema rediscovery triggers and bounded retries without duplicate scene mutations.
+- Added A13-01–A13-10 acceptance cases and a multi-client matched-trial protocol with clear evidence requirements for meaningful efficiency comparisons.
+- Linked the policy to the skill entry point and existing progressive-reference and portability guides.
+
+**Limitations:** live agent behavior, actual token reduction, multi-client compatibility, engine import and visual quality are NOT VERIFIED; protocol and documentation are not test results. No npm publication or public GitHub release is implied.
+
 ## 1.2.0 — game assets and design interviews (2026-11-04)
 
 - Replaced the generic single-question modeling kickoff with an adaptive

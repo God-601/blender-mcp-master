@@ -2,10 +2,12 @@
 
 **Goal:** reduce unnecessary context, shell calls and repeated work without weakening the Blender MCP Master safety or quality gates. This is an agent policy, not a runtime token counter. The skill cannot measure actual API billing unless the client exposes token usage.
 
+The v1.3 policy for autonomous progression, risk-based permission and tool-failure retry is `references/autonomous-execution-policy.md`. A reduction in tool calls is never a substitute for scene safety or quality checks.
+
 ## Preferred workflow
 
 1. **GENERAL KICKOFF stays mandatory once per NEW modeling project.** Reuse the known brief and ask a concise **group of meaningful nonredundant design questions** (normally 2–6, scaled to complexity). A useful design interview saves rework; a generic 'may I proceed?' does not. Do not restart it for refinements or retries.
-2. **Discover once per client/session:** Blender version, MCP tools/schema, scene state and ownership. Repeat discovery only after a relevant environment change.
+2. **Discover once per client/session while identity is stable:** Blender version, MCP tools/schema, scene state and ownership. Repeat discovery only after a relevant environment change.
 3. **Route before reading:** choose only the relevant modeling discipline and one cross-cutting validation/safety guide. Don't load all of `references/` or unrelated Blender manuals.
 4. **Prefer semantic tools to generic Bash:**
    - Connected Blender-control MCP tools for scene inspection and safe edits.

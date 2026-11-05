@@ -8,7 +8,7 @@ class BetaDistributionTests(unittest.TestCase):
     def test_version_and_documentation(self):
         manifest=json.loads((ROOT/"package.json").read_text())
         lock=json.loads((ROOT/"package-lock.json").read_text())
-        self.assertEqual(manifest["version"],"1.2.0")
+        self.assertEqual(manifest["version"],"1.3.0")
         self.assertEqual(lock["version"],manifest["version"])
         self.assertEqual(lock["packages"][""]["version"],manifest["version"])
         for name in ("docs/QUICKSTART.md","CHANGELOG.md",

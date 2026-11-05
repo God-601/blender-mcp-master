@@ -4,6 +4,8 @@
 
 A skill file can be readable by an agent without that agent being able to control Blender. Compatibility requires both the skill and a working Blender-control MCP integration.
 
+For v1.3 use the matched-trial protocol and acceptance scenarios in `docs/AGENT-1.3-EVALUATION.md`. This document contains no evidence of cross-client success.
+
 ## Verification protocol
 
 For each client, use a fresh session and record:
