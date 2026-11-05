@@ -45,7 +45,13 @@ def _snapshot(name, depsgraph):
         if not all(math.isfinite(x) for x in mins + maxs):
             raise ValueError("non-finite world-space coordinates")
         tree = BVHTree.FromBMesh(bm, epsilon=0.0)
-        return {"name": name, "min": mins, "max": maxs, "triangles": ntris, "tree": tree}
+        # Evaluated world-space surface vertices: deterministic bounded samples.
+        # This is narrower than the AABB but NOT a universal mesh distance proof.
+        vertices = list(bm.verts)
+        stride = max(1, (len(vertices) + 127) // 128)
+        samples = [v.co.copy() for v in vertices[::stride][:128]]
+        return {"name": name, "min": mins, "max": maxs, "triangles": ntris,
+                "tree": tree, "samples": samples}
     finally:
         bm.free()
         eval_obj.to_mesh_clear()
@@ -85,6 +91,16 @@ def _pair(spec, depsgraph):
         gap = math.sqrt(sum(x * x for x in separations))
         positive_volume_aabb = all(x > EPSILON for x in shared)
         candidates = first["tree"].overlap(second["tree"]) if gap <= EPSILON else []
+        # Nearby sampled evaluated surfaces are additional evidence. Samples can
+        # miss narrow contacts, concavities and full containment; never PASS
+        # contact or penetration merely because a sample distance is large.
+        sampled_distances = []
+        for source, target in ((first, second), (second, first)):
+            for point in source["samples"]:
+                hit = target["tree"].find_nearest(point)
+                if hit is not None and hit[0] is not None and math.isfinite(hit[3]):
+                    sampled_distances.append(float(hit[3]))
+        sampled_min_distance = min(sampled_distances) if sampled_distances else None
         supported_axes = [i for i, length in enumerate(shared) if length > EPSILON]
         nearly_touching = [i for i, length in enumerate(shared)
                            if -max_gap <= length <= EPSILON]
@@ -109,6 +125,11 @@ def _pair(spec, depsgraph):
             "triangle_candidate_examples": [[int(x), int(y)] for x, y in
                                              candidates[:MAX_REPORTED_TRIANGLE_PAIRS]],
             "measured_evaluated_triangles": [first["triangles"], second["triangles"]],
+            "sampled_surface_distance_min": (round(sampled_min_distance, 8)
+                                             if sampled_min_distance is not None else None),
+            "sampled_surface_points": [len(first["samples"]), len(second["samples"])],
+            "sampled_surface_distance_limit": ("Vertex samples to other evaluated BVH surface only; "
+                                               "not exact mesh-to-mesh distance or penetration proof"),
         })
         if expectation == "surface_joint":
             if gap > max_gap:
