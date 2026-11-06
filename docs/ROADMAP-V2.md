@@ -4,6 +4,8 @@
 scripts no repositório, CI bpy ou um importador smoke com uma demonstração de
 qualidade artística ou compatibilidade entre agentes.
 
+> Os marcos detalhados **1.5, 1.6, 1.7, 1.8 e 1.9**, com ferramentas entregues e testes externos ainda pendentes, estão em [V1.5-V2.0-MILESTONES.md](V1.5-V2.0-MILESTONES.md). Não representam releases publicadas.
+
 ## 1. Objetivo do 2.0
 
 Transformar a skill em um **sistema de produção 3D guiado por evidências**:

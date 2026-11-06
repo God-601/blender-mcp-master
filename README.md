@@ -135,7 +135,7 @@ python -m unittest discover -s tests -v
 
 Some tests require a compatible `bpy` runtime. Passing tests is not proof of artistic quality or live MCP and downstream export compatibility.
 
-[Roadmap v2.0 and pre-release audit](docs/ROADMAP-V2.md) · [Quality checklist](references/quality-checklist.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md)
+[Milestones v1.5–1.9](docs/V1.5-V2.0-MILESTONES.md) · [Roadmap v2.0 and pre-release audit](docs/ROADMAP-V2.md) · [Quality checklist](references/quality-checklist.md) · [Changelog](CHANGELOG.md) · [Contributing](CONTRIBUTING.md)
 </details>
 
 ---
