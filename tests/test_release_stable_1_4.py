@@ -37,7 +37,7 @@ class StableReleaseV14Tests(unittest.TestCase):
     def test_release_claims_do_not_overstate_user_observation(self):
         notes = (ROOT / "docs/release-notes-1.4.md").read_text(encoding="utf-8")
         self.assertIn("user-reported", notes)
-        self.assertIn("NOT", notes)
+        self.assertIn("not independently verified", notes.lower())
         self.assertIn("3,860", notes)
         self.assertIn("Godot", notes)
         self.assertIn("No npm registry publication", notes)
