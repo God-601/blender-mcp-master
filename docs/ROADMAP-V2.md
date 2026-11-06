@@ -43,7 +43,7 @@ linha a linha de cada arquivo nem prova de ausência de falhas.
 | A02 | P1 | ZIP de release-readiness copia docs/scripts, mas omite `integrations/` recém-criada | Corrigido com verificação de Godot dentro do ZIP |
 | A03 | P1 | Decoder PNG limita `decompress`, mas invoca `zlib.flush()` sem limite de saída | Saída limitada e regressão para PNG com deflate exagerado |
 | A04 | P1 | Teste Godot anterior usa só GLB sintético; não prova exportação do Blender nem fidelidade visual | Adicionado fluxo bpy → GLB → Godot 4 real em CI; só é PASS depois de rodar no exato commit |
-| A05 | P2 | Pré-release ainda chama o artefato de `1.2-PREFLIGHT` embora manifest atual seja 1.3.0 | Limpeza/versionamento por manifesto em etapa posterior, sem alterar release histórica |
+| A05 | P2 | Pré-release chamava o artefato de `1.2-PREFLIGHT` embora manifest atual fosse 1.3.0 | Corrigido: nome dinâmico a partir do `package.json`, sem alterar release histórica e sem publicar |
 | A06 | P0 | Cliente real Codex/Claude + Blender-control MCP e custo/tokens efetivos continuam sem trials comparáveis | [#54](https://github.com/God-601/blender-mcp-master/issues/54), [#51](https://github.com/God-601/blender-mcp-master/issues/51) |
 | A07 | P1 | BVH e paridade detectam candidatos mas não demonstram interseção universal; análise visual de máscara não avalia estética | [#55](https://github.com/God-601/blender-mcp-master/issues/55), [#56](https://github.com/God-601/blender-mcp-master/issues/56) |
 | A08 | P1 | Godot fixture não significa Roblox/Unity/Unreal; UV, materiais e rig podem variar | [#57](https://github.com/God-601/blender-mcp-master/issues/57) |
