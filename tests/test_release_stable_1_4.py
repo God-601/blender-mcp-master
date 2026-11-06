@@ -31,7 +31,7 @@ class StableReleaseV14Tests(unittest.TestCase):
             with self.subTest(required=name):
                 self.assertIn(name, source)
         self.assertIn("contents: write", source)
-        self.assertNotIn("npm publish", source.replace("# Only runs after", "# Only runs after"))
+        self.assertNotRegex(source, r"(?m)^\\s*npm publish\\b")
         self.assertNotIn("NODE_AUTH_TOKEN", source)
 
     def test_release_claims_do_not_overstate_user_observation(self):
