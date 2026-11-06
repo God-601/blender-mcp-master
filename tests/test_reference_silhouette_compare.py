@@ -88,13 +88,13 @@ class SilhouetteTests(unittest.TestCase):
             # 2x2 claims 18 bytes of decoded RGBA scanlines; stream expands to
             # far more. Recomputing IDAT CRC ensures decompression is tested.
             root = Path(folder)
-            signature = b"\\x89PNG\\r\\n\\x1a\\n"
+            signature = bytes([137, 80, 78, 71, 13, 10, 26, 10])
             def chunk(kind, data):
                 return (struct.pack(">I", len(data)) + kind + data
                         + struct.pack(">I", zlib.crc32(kind + data) & 0xffffffff))
             content = (signature
                        + chunk(b"IHDR", struct.pack(">IIBBBBB", 2, 2, 8, 6, 0, 0, 0))
-                       + chunk(b"IDAT", zlib.compress(b"\\x00" * 200000))
+                       + chunk(b"IDAT", zlib.compress(bytes(200000)))
                        + chunk(b"IEND", b""))
             image = root / "bomb.png"
             image.write_bytes(content)
