@@ -65,11 +65,18 @@ def _png_alpha_mask(path):
     inflater = zlib.decompressobj()
     raw = bytearray()
     for compressed in idat:
-        raw.extend(inflater.decompress(compressed, max(0, required + 1 - len(raw))))
-        if len(raw) > required or inflater.unconsumed_tail:
+        # Bound *both* decompression and flush to the image's exact expected
+        # scanline size. Never allow a tiny compressed PNG to allocate an
+        # unbounded amount of raw bytes.
+        allowance = required + 1 - len(raw)
+        if allowance <= 0:
             raise ValueError("PNG decompressed data exceeds cap")
-    raw.extend(inflater.flush())
-    if len(raw) != required or not inflater.eof:
+        raw.extend(inflater.decompress(compressed, allowance))
+        if len(raw) > required or inflater.unconsumed_tail or inflater.unused_data:
+            raise ValueError("PNG decompressed data exceeds cap or has trailing stream data")
+    # zlib.flush() with no length argument can allocate arbitrarily much output.
+    raw.extend(inflater.flush(max(1, required + 1 - len(raw))))
+    if len(raw) != required or not inflater.eof or inflater.unused_data:
         raise ValueError("Unexpected PNG pixel stream length")
     mask = bytearray()
     prior = bytearray(row_bytes)
