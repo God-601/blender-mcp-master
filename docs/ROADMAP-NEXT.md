@@ -1,5 +1,8 @@
 # Blender MCP Master — roadmap após v1.0
 
+> A proposta consolidada para a **v2.0**, com auditoria prévia, arquiteturas, fases e testes de aceitação, está em [ROADMAP-V2.md](ROADMAP-V2.md). Esta página preserva o histórico das versões intermediárias.
+
+
 **Planejamento proposto, não promessa de datas ou compatibilidade.** Cada versão
 deverá ter escopo limitado, regressões reproduzíveis, evidências práticas e
 release notes que diferenciem capacidades medidas de hipóteses.
