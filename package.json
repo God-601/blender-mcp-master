@@ -34,7 +34,10 @@
     "references/",
     "scripts/",
     "integrations/",
+    "docs/",
     "assets/",
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
     "README.md",
     "LICENSE"
   ],
