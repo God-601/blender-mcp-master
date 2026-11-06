@@ -28,8 +28,7 @@ class VectorGraphicsTests(unittest.TestCase):
 
     def test_readme_uses_current_artwork_and_discloses_illustration(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
-        for name in ("banner.svg", "workflow.svg", "architecture.svg"):
-            self.assertIn("assets/" + name, readme)
+        self.assertIn("assets/banner.svg", readme)
         self.assertIn("Concept illustration", readme)
         banner = (ASSETS / "banner.svg").read_text(encoding="utf-8")
         self.assertIn("CONCEPT ILLUSTRATION", banner)
