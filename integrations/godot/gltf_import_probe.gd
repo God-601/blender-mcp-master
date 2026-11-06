@@ -36,17 +36,18 @@ func _initialize() -> void:
     var pending: Array[Node] = [scene]
     while not pending.is_empty():
         var node: Node = pending.pop_back()
-        if node is MeshInstance3D and node.mesh != null:
+        var instance := node as MeshInstance3D
+        if instance != null and instance.mesh != null:
             meshes += 1
-            for i in range(node.mesh.get_surface_count()):
+            for i in range(instance.mesh.get_surface_count()):
                 surfaces += 1
-                var arrays := node.mesh.surface_get_arrays(i)
+                var arrays := instance.mesh.surface_get_arrays(i)
                 if arrays[Mesh.ARRAY_TEX_UV].size() > 0:
                     uv_surfaces += 1
-                if node.get_active_material(i) != null:
+                if instance.get_active_material(i) != null:
                     material_surfaces += 1
-                if node.mesh.surface_get_primitive_type(i) == Mesh.PRIMITIVE_TRIANGLES:
-                    var indices := arrays[Mesh.ARRAY_INDEX]
+                if instance.mesh.surface_get_primitive_type(i) == Mesh.PRIMITIVE_TRIANGLES:
+                    var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
                     if indices.size() > 0:
                         triangles += int(indices.size() / 3)
                     else:
