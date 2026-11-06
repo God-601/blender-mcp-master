@@ -186,8 +186,17 @@ test("npm pack contains the skill content and excludes tests and dependencies", 
   });
   assert.equal(result.status, 0, result.stderr);
   const files = JSON.parse(result.stdout)[0].files.map((file) => file.path);
-  for (const required of ["SKILL.md", "README.md", "LICENSE", "package.json", "bin/blender-mcp-master.js", "src/server.js", "scripts/validate_asset.py", "references/modeling-quality-loop.md", "assets/banner.svg", "assets/workflow.svg", "assets/architecture.svg", "integrations/godot/gltf_import_probe.gd", "integrations/godot/project.godot"]) {
+  for (const required of ["SKILL.md", "README.md", "LICENSE", "package.json", "bin/blender-mcp-master.js", "src/server.js", "scripts/validate_asset.py", "references/modeling-quality-loop.md", "assets/banner.svg", "assets/workflow.svg", "assets/architecture.svg", "integrations/godot/gltf_import_probe.gd", "integrations/godot/project.godot", "docs/QUICKSTART.md", "docs/ROADMAP-V2.md", "docs/V1.5-V2.0-MILESTONES.md", "CHANGELOG.md", "CONTRIBUTING.md"]) {
     assert.ok(files.includes(required), `missing from package: ${required}`);
+  }
+  // README links must resolve in the npm tarball, not just in the Git checkout.
+  const packed = new Set(files);
+  const readme = readFileSync(resolve(root, "README.md"), "utf8");
+  const referenced = [...readme.matchAll(/\]\(([^)]+)\)/g), ...readme.matchAll(/(?:href|src)="([^"]+)"/g)]
+    .map(match => match[1].split("#", 1)[0])
+    .filter(link => link && !/^(?:https?:|mailto:|data:)/i.test(link));
+  for (const link of referenced) {
+    assert.ok(packed.has(link), `README local link missing from npm package: ${link}`);
   }
   assert.ok(!files.some((path) => path.startsWith("tests/") || path.startsWith("node_modules/") || path.startsWith(".github/")), "package must not ship tests, deps or CI files");
 });
