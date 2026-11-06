@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.4.0 — verified quality gates and safe asset delivery (2026-11-06)
+
+- Introduced task-oriented MCP workflow guidance, conservative geometry/solid-containment diagnostics, and PNG silhouette reference measurements.
+- Added PBR/UV channel review, game budgets, specialist review receipts, paired benchmark summarization and versioned release evidence checks. Foundations for later milestones; these tools do not independently certify artistic quality or agent orchestration.
+- CI now runs real Godot 4.4.1 GLB import of an asset exported by Blender, plus real Cycles texture bake fixture with PNG pixel checks.
+- User-tested Sofa V3 in Blender 3.1.2 and Roblox Studio: reported 3 LODs (3,860/1,930/964 tris), actual MeshParts and SurfaceAppearance channels detected, and user approval of visible result.
+- Fixed Node >=20 metadata, ZIP/npm documentation and integration contents, PNG decoding bounds and clean-install package naming.
+
+**Limits:** Sofa V3 user observations are not universal game-engine certification. Exact solid collision, Codex/Claude token savings, full game PBR material fidelity and autonomous specialist sessions are not independently demonstrated. See `docs/release-notes-1.4.md`.
+
 ## 1.3.0 — autonomous agent policy and measurable evaluation (candidate, 2026-11-04)
 
 - Added tiered autonomous decision rules: safe read-only and owned reversible work, explicit approval for destructive/unowned edits, and stop conditions after ambiguous crashes or MCP tool failures.
