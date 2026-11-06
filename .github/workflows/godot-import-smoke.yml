@@ -1,0 +1,76 @@
+name: Real Godot 4 GLB importer smoke
+
+# This workflow runs the external Godot executable. It does NOT certify
+# Codex/Claude behavior, artistic quality, source-scene preservation or Roblox.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  godot-headless-import:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
+        with:
+          python-version: '3.11'
+      - name: Create isolated, deterministic test-only GLB
+        run: |
+          mkdir -p "$RUNNER_TEMP/godot-fixtures"
+          python integrations/godot/create_smoke_glb.py "$RUNNER_TEMP/godot-fixtures/smoke.glb"
+          sha256sum "$RUNNER_TEMP/godot-fixtures/smoke.glb"
+      - name: Download official Godot headless-capable executable
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl --fail --location --retry 3 --retry-delay 2 --output "$RUNNER_TEMP/godot.zip" \
+            https://github.com/godotengine/godot/releases/download/4.4.1-stable/Godot_v4.4.1-stable_linux.x86_64.zip
+          unzip -q "$RUNNER_TEMP/godot.zip" -d "$RUNNER_TEMP"
+          mv "$RUNNER_TEMP/Godot_v4.4.1-stable_linux.x86_64" "$RUNNER_TEMP/godot"
+          chmod +x "$RUNNER_TEMP/godot"
+          "$RUNNER_TEMP/godot" --headless --version
+      - name: Import real GLB with Godot and capture diagnostic output
+        shell: bash
+        run: |
+          set -euo pipefail
+          "$RUNNER_TEMP/godot" --headless --path integrations/godot \
+            --script res://gltf_import_probe.gd -- "$RUNNER_TEMP/godot-fixtures/smoke.glb" \
+            | tee "$RUNNER_TEMP/godot-import-result.log"
+      - name: Require positive importer observations (not a visual quality claim)
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          log = (Path(os.environ['RUNNER_TEMP']) / 'godot-import-result.log').read_text()
+          block = log.split('BLENDER_MCP_GODOT_IMPORT_BEGIN', 1)[1].split('BLENDER_MCP_GODOT_IMPORT_END', 1)[0].strip()
+          result = json.loads(block)
+          assert result['status'] == 'IMPORTED_GEOMETRY', result
+          assert result['mesh_instances'] >= 1, result
+          assert result['mesh_surfaces'] >= 1, result
+          assert result['triangle_primitives'] == 1, result
+          assert result['uv_surfaces'] >= 1, result
+          assert result['material_surfaces'] >= 1, result
+          assert result['visual_quality'] == 'NOT VERIFIED', result
+          assert result['collision'] == 'NOT VERIFIED', result
+          print(json.dumps(result, indent=2, sort_keys=True))
+          PY
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: real-godot-glb-import-smoke
+          path: |
+            ${{ runner.temp }}/godot-import-result.log
+            ${{ runner.temp }}/godot-fixtures/smoke.glb
+          if-no-files-found: warn
+          retention-days: 14
