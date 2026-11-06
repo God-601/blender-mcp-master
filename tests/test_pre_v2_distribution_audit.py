@@ -23,6 +23,18 @@ class PreV2DistributionTests(unittest.TestCase):
         self.assertIn('"integrations/godot/README.md"', src)
         self.assertTrue((ROOT / "integrations" / "godot" / "gltf_import_probe.gd").is_file())
 
+    def test_readiness_artifact_uses_actual_package_version_not_old_v12_label(self):
+        src = (ROOT / ".github" / "workflows" / "release-readiness.yml").read_text(encoding="utf-8")
+        self.assertIn('VERSION="$(node -p', src)
+        self.assertIn('PREFLIGHT_NAME=blender-mcp-master-', src)
+        self.assertIn('os.environ["PREFLIGHT_NAME"]', src)
+        self.assertIn('dist/*-PREFLIGHT-NOT-A-RELEASE.zip', src)
+        self.assertNotIn('blender-mcp-master-1.2-PREFLIGHT-NOT-A-RELEASE.zip', src)
+        for required in ("pbr_channel_audit.py", "game_delivery_manifest.py",
+                         "specialist_review_gate.py", "benchmark_suite_summary.py",
+                         "release_gate_report.py"):
+            self.assertIn(required, src)
+
     def test_png_decoder_has_decompression_and_flush_limits(self):
         src = (ROOT / "scripts" / "reference_silhouette_compare.py").read_text(encoding="utf-8")
         self.assertIn("inflater.flush(max(1, required + 1 - len(raw)))", src)
