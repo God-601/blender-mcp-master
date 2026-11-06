@@ -8,12 +8,12 @@ a separately connected Blender-control MCP provider.
 ## Windows: install the Agent Skill from ZIP
 
 1. Open [GitHub Releases](https://github.com/God-601/blender-mcp-master/releases)
-   and download `blender-mcp-master-1.2.0.zip` and `SHA256SUMS.txt`
+   and download `blender-mcp-master-1.4.0.zip` and `SHA256SUMS.txt`
    from the same tagged release.
 2. Verify the SHA256 against the checksum file (PowerShell):
 
    ```powershell
-   (Get-FileHash .\blender-mcp-master-1.2.0.zip -Algorithm SHA256).Hash
+   (Get-FileHash .\blender-mcp-master-1.4.0.zip -Algorithm SHA256).Hash
    ```
 
    Compare the printed hash with the ZIP's entry in `SHA256SUMS.txt`.
@@ -22,7 +22,7 @@ a separately connected Blender-control MCP provider.
 3. Extract the ZIP:
 
    ```powershell
-   Expand-Archive .\blender-mcp-master-1.2.0.zip -DestinationPath .\blender-release
+   Expand-Archive .\blender-mcp-master-1.4.0.zip -DestinationPath .\blender-release
    ```
 
 4. Copy the **inner** `blender-mcp-master` folder to a skills root supported by
@@ -58,16 +58,16 @@ the ZIP method works without Node.js.
 
 ## Optional: start the npm resource server
 
-If `blender-mcp-master@1.2.0` is published on npm by the maintainer:
+If `blender-mcp-master@1.4.0` is published on npm by the maintainer:
 
 ```powershell
-npx -y blender-mcp-master@1.2.0
+npx -y blender-mcp-master@1.4.0
 ```
 
 Configure that command in the agent's **MCP server config** as a stdio server
 if the agent supports external MCP servers. It exposes reference documents and
 scripts, and it does **not** offer any write/control tool for a live Blender scene.
-The Node server supports Node >=18.18. Its `skill`, `list`, and `--help`
+The Node server supports Node >=20. Its `skill`, `list`, and `--help`
 subcommands work without MCP interaction when installed.
 
 **A first npm publish requires a package owner's authorized npm login/token.**

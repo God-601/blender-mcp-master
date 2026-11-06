@@ -32,9 +32,10 @@ class VectorGraphicsTests(unittest.TestCase):
             self.assertIn("assets/" + name, readme)
         self.assertIn("Concept illustration", readme)
         banner = (ASSETS / "banner.svg").read_text(encoding="utf-8")
-        self.assertIn("without pretending it was produced by an AI agent", banner)
-        self.assertIn("VECTOR STUDY", banner)
-        self.assertGreater(banner.count("<polygon"), 8)
+        self.assertIn("CONCEPT ILLUSTRATION", banner)
+        self.assertIn("not a Blender render", banner)
+        for stage in ("PLAN", "MODEL", "VERIFY"):
+            self.assertIn(stage, banner)
 
     def test_workflow_keeps_clarification_and_correction_loop(self):
         workflow = (ASSETS / "workflow.svg").read_text(encoding="utf-8")
