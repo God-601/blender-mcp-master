@@ -47,7 +47,7 @@ func _initialize() -> void:
                 if instance.get_active_material(i) != null:
                     material_surfaces += 1
                 if instance.mesh.surface_get_primitive_type(i) == Mesh.PRIMITIVE_TRIANGLES:
-                    var indices := arrays[Mesh.ARRAY_INDEX]
+                    var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
                     if indices.size() > 0:
                         triangles += int(indices.size() / 3)
                     else:
