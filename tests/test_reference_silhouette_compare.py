@@ -82,6 +82,25 @@ class SilhouetteTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "checksum"):
                 m._png_alpha_mask(root / "b.png")
 
+    def test_compressed_scanline_bomb_rejected_with_bounded_decode(self):
+        m = module()
+        with tempfile.TemporaryDirectory() as folder:
+            # 2x2 claims 18 bytes of decoded RGBA scanlines; stream expands to
+            # far more. Recomputing IDAT CRC ensures decompression is tested.
+            root = Path(folder)
+            signature = b"\\x89PNG\\r\\n\\x1a\\n"
+            def chunk(kind, data):
+                return (struct.pack(">I", len(data)) + kind + data
+                        + struct.pack(">I", zlib.crc32(kind + data) & 0xffffffff))
+            content = (signature
+                       + chunk(b"IHDR", struct.pack(">IIBBBBB", 2, 2, 8, 6, 0, 0, 0))
+                       + chunk(b"IDAT", zlib.compress(b"\\x00" * 200000))
+                       + chunk(b"IEND", b""))
+            image = root / "bomb.png"
+            image.write_bytes(content)
+            with self.assertRaisesRegex(ValueError, "exceeds cap"):
+                m._png_alpha_mask(image)
+
     def test_path_traversal_refused(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
