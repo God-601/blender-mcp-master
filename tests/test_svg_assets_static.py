@@ -28,13 +28,13 @@ class VectorGraphicsTests(unittest.TestCase):
 
     def test_readme_uses_current_artwork_and_discloses_illustration(self):
         readme = (ROOT / "README.md").read_text(encoding="utf-8")
-        for name in ("banner.svg", "workflow.svg", "architecture.svg"):
-            self.assertIn("assets/" + name, readme)
+        self.assertIn("assets/banner.svg", readme)
         self.assertIn("Concept illustration", readme)
         banner = (ASSETS / "banner.svg").read_text(encoding="utf-8")
-        self.assertIn("without pretending it was produced by an AI agent", banner)
-        self.assertIn("VECTOR STUDY", banner)
-        self.assertGreater(banner.count("<polygon"), 8)
+        self.assertIn("CONCEPT ILLUSTRATION", banner)
+        self.assertIn("not a Blender render", banner)
+        for stage in ("PLAN", "MODEL", "VERIFY"):
+            self.assertIn(stage, banner)
 
     def test_workflow_keeps_clarification_and_correction_loop(self):
         workflow = (ASSETS / "workflow.svg").read_text(encoding="utf-8")
