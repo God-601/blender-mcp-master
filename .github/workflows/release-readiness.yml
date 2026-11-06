@@ -27,6 +27,11 @@ jobs:
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: '3.11'
+      - name: Determine versioned preflight archive name (never publish)
+        run: |
+          set -euo pipefail
+          VERSION="$(node -p 'require("./package.json").version')"
+          echo "PREFLIGHT_NAME=blender-mcp-master-${VERSION}-PREFLIGHT-NOT-A-RELEASE.zip" >> "$GITHUB_ENV"
       - name: Static Python and release safety assertions
         run: |
           python -m unittest discover -s tests -v
@@ -42,12 +47,13 @@ jobs:
           set -euo pipefail
           mkdir -p dist/blender-mcp-master
           cp -R SKILL.md README.md LICENSE CHANGELOG.md CONTRIBUTING.md references scripts integrations assets docs dist/blender-mcp-master/
-          (cd dist && zip -q -r blender-mcp-master-1.2-PREFLIGHT-NOT-A-RELEASE.zip blender-mcp-master)
+          (cd dist && zip -q -r "$PREFLIGHT_NAME" blender-mcp-master)
           python - <<'PY'
           from pathlib import Path
           from zipfile import ZipFile
           import re
-          p = Path("dist/blender-mcp-master-1.2-PREFLIGHT-NOT-A-RELEASE.zip")
+          import os
+          p = Path("dist") / os.environ["PREFLIGHT_NAME"]
           with ZipFile(p) as archive:
               names = set(archive.namelist())
               required = (
@@ -66,6 +72,12 @@ jobs:
                   "integrations/godot/gltf_import_probe.gd",
                   "integrations/godot/project.godot",
                   "integrations/godot/README.md",
+                  "scripts/pbr_channel_audit.py",
+                  "scripts/game_delivery_manifest.py",
+                  "scripts/specialist_review_gate.py",
+                  "scripts/benchmark_suite_summary.py",
+                  "scripts/release_gate_report.py",
+                  "docs/V1.5-V2.0-MILESTONES.md",
               )
               assert all("blender-mcp-master/" + item in names for item in required), "Missing packaged file"
               assert all(not x.startswith("/") and ".." not in x.split("/") for x in names), "Unsafe ZIP entry"
@@ -79,12 +91,12 @@ jobs:
               assert not missing, "Packaged README contains broken local links: " + repr(missing)
           print("Nonpublishing package verified:", p, p.stat().st_size, "bytes")
           PY
-          (cd dist && sha256sum blender-mcp-master-1.2-PREFLIGHT-NOT-A-RELEASE.zip > SHA256SUMS.txt)
+          (cd dist && sha256sum "$PREFLIGHT_NAME" > SHA256SUMS.txt)
           test -s dist/SHA256SUMS.txt
       - name: Fresh isolated skill install and integrity smoke
         run: |
           python scripts/clean_install_smoke.py \
-            dist/blender-mcp-master-1.2-PREFLIGHT-NOT-A-RELEASE.zip \
+            "dist/$PREFLIGHT_NAME" \
             dist/SHA256SUMS.txt \
             --report dist/clean-install-report.json
           python - <<'PY'
@@ -96,9 +108,9 @@ jobs:
           PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: blender-mcp-master-1.2-PREFLIGHT-NOT-A-RELEASE
+          name: blender-mcp-master-preflight-${{ github.sha }}
           path: |
-            dist/blender-mcp-master-1.2-PREFLIGHT-NOT-A-RELEASE.zip
+            dist/*-PREFLIGHT-NOT-A-RELEASE.zip
             dist/SHA256SUMS.txt
             dist/clean-install-report.json
           if-no-files-found: error
