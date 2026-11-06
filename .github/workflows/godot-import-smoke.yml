@@ -37,6 +37,25 @@ jobs:
           python integrations/godot/blender_export_fixture.py "$RUNNER_TEMP/godot-fixtures/from-blender.glb"
           test -s "$RUNNER_TEMP/godot-fixtures/from-blender.glb"
           sha256sum "$RUNNER_TEMP/godot-fixtures/from-blender.glb"
+      - name: Bake actual texture with Blender Cycles CPU
+        shell: bash
+        run: |
+          set -euo pipefail
+          python integrations/godot/blender_bake_fixture.py "$RUNNER_TEMP/godot-fixtures" | tee "$RUNNER_TEMP/blender-cycles-bake.log"
+          python - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          folder = Path(os.environ["RUNNER_TEMP"])
+          log = (folder / "blender-cycles-bake.log").read_text()
+          result = json.loads(log.split("MCP_CYCLES_BAKE_BEGIN", 1)[1].split("MCP_CYCLES_BAKE_END", 1)[0].strip())
+          assert result["status"] == "BAKED_TEXTURE_MEASURED"
+          assert result["scene_geometry_preserved"] is True
+          assert result["resolution"] == [64, 64]
+          assert (folder / "godot-fixtures" / "cycles-emission-bake.png").is_file()
+          assert result["visual_artistic_quality"] == "NOT VERIFIED"
+          print("Actual Cycles texture bake:", json.dumps(result, sort_keys=True))
+          PY
       - name: Download official Godot headless-capable executable
         shell: bash
         run: |
@@ -95,5 +114,7 @@ jobs:
             ${{ runner.temp }}/godot-fixtures/smoke.glb
             ${{ runner.temp }}/godot-blender-import-result.log
             ${{ runner.temp }}/godot-fixtures/from-blender.glb
+            ${{ runner.temp }}/godot-fixtures/cycles-emission-bake.png
+            ${{ runner.temp }}/blender-cycles-bake.log
           if-no-files-found: warn
           retention-days: 14
