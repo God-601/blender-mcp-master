@@ -22,7 +22,7 @@
     "game-ready"
   ],
   "engines": {
-    "node": ">=18.18"
+    "node": ">=20"
   },
   "bin": {
     "blender-mcp-master": "./bin/blender-mcp-master.js"

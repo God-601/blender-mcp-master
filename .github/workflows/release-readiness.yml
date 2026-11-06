@@ -41,7 +41,7 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p dist/blender-mcp-master
-          cp -R SKILL.md README.md LICENSE CHANGELOG.md CONTRIBUTING.md references scripts assets docs dist/blender-mcp-master/
+          cp -R SKILL.md README.md LICENSE CHANGELOG.md CONTRIBUTING.md references scripts integrations assets docs dist/blender-mcp-master/
           (cd dist && zip -q -r blender-mcp-master-1.2-PREFLIGHT-NOT-A-RELEASE.zip blender-mcp-master)
           python - <<'PY'
           from pathlib import Path
@@ -63,6 +63,9 @@ jobs:
                   "docs/RELEASE-1.2-EVIDENCE.md",
                   "scripts/game_asset_preflight.py",
                   "scripts/uv_island_gutter_audit.py",
+                  "integrations/godot/gltf_import_probe.gd",
+                  "integrations/godot/project.godot",
+                  "integrations/godot/README.md",
               )
               assert all("blender-mcp-master/" + item in names for item in required), "Missing packaged file"
               assert all(not x.startswith("/") and ".." not in x.split("/") for x in names), "Unsafe ZIP entry"
