@@ -27,6 +27,16 @@ jobs:
           mkdir -p "$RUNNER_TEMP/godot-fixtures"
           python integrations/godot/create_smoke_glb.py "$RUNNER_TEMP/godot-fixtures/smoke.glb"
           sha256sum "$RUNNER_TEMP/godot-fixtures/smoke.glb"
+      - name: Install Blender bpy for real Blender-to-Godot integration
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libgl1 libxi6 libxrender1 libxxf86vm1 libxfixes3 libsm6 libxkbcommon0
+          pip install bpy==4.5.15
+      - name: Export a Blender-authored UV/material GLB
+        run: |
+          python integrations/godot/blender_export_fixture.py "$RUNNER_TEMP/godot-fixtures/from-blender.glb"
+          test -s "$RUNNER_TEMP/godot-fixtures/from-blender.glb"
+          sha256sum "$RUNNER_TEMP/godot-fixtures/from-blender.glb"
       - name: Download official Godot headless-capable executable
         shell: bash
         run: |
@@ -44,6 +54,9 @@ jobs:
           "$RUNNER_TEMP/godot" --headless --path integrations/godot \
             --script res://gltf_import_probe.gd -- "$RUNNER_TEMP/godot-fixtures/smoke.glb" \
             | tee "$RUNNER_TEMP/godot-import-result.log"
+          "$RUNNER_TEMP/godot" --headless --path integrations/godot \
+            --script res://gltf_import_probe.gd -- "$RUNNER_TEMP/godot-fixtures/from-blender.glb" \
+            | tee "$RUNNER_TEMP/godot-blender-import-result.log"
       - name: Require positive importer observations (not a visual quality claim)
         shell: bash
         run: |
@@ -64,6 +77,14 @@ jobs:
           assert result['visual_quality'] == 'NOT VERIFIED', result
           assert result['collision'] == 'NOT VERIFIED', result
           print(json.dumps(result, indent=2, sort_keys=True))
+          from_blender_log = (Path(os.environ['RUNNER_TEMP']) / 'godot-blender-import-result.log').read_text()
+          blender_result = json.loads(from_blender_log.split('BLENDER_MCP_GODOT_IMPORT_BEGIN', 1)[1].split('BLENDER_MCP_GODOT_IMPORT_END', 1)[0].strip())
+          assert blender_result['status'] == 'IMPORTED_GEOMETRY', blender_result
+          assert blender_result['triangle_primitives'] >= 12, blender_result
+          assert blender_result['uv_surfaces'] >= 1, blender_result
+          assert blender_result['material_surfaces'] >= 1, blender_result
+          assert blender_result['visual_quality'] == 'NOT VERIFIED'
+          print("Blender-to-Godot import:", json.dumps(blender_result, sort_keys=True))
           PY
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         if: always()
@@ -72,5 +93,7 @@ jobs:
           path: |
             ${{ runner.temp }}/godot-import-result.log
             ${{ runner.temp }}/godot-fixtures/smoke.glb
+            ${{ runner.temp }}/godot-blender-import-result.log
+            ${{ runner.temp }}/godot-fixtures/from-blender.glb
           if-no-files-found: warn
           retention-days: 14
