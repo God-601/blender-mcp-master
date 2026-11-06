@@ -71,8 +71,8 @@ class RuntimeAuditTests(unittest.TestCase):
         bpy.ops.mesh.primitive_cube_add()
         obj = bpy.context.object
         obj.name = "NoUV"
-        if obj.data.uv_layers:
-            obj.data.uv_layers.clear()
+        while obj.data.uv_layers:
+            obj.data.uv_layers.remove(obj.data.uv_layers[0])
         result = module()["inspect_targets"](["NoUV"])
         self.assertEqual(result["targets"][0]["status"], "ISSUE")
         self.assertEqual(result["actual_bake"], "NOT VERIFIED")
