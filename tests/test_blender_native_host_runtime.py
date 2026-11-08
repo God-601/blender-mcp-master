@@ -54,12 +54,12 @@ class NativeHostTests(unittest.TestCase):
             result = run({'category': 'hard_surface'}, host.context, self.root, host, dry_run=False)
             self.assertEqual(result['status'], 'REVIEW')
             checkpoint = self.root / host.context['checkpoint_ref']
-            self.assertTrue(checkpoint.read_bytes().startswith(b'BLENDER'))
             self.assertEqual(bpy.data.filepath, original_path)
             self.assertIn('Owned', bpy.data.objects)
             self.assertEqual(self.keep.location.x, 0)
             stage = [e['path'] for e in result['steps'][0]['evidence'] if e['path'].endswith('.blend')][0]
             self.assertTrue((self.root / stage).is_file())
+        # Reopening verifies the actual checkpoint across Blender file-format versions.
         bpy.ops.wm.open_mainfile(filepath=str(checkpoint))
         self.assertIn('Keep', bpy.data.objects)
         self.assertNotIn('Owned', bpy.data.objects)
