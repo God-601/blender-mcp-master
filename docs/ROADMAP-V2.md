@@ -1,6 +1,6 @@
 # Blender MCP Master 2.0 — Auditoria, arquitetura e plano de entrega
 
-**Status:** proposta de engenharia, **não** release 2.0. Não confundir documentação,
+**Status:** proposta de engenharia, **não** release 2.0. O protocolo executável de testes por etapa está em [V2-ACCEPTANCE-CAMPAIGN.md](V2-ACCEPTANCE-CAMPAIGN.md); o script de comparação antes/depois de silhuetas exige evidência de preservação da cena e revisão independente, sem emitir aprovação artística automática. Não confundir documentação,
 scripts no repositório, CI bpy ou um importador smoke com uma demonstração de
 qualidade artística ou compatibilidade entre agentes.
 

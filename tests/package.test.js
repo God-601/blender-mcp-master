@@ -136,7 +136,7 @@ test("every listed reference and script can be read through the MCP tools", asyn
       if (name === "workflow_router.py" || name === "reference_silhouette_compare.py") {
         // Pure Python tools use declared input and have no Blender runtime dependency.
         assert.match(result.content[0].text, /def (?:route|compare_masks)\(/);
-      } else if (name === "game_delivery_manifest.py" || name === "specialist_review_gate.py" || name === "benchmark_suite_summary.py" || name === "release_gate_report.py") {
+      } else if (name === "game_delivery_manifest.py" || name === "specialist_review_gate.py" || name === "benchmark_suite_summary.py" || name === "release_gate_report.py" || name === "visual_iteration_gate.py") {
         // Pure evidence validators intentionally do not import bpy.
         assert.match(result.content[0].text, /def (?:evaluate|summarize)\(/);
       } else if (name === "modeling_scorecard.py") {
