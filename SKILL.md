@@ -37,7 +37,7 @@ CLARIFY -> PROBE -> PLAN -> BLOCK -> LOOK -> REFINE -> VERIFY -> CORRECT -> DELI
 | Game optimization / export | `references/game-ready-export.md` | `references/model-performance-strategy.md` |
 | Bug / unknown API | `references/troubleshooting.md` | `references/capability-mapping.md` |
 
-For measured A/B experiments use `references/skill-evaluation-protocol.md`; defer test procedures unless running a benchmark. For a multi-view correction needing before/after silhouette evidence, use `scripts/visual_iteration_gate.py` only after independently reviewed images and protected-scene receipts exist; it never authorizes a visual PASS. See `docs/V2-ACCEPTANCE-CAMPAIGN.md` for the actual five-fixture campaign.
+A/B experiments: `references/skill-evaluation-protocol.md`. Visual before/after corrections: `scripts/visual_iteration_gate.py`, requiring reviewed images and protected-scene evidence; never artistic PASS. Five-fixture plan: `docs/V2-ACCEPTANCE-CAMPAIGN.md`.
 
 For a selected task, if the optional resource MCP exposes `plan_blender_workflow`, call it once to select the smallest relevant guides and missing brief topics; it does not replace the design conversation or live scene probing. For complex geometric joints load `scripts/solid_overlap_probe.py` only when needed; BVH/ray results are REVIEW, not automatic collision certification. For real Godot GLB import testing see `integrations/godot/README.md`.
 
