@@ -63,6 +63,39 @@ python scripts/visual_iteration_gate.py before_compare.json after_compare.json \
 - This is a conservative **measurement audit**, not pixel-based artistic
   judgment, camera verification, automatic retopology or proof of engine import.
 
+## One-command full evidence audit (recommended)
+
+Instead of manually generating four separate JSON assessments, prepare a
+`manifest.json` containing three views (same camera/framing, before and after)
+and real captured source-protection and independent reviewer input. This is
+**read-only**; it never opens Blender, requests mutations or generates imagery.
+
+```json
+{
+  "asset": "Sofa",
+  "views": [
+    {"view": "front", "reference": "front_ref.png", "before": "front_before.png", "after": "front_after.png"},
+    {"view": "side", "reference": "side_ref.png", "before": "side_before.png", "after": "side_after.png"},
+    {"view": "three_quarter", "reference": "three_quarter_ref.png", "before": "three_quarter_before.png", "after": "three_quarter_after.png"}
+  ]
+}
+```
+
+```bash
+python scripts/visual_iteration_audit.py manifest.json --evidence-root ./views \
+  --scene-before scene_before.json --scene-after scene_after.json \
+  --review reviewer_report.json
+```
+
+The scene files are from `scene_baseline_snapshot.py` **before and after
+editing**. The reviewer report is the *raw* `visual_review_report.py` input,
+with front/side/three-quarter capture receipts and unresolved defect records.
+The output includes the PNG SHA-256 values, measured IoUs, selected protected
+scene comparison, reviewer triage, and an explicit `NOT VERIFIED` artistic
+result. In CI, this command is tested with actual generated transparent PNGs
+and both preserved and damaged scene snapshots; it is **not** a real Blender
+visual correction session or a camera-alignment verifier.
+
 ## Five controlled acceptance fixtures
 
 | Case | Main success criterion | Real positive/negative checks |
