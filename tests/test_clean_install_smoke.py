@@ -56,7 +56,7 @@ class CleanInstallSmokeTests(unittest.TestCase):
                 for name in ("SKILL.md", "README.md", "LICENSE",
                              "CHANGELOG.md", "CONTRIBUTING.md"):
                     zf.write(ROOT / name, "blender-mcp-master/" + name)
-                for dirname in ("docs", "references", "scripts", "assets"):
+                for dirname in ("docs", "references", "scripts", "integrations", "assets"):
                     for source in sorted((ROOT / dirname).rglob("*")):
                         if source.is_file() and "__pycache__" not in source.parts:
                             zf.write(source, "blender-mcp-master/" +
