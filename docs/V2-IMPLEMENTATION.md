@@ -18,7 +18,7 @@ iteration checks, engine probes and read-only MCP tools remain supported.
   default dry-run, fail-stop and structured handoffs. Test real subprocess
   dispatch with deterministic workers, malformed/missing evidence, timeout,
   scene drift and unavailable adapters. Test doubles are not live AI trials.
-- [ ] Stage 3: CI evidence artifacts, exact-SHA release gate coverage,
+- [x] Stage 3: CI evidence artifacts, exact-SHA release gate coverage,
   distribution checks, README/roadmap and reproducible integration instructions.
   Keep pending live agent, visual, target-engine and cost gates explicit.
 

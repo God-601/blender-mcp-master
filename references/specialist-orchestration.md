@@ -50,8 +50,9 @@ stdout. Diagnostics go to stderr. Operations:
   destination, context, selected module/acceptance/resources, previous
   hashed results and checkpoint digest. Invoke the actual named specialist
   with only this stage's resources. Honor read/write scope. In single mode
-  all production stages use the coordinator; independent final QA must use
-  a different actual identity. In delegated mode choose suitable specialists.
+  all production and validation stages use the coordinator; independence
+  remains NOT VERIFIED. In delegated mode choose suitable specialists and
+  final QA must use a different actual identity from every producer.
   Return `request_id`, actual `agent_id`/unique `run_id`, `status`
   (PASS/ISSUE/NOT VERIFIED), relative `evidence` files, `errors`, `metrics`,
   and a relative JSON `receipt`.

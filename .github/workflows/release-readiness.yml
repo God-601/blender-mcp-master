@@ -77,6 +77,11 @@ jobs:
                   "scripts/specialist_review_gate.py",
                   "scripts/benchmark_suite_summary.py",
                   "scripts/release_gate_report.py",
+                  "scripts/specialist_plan.py",
+                  "scripts/specialist_orchestrator.py",
+                  "references/specialist-modules.json",
+                  "integrations/agents/codex_reviewer.py",
+                  "integrations/agents/run_specialists.py",
                   "docs/V1.5-V2.0-MILESTONES.md",
               )
               assert all("blender-mcp-master/" + item in names for item in required), "Missing packaged file"

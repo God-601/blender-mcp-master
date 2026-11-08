@@ -19,6 +19,15 @@ jobs:
           python-version: "3.11"
       # Without bpy the runtime tests are skipped; only parsing and text checks run here.
       - run: python -m unittest discover -s tests -v
+      - name: Record V2 execution contract evidence (no live AI claims)
+        run: python tests/run_v2_evidence.py --output v2-evidence.json
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        if: always()
+        with:
+          name: v2-execution-contract-${{ github.sha }}
+          path: v2-evidence.json
+          if-no-files-found: error
+          retention-days: 30
 
   blender-runtime:
     # Runs the scripts in a real Blender (bpy wheel) once per Blender version. PyPI only ships

@@ -46,7 +46,7 @@ class CodexReviewer:
             schema, output = Path(folder) / 'schema.json', Path(folder) / 'result.json'
             schema.write_text(json.dumps(SCHEMA), encoding='utf-8')
             command = [self.executable, '-a', 'never', 'exec', '--ignore-user-config', '--ephemeral',
-                       '--json', '--sandbox', 'read-only', '--output-schema', str(schema),
+                       '--json', '--skip-git-repo-check', '--sandbox', 'read-only', '--output-schema', str(schema),
                        '--output-last-message', str(output), '-']
             process = subprocess.run(command, input=prompt, cwd=self.cwd, text=True,
                                      encoding='utf-8', capture_output=True, timeout=self.timeout, check=True)

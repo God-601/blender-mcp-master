@@ -58,6 +58,13 @@ def write_receipt(root, request, result):
     return name
 
 
+def verify_upstream(root, steps):
+    for step in steps:
+        for recorded in step['evidence'] + [step['receipt']]:
+            if artifact(root, recorded['path']) != recorded:
+                raise ValueError('Previously accepted evidence changed: ' + recorded['path'])
+
+
 def validate_probe(probe, context):
     if not isinstance(probe, dict) or probe.get('scene_id') != context['scene_id']:
         raise ValueError("Scene identity mismatch")
@@ -112,6 +119,7 @@ def run(task, context, evidence_root, host=None, *, dry_run=True):
     plan = build_plan(task)
     report = {'schema_version': 1, 'status': 'DRY_RUN', 'plan': plan, 'steps': [], 'errors': [],
               'recovery_required': False, 'publication_authorized': False,
+              'independent_review': 'NOT VERIFIED',
               'artistic_quality': 'NOT VERIFIED', 'engine_validation': 'NOT VERIFIED'}
     if dry_run:
         return report
@@ -134,6 +142,7 @@ def run(task, context, evidence_root, host=None, *, dry_run=True):
                 baseline = identity
             if identity != baseline or artifact(root, context['checkpoint_ref']) != checkpoint:
                 raise ValueError('Scene/session/protected objects or checkpoint changed; stop and inspect recovery')
+            verify_upstream(root, report['steps'])
             if (step['module'] not in probe.get('modules', []) or
                     (step['access'] == 'write' and probe.get('write') is not True) or
                     (plan['mode'] == 'delegated' and probe.get('delegation') is not True)):
@@ -150,6 +159,7 @@ def run(task, context, evidence_root, host=None, *, dry_run=True):
                 raise ValueError('Scene/session or protected objects changed during dispatch')
             if artifact(root, context['checkpoint_ref']) != checkpoint:
                 raise ValueError('Recovery checkpoint was overwritten')
+            verify_upstream(root, report['steps'])
             if not isinstance(result, dict) or result.get('request_id') != request['request_id']:
                 raise ValueError('Stale or mismatched specialist response')
             for key in ('agent_id', 'run_id'):
@@ -181,9 +191,13 @@ def run(task, context, evidence_root, host=None, *, dry_run=True):
                 if plan['mode'] == 'single' and writers and result['agent_id'] not in writers:
                     raise ValueError('Simple plan unexpectedly changed production agent')
                 writers.add(result['agent_id'])
-            elif result['agent_id'] in writers:
+            elif plan['mode'] == 'single' and result['agent_id'] not in writers:
+                raise ValueError('Simple plan unexpectedly changed coordinator for validation')
+            elif plan['mode'] == 'delegated' and result['agent_id'] in writers:
                 state = 'NOT VERIFIED'
                 errors = errors + ['Independent review cannot be performed by a producer']
+            elif step['access'] == 'read' and plan['mode'] == 'delegated':
+                report['independent_review'] = 'RECEIPT VERIFIED'
             entry.update({'status': state, 'agent_id': result['agent_id'], 'run_id': result['run_id'],
                           'request_id': request['request_id'], 'evidence': evidence, 'receipt': receipt_file,
                           'errors': errors, 'metrics': metrics})

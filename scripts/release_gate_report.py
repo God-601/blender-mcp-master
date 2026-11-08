@@ -5,6 +5,8 @@ created here. Self-reported evidence must still be verified independently.
 """
 import json
 import re
+import hashlib
+from pathlib import Path
 
 INPUT = {"version": "", "commit_sha": "", "checks": {}}
 GATES = (
@@ -14,9 +16,10 @@ GATES = (
     "destination_validation", "usage_quality_benchmark",
 )
 STATUS = {"PASS", "FAIL", "NOT VERIFIED", "N/A"}
+V2_GATES = GATES + ('specialist_orchestration',)
 
 
-def evaluate(record):
+def evaluate(record, evidence_root=None):
     if not isinstance(record, dict):
         raise ValueError("Release evidence must be an object")
     version = record.get("version")
@@ -26,10 +29,12 @@ def evaluate(record):
     if not isinstance(sha, str) or not re.fullmatch(r"[0-9a-f]{40}", sha):
         raise ValueError("Exact 40-character Git commit SHA is required")
     checks = record.get("checks")
-    if not isinstance(checks, dict) or set(checks) - set(GATES):
+    is_v2 = version.startswith('2.0.')
+    gates = V2_GATES if is_v2 else GATES
+    if not isinstance(checks, dict) or set(checks) - set(gates):
         raise ValueError("Unexpected release checks")
     evaluated = {}
-    for key in GATES:
+    for key in gates:
         check = checks.get(key, {})
         if not isinstance(check, dict):
             raise ValueError("Each check must be an object")
@@ -43,7 +48,32 @@ def evaluate(record):
             state = "NOT VERIFIED"
         if state == "N/A" and not check.get("reason"):
             state = "NOT VERIFIED"
-        evaluated[key] = {"status": state, "evidence": list(refs)}
+        errors = []
+        if is_v2:
+            if state == 'N/A':
+                state = 'NOT VERIFIED'
+                errors.append('V2 core acceptance gates cannot be waived as N/A')
+            if state == 'PASS':
+                if evidence_root is None or check.get('commit_sha') != sha:
+                    errors.append('Exact-commit artifacts and an evidence root are required')
+                else:
+                    root = Path(evidence_root).resolve()
+                    hashes = check.get('sha256', {})
+                    if not isinstance(hashes, dict):
+                        errors.append('Artifact SHA256 mapping required')
+                    else:
+                        for ref in refs:
+                            path = (root / ref).resolve()
+                            try:
+                                if Path(ref).is_absolute() or not path.is_relative_to(root) or not path.is_file() or path.stat().st_size > 64 * 1024 * 1024:
+                                    raise ValueError('Missing, escaped or oversized artifact')
+                                if hashlib.sha256(path.read_bytes()).hexdigest() != hashes.get(ref):
+                                    raise ValueError('Artifact digest mismatch')
+                            except (ValueError, OSError) as error:
+                                errors.append(ref + ': ' + str(error))
+                if errors:
+                    state = 'NOT VERIFIED'
+        evaluated[key] = {"status": state, "evidence": list(refs), 'errors': errors}
     blockers = [key for key, details in evaluated.items()
                 if details["status"] in ("FAIL", "NOT VERIFIED")]
     # Even a complete declared record is not automatically proof of real

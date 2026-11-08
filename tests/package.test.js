@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { spawnSync } from "node:child_process";
-import { resolve } from "node:path";
+import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
@@ -186,14 +186,16 @@ test("file tools reject unknown names, path traversal and files from the other d
 });
 
 test("npm pack contains the skill content and excludes tests and dependencies", () => {
-  const result = spawnSync("npm", ["pack", "--dry-run", "--json", "--ignore-scripts"], {
+  const npmCli = process.env.npm_execpath ?? (process.platform === "win32"
+    ? resolve(dirname(process.execPath), "node_modules/npm/bin/npm-cli.js") : null);
+  const result = spawnSync(npmCli ? process.execPath : "npm", [...(npmCli ? [npmCli] : []), "pack", "--dry-run", "--json", "--ignore-scripts"], {
     cwd: root,
     encoding: "utf8",
     timeout: 60000
   });
   assert.equal(result.status, 0, result.stderr);
   const files = JSON.parse(result.stdout)[0].files.map((file) => file.path);
-  for (const required of ["SKILL.md", "README.md", "LICENSE", "package.json", "bin/blender-mcp-master.js", "src/server.js", "scripts/validate_asset.py", "references/modeling-quality-loop.md", "assets/banner.svg", "assets/workflow.svg", "assets/architecture.svg", "integrations/godot/gltf_import_probe.gd", "integrations/godot/project.godot", "docs/QUICKSTART.md", "docs/ROADMAP-V2.md", "docs/V1.5-V2.0-MILESTONES.md", "CHANGELOG.md", "CONTRIBUTING.md"]) {
+  for (const required of ["SKILL.md", "README.md", "LICENSE", "package.json", "bin/blender-mcp-master.js", "src/server.js", "scripts/validate_asset.py", "scripts/specialist_plan.py", "scripts/specialist_orchestrator.py", "references/specialist-modules.json", "references/modeling-quality-loop.md", "assets/banner.svg", "assets/workflow.svg", "assets/architecture.svg", "integrations/agents/codex_reviewer.py", "integrations/agents/run_specialists.py", "integrations/godot/gltf_import_probe.gd", "integrations/godot/project.godot", "docs/QUICKSTART.md", "docs/ROADMAP-V2.md", "docs/V1.5-V2.0-MILESTONES.md", "CHANGELOG.md", "CONTRIBUTING.md"]) {
     assert.ok(files.includes(required), `missing from package: ${required}`);
   }
   // README links must resolve in the npm tarball, not just in the Git checkout.

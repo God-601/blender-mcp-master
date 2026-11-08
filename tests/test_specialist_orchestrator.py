@@ -35,7 +35,7 @@ class Host:
         if self.fail:
             raise RuntimeError('worker disconnected after edit')
         role = request['step']['module']
-        result = {'request_id': request['request_id'], 'agent_id': 'builder' if self.same_reviewer or role != 'validation' else 'reviewer',
+        result = {'request_id': request['request_id'], 'agent_id': 'builder' if self.same_reviewer or role != 'validation' or request['mode'] == 'single' else 'reviewer',
                 'run_id': request['request_id'], 'status': 'PASS',
                 'evidence': ['missing.json' if self.bad_evidence else 'audit.json'], 'errors': [], 'metrics': {'triangles': 12}}
         receipt = {k: result[k] for k in ('request_id', 'agent_id', 'run_id', 'status')}
@@ -77,6 +77,8 @@ class OrchestrationTests(unittest.TestCase):
         self.assertEqual(result['steps'][0]['evidence'][0]['sha256'], hashlib.sha256((self.root / 'audit.json').read_bytes()).hexdigest())
         self.assertFalse(result['publication_authorized'])
         self.assertEqual(result['artistic_quality'], 'NOT VERIFIED')
+        self.assertEqual(result['independent_review'], 'NOT VERIFIED')
+        self.assertEqual({s['agent_id'] for s in result['steps']}, {'builder'})
 
     def test_missing_adapter_blocks_without_fabricating_agent(self):
         result = run(self.task, self.context, self.root, dry_run=False)
@@ -86,6 +88,17 @@ class OrchestrationTests(unittest.TestCase):
     def test_stale_receipt_cannot_pass_with_fresh_response_id(self):
         self.host.stale_receipt = True
         self.assertEqual(self.execute()['status'], 'ISSUE')
+
+    def test_later_stage_cannot_replace_previously_accepted_evidence(self):
+        dispatch = self.host.dispatch
+        def replace(request):
+            if request['step']['module'] == 'validation':
+                (self.root / 'audit.json').write_text('replaced first-stage audit', encoding='utf-8')
+            return dispatch(request)
+        self.host.dispatch = replace
+        result = self.execute()
+        self.assertEqual(result['status'], 'ISSUE')
+        self.assertIn('Previously accepted evidence changed', result['errors'][0])
 
     def test_dispatch_carries_actual_task_and_destination(self):
         self.task.update({'category': 'organic', 'destination': 'unity', 'needs': ['export']})
@@ -120,6 +133,7 @@ class OrchestrationTests(unittest.TestCase):
         self.assertEqual(len(self.host.calls), 1)
 
     def test_independent_review_and_evidence_required(self):
+        self.task['needs'] = ['uv', 'pbr']
         self.host.same_reviewer = True
         self.assertEqual(self.execute()['status'], 'NOT VERIFIED')
         self.host.same_reviewer = False

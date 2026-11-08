@@ -14,6 +14,8 @@ import importlib.util
 import json
 import re
 import stat
+import subprocess
+import sys
 import tempfile
 import zipfile
 from pathlib import Path
@@ -30,6 +32,11 @@ REQUIRED = (
     "scripts/uv_diagnostics.py",
     "scripts/scene_baseline_snapshot.py",
     "scripts/compare_scene_baselines.py",
+    "scripts/specialist_plan.py",
+    "scripts/specialist_orchestrator.py",
+    "references/specialist-modules.json",
+    "integrations/agents/codex_reviewer.py",
+    "integrations/agents/run_specialists.py",
     "docs/QUICKSTART.md",
 )
 MAX_ENTRIES = 2500
@@ -131,6 +138,13 @@ def smoke(archive_path, checksums_path):
         changed["objects"] = [{"name": "USER_Keep_Mesh", "fingerprint_sha256": "b" * 64}]
         if mod.compare(record, changed)["status"] != "ISSUE":
             raise ValueError("Installed helper failed scene-change smoke check")
+        brief = home / 'brief.json'
+        brief.write_text(json.dumps({'category': 'game_asset', 'needs': ['export', 'uv', 'pbr']}), encoding='utf-8')
+        planned = subprocess.run([sys.executable, str(installed / 'scripts/specialist_plan.py'), str(brief)],
+                                 capture_output=True, text=True, encoding='utf-8', timeout=10, check=True)
+        plan = json.loads(planned.stdout)
+        if plan['steps'][-2]['module'] != 'export' or plan['mode'] != 'delegated':
+            raise ValueError('Installed specialist planner failed')
         return {
             "result": "PASS", "scope": "isolated agent-style skill ZIP installation",
             "sha256": checksum, "archive_name": archive.name,
@@ -139,6 +153,7 @@ def smoke(archive_path, checksums_path):
             "readme_links_checked": len(local),
             "skill_routing": "PASS",
             "protected_object_helper": "PASS",
+            "specialist_planning": "PASS",
             "actual_agent_discovery": "NOT VERIFIED",
             "live_blender_mcp_connection": "NOT VERIFIED",
             "target_engine_import": "NOT VERIFIED",
