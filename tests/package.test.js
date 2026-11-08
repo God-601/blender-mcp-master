@@ -123,7 +123,9 @@ test("MCP server reports the package.json version", async () => {
 test("every listed reference and script can be read through the MCP tools", async () => {
   await withClient(async (client) => {
     const listed = await client.callTool({ name: "list_blender_resources", arguments: {} });
-    const { references, scripts } = JSON.parse(listed.content[0].text);
+      const { references, scripts, specialist_modules } = JSON.parse(listed.content[0].text);
+      assert.equal(specialist_modules.schema_version, 1);
+      assert.equal(Object.keys(specialist_modules.modules).length, 7);
     assert.ok(references.length > 0 && scripts.length > 0);
     for (const name of references) {
       const result = await client.callTool({ name: "get_blender_reference", arguments: { name } });
@@ -133,7 +135,9 @@ test("every listed reference and script can be read through the MCP tools", asyn
     for (const name of scripts) {
       const result = await client.callTool({ name: "get_blender_script", arguments: { name } });
       assert.ok(!result.isError, `${name}: ${JSON.stringify(result.content)}`);
-      if (name === "workflow_router.py" || name === "reference_silhouette_compare.py") {
+      if (name === "specialist_plan.py") {
+        assert.match(result.content[0].text, /def build_plan\(/);
+      } else if (name === "workflow_router.py" || name === "reference_silhouette_compare.py") {
         // Pure Python tools use declared input and have no Blender runtime dependency.
         assert.match(result.content[0].text, /def (?:route|compare_masks)\(/);
       } else if (name === "game_delivery_manifest.py" || name === "specialist_review_gate.py" || name === "benchmark_suite_summary.py" || name === "release_gate_report.py" || name === "visual_iteration_gate.py") {

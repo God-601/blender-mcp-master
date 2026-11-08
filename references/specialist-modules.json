@@ -1,0 +1,40 @@
+{
+  "schema_version": 1,
+  "modules": {
+    "modeling": {
+      "guides": ["references/modeling-decision-framework.md"],
+      "scripts": ["scripts/geometry_builder.py", "scripts/hard_surface_builder.py", "scripts/modular_builder.py"],
+      "acceptance": "Measured silhouette/proportions and explicit owned targets; inspect actual views before detail."
+    },
+    "materials": {
+      "guides": ["references/materials.md"],
+      "scripts": ["scripts/pbr_material.py", "scripts/pbr_channel_audit.py"],
+      "acceptance": "Saved texture dependencies, correct channel colorspaces; shader metadata is not visual approval."
+    },
+    "uv": {
+      "guides": ["references/uv-baking.md"],
+      "scripts": ["scripts/uv_diagnostics.py", "scripts/uv_island_gutter_audit.py", "scripts/validate_uvs.py"],
+      "acceptance": "Explicit overlap policy, padding and measured density; inspect actual bake pixels when baking."
+    },
+    "retopology": {
+      "guides": ["references/advanced-retopology.md"],
+      "scripts": ["scripts/retopology_advanced.py", "scripts/topology_face_diagnostics.py"],
+      "acceptance": "Duplicate-only operations; preserve source, UVs and shape keys; deformation requires pose tests."
+    },
+    "optimization": {
+      "guides": ["references/model-performance-strategy.md"],
+      "scripts": ["scripts/optimize_mesh.py", "scripts/make_lods.py", "scripts/asset_performance_audit.py"],
+      "acceptance": "Evaluated triangle/material budgets and inspected LOD transitions; no invented engine limits."
+    },
+    "export": {
+      "guides": ["references/game-ready-export.md"],
+      "scripts": ["scripts/game_asset_preflight.py", "scripts/export_asset.py", "scripts/game_delivery_manifest.py"],
+      "acceptance": "Explicit target export and digest; target engine import and appearance remain separate gates."
+    },
+    "validation": {
+      "guides": ["references/quality-checklist.md", "references/component-fit-and-joints.md", "references/visual-inspection.md"],
+      "scripts": ["scripts/inspection_report.py", "scripts/solid_overlap_probe.py", "scripts/compare_scene_baselines.py", "scripts/visual_iteration_audit.py", "scripts/specialist_review_gate.py"],
+      "acceptance": "Audit topology, geometry, UV, fit/collision, proportions, materials and scene preservation independently; absent measurements are NOT VERIFIED."
+    }
+  }
+}
