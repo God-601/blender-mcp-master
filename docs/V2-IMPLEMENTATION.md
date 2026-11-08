@@ -1,7 +1,8 @@
 # V2 implementation plan and scope
 
 The current request authorizes implementation and staged PRs. Stable version
-stays 1.4.0; these changes do not authorize merging or publishing 2.0.
+stays 1.4.0 until the full acceptance campaign passes. The user's follow-up
+authorizes review and merge; publication remains subject to the evidence gates.
 
 Baseline inspected: `2affc0b0cfa2eff5743270b2e61c4b0cd2787641` (main).
 Existing builders, scoped mutation guards, UV/PBR/geometry audits, visual

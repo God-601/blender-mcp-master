@@ -32,6 +32,13 @@ def build_plan(task):
             "acceptance": modules[module]["acceptance"],
             "guides": modules[module]["guides"], "scripts": modules[module]["scripts"],
         })
+    for guide in [routed['primary']] + routed['optional']:
+        module = {'uv-baking.md': 'uv', 'materials.md': 'materials',
+                  'model-performance-strategy.md': 'optimization',
+                  'game-ready-export.md': 'export', 'visual-inspection.md': 'validation'}.get(guide.split('/')[-1])
+        target = next((step for step in steps if step['module'] == module), steps[0])
+        if guide not in target['guides']:
+            target['guides'] = target['guides'] + [guide]
     return {"schema_version": 1, "mode": "delegated" if len(selected) > 3 else "single",
             "destination": routed["destination"], "route": routed, "steps": steps}
 

@@ -125,6 +125,32 @@ class OrchestrationTests(unittest.TestCase):
         self.assertEqual(self.execute()['status'], 'NOT VERIFIED')
         self.assertEqual(self.host.calls, [])
 
+    def test_missing_later_capability_is_preflighted_before_any_write(self):
+        original = self.host.probe
+        def limited(context):
+            result = original(context)
+            result['modules'] = ['modeling']
+            return result
+        self.host.probe = limited
+        result = self.execute()
+        self.assertEqual(result['status'], 'NOT VERIFIED')
+        self.assertEqual(self.host.calls, [])
+
+    def test_disappearing_capability_after_writer_requires_recovery(self):
+        original = self.host.probe
+        count = [0]
+        def limited(context):
+            count[0] += 1
+            result = original(context)
+            if count[0] >= 3:
+                result['modules'] = ['modeling']
+            return result
+        self.host.probe = limited
+        result = self.execute()
+        self.assertEqual(result['status'], 'NOT VERIFIED')
+        self.assertTrue(result['recovery_required'])
+        self.assertEqual(len(self.host.calls), 1)
+
     def test_writer_failure_is_not_retried_or_auto_reverted(self):
         self.host.fail = True
         result = self.execute()

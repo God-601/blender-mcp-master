@@ -37,6 +37,7 @@ REQUIRED = (
     "references/specialist-modules.json",
     "integrations/agents/codex_reviewer.py",
     "integrations/agents/run_specialists.py",
+    "integrations/agents/blender_native_host.py",
     "docs/QUICKSTART.md",
 )
 MAX_ENTRIES = 2500

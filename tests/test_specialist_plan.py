@@ -41,3 +41,10 @@ class SpecialistPlanTests(unittest.TestCase):
         for task in ({'category': 'unknown'}, {'category': 'hard_surface', 'needs': ['unknown']}, None):
             with self.assertRaises(ValueError):
                 build_plan(task)
+
+    def test_task_specific_guides_reach_actual_specialist_steps(self):
+        for category, expected in [('organic', 'references/organic.md'), ('architecture', 'references/modular-modeling.md'), ('character', 'references/character-rig.md')]:
+            plan = build_plan({'category': category, 'needs': ['rigging', 'measure']})
+            self.assertIn(expected, plan['steps'][0]['guides'])
+            self.assertIn('references/topology-retopology.md', plan['steps'][0]['guides'])
+            self.assertIn('references/measured-proportion-recipes.md', plan['steps'][0]['guides'])

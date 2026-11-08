@@ -4,7 +4,9 @@ Status: staged implementation, **not a 2.0 release or complete production
 acceptance**. Review the stages in order: [#69](https://github.com/God-601/blender-mcp-master/pull/69),
 [#70](https://github.com/God-601/blender-mcp-master/pull/70), then the evidence/gates PR.
 Stable manifest and lock remain 1.4.0. No release tags, npm publication or
-merges are part of this delivery.
+merges were part of the initial delivery. The user's follow-up explicitly
+authorizes review and merge; the complete 2.0 production acceptance and
+publication gates remain separate and are not waived by merge authorization.
 
 ## Reproduce engineering checks
 
@@ -72,3 +74,43 @@ File integrity and identity checks cannot authenticate whether an external
 host actually ran Blender or whether an artistic assessment is correct.
 Legacy release workflows already restrict their own historical versions;
 there is deliberately no 2.0 publishing workflow to bypass this hold.
+
+## Review follow-up: actual native production
+
+The merge review found and fixed two further defects: task-specific guides
+were omitted from specialist handoffs, and missing later capabilities could
+be discovered after an earlier write. All required capabilities are now
+preflighted; capability loss after writes requires recovery inspection.
+
+The bundled `integrations/agents/blender_native_host.py` now provides actual
+bpy probes, saved-copy checkpoints/stage files, a per-scene writer lease,
+ownership/dependency checks and selected-property read-stage audits.
+Regression tests use actual Blender save/reopen, competing writers, shared
+mesh/image data, omitted protected objects, read-stage geometry edits,
+protected modifier edits and world-content edits. This is selected-property
+damage detection with explicit limits, not arbitrary Python isolation or
+complete .blend equivalence.
+
+A real live Blender MCP 3.1.2 run completed a controlled six-part chair:
+four legs, 72 triangles, UV coordinates, four saved constant-color PBR PNGs,
+GLB export and front/side/three-quarter captures. The actual independent
+Codex reviewer `01a1bd7a-2444-7153-abf9-263f1c2579cd` returned PASS for the
+explicitly scoped report/image audit. The coordinator returned REVIEW, with
+artistic quality and universal engine fidelity still NOT VERIFIED. Existing
+objects' captured properties and the original Blender filepath were preserved;
+the original active scene was restored.
+
+The exact exported chair GLB was also imported by an actual local Godot
+4.4.1 process: 72 triangle primitives, one UV surface and one material surface.
+This is actual geometry import, not a visual/PBR/physics certification.
+
+The live run used the working review source, not a final release-tagged SHA;
+it is integration evidence, not a replacement for final-commit release gates.
+Earlier attempts are retained: an invalid model evidence path stopped the
+first run; a subsequent scoped PASS containing uncertainty in `errors` was
+downgraded to NOT VERIFIED. The output contract now restricts evidence to
+actual supplied paths, separates scoped notes from errors and persists parsed
+responses and provider usage. The successful reviewer reported 33,281 input
+and 438 output tokens. These are actual single-run usage values, **not** an
+A/B savings claim. The full five-fixture campaign and remaining engine/client
+acceptance are still pending.

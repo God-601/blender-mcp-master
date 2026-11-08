@@ -42,6 +42,43 @@ def serialize_socket_value(value):
         return None
 
 
+def scalar_properties(block):
+    """Writable scalar RNA properties; collection contents need explicit capture."""
+    output = {}
+    for prop in block.bl_rna.properties:
+        if prop.is_readonly or prop.type not in {'BOOLEAN', 'INT', 'FLOAT', 'STRING', 'ENUM'}:
+            continue
+        value = getattr(block, prop.identifier)
+        if isinstance(value, set):
+            value = sorted(value)
+        elif getattr(prop, 'is_array', False):
+            value = list(value)
+        output[prop.identifier] = value
+    return output
+
+
+def node_tree_signature(tree, seen=None):
+    if tree is None:
+        return None
+    seen = set() if seen is None else set(seen)
+    if tree.as_pointer() in seen:
+        return {'recursive_group': tree.name}
+    seen.add(tree.as_pointer())
+    return {
+        'name': tree.name,
+        'nodes': sorted([{'name': node.name, 'type': node.bl_idname,
+            'properties': scalar_properties(node),
+            'image': ({'name': node.image.name, 'filepath': node.image.filepath,
+                       'colorspace': node.image.colorspace_settings.name} if getattr(node, 'image', None) else None),
+            'group': node_tree_signature(getattr(node, 'node_tree', None), seen),
+            'inputs': [{'name': sock.name, 'value': serialize_socket_value(sock.default_value)}
+                       for sock in node.inputs if hasattr(sock, 'default_value')]}
+            for node in tree.nodes], key=lambda node: node['name']),
+        'links': sorted([[link.from_node.name, link.from_socket.name, link.to_node.name, link.to_socket.name]
+                         for link in tree.links]),
+    }
+
+
 def material_signature(mat):
     if mat is None:
         return None
@@ -53,6 +90,7 @@ def material_signature(mat):
         "surface_render_method": str(getattr(mat, "surface_render_method", "NOT_AVAILABLE")),
     }
     if mat.use_nodes and mat.node_tree:
+        properties['node_tree'] = node_tree_signature(mat.node_tree)
         properties["nodes"] = sorted(
             [{"name": node.name, "type": node.bl_idname,
               "inputs": [{"name": sock.name, "value": serialize_socket_value(sock.default_value)}
@@ -106,11 +144,13 @@ def capture_object(obj):
                            for slot in obj.material_slots],
         "materials": [material_signature(slot.material)
                       for slot in obj.material_slots],
-        "modifiers": [{"name": mod.name, "type": mod.type,
+        "modifiers": [{"name": mod.name, "type": mod.type, 'properties': scalar_properties(mod),
                        "show_viewport": bool(mod.show_viewport),
                        "show_render": bool(mod.show_render)}
                       for mod in obj.modifiers],
     }
+    if obj.data is not None and obj.type in ('CAMERA', 'LIGHT'):
+        props['data_properties'] = scalar_properties(obj.data)
     if obj.type == "MESH":
         props["mesh_sha256"] = hash_payload(mesh_signature(obj.data))
     elif obj.type == "LIGHT":

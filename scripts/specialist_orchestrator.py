@@ -132,6 +132,7 @@ def run(task, context, evidence_root, host=None, *, dry_run=True):
         return report
     writers, run_ids = set(), set()
     baseline = None
+    required_modules = {step['module'] for step in plan['steps']}
     for step in plan['steps']:
         dispatched = False
         entry = {'id': step['id'], 'status': 'NOT VERIFIED', 'evidence': []}
@@ -143,10 +144,11 @@ def run(task, context, evidence_root, host=None, *, dry_run=True):
             if identity != baseline or artifact(root, context['checkpoint_ref']) != checkpoint:
                 raise ValueError('Scene/session/protected objects or checkpoint changed; stop and inspect recovery')
             verify_upstream(root, report['steps'])
-            if (step['module'] not in probe.get('modules', []) or
-                    (step['access'] == 'write' and probe.get('write') is not True) or
+            if (not required_modules.issubset(probe.get('modules', [])) or
+                    (any(s['access'] == 'write' for s in plan['steps']) and probe.get('write') is not True) or
                     (plan['mode'] == 'delegated' and probe.get('delegation') is not True)):
-                report['errors'].append('Required host capability unavailable: ' + step['module'])
+                report['errors'].append('Required plan capabilities unavailable')
+                report['recovery_required'] = bool(writers)
                 return report
             request = {'schema_version': 1, 'request_id': str(uuid.uuid4()), 'task': task,
                        'destination': plan['destination'],
@@ -173,9 +175,12 @@ def run(task, context, evidence_root, host=None, *, dry_run=True):
                 raise ValueError('Invalid specialist status')
             refs = result.get('evidence', [])
             errors = result.get('errors', [])
+            notes = result.get('notes', [])
             metrics = result.get('metrics', {})
             if not isinstance(refs, list) or len(refs) > 30 or not isinstance(errors, list) or any(not isinstance(e, str) for e in errors) or not isinstance(metrics, dict):
                 raise ValueError('Invalid evidence/errors/metrics contract')
+            if not isinstance(notes, list) or any(not isinstance(note, str) for note in notes):
+                raise ValueError('Invalid scoped review notes')
             evidence = [artifact(root, name) for name in refs]
             receipt_file = artifact(root, result.get('receipt'))
             receipt = json.loads((root / receipt_file['path']).read_text(encoding='utf-8'))
@@ -196,11 +201,11 @@ def run(task, context, evidence_root, host=None, *, dry_run=True):
             elif plan['mode'] == 'delegated' and result['agent_id'] in writers:
                 state = 'NOT VERIFIED'
                 errors = errors + ['Independent review cannot be performed by a producer']
-            elif step['access'] == 'read' and plan['mode'] == 'delegated':
+            elif step['access'] == 'read' and plan['mode'] == 'delegated' and state == 'PASS':
                 report['independent_review'] = 'RECEIPT VERIFIED'
             entry.update({'status': state, 'agent_id': result['agent_id'], 'run_id': result['run_id'],
                           'request_id': request['request_id'], 'evidence': evidence, 'receipt': receipt_file,
-                          'errors': errors, 'metrics': metrics})
+                          'errors': errors, 'notes': notes, 'metrics': metrics})
             report['steps'].append(entry)
             if state != 'PASS':
                 report['status'] = state

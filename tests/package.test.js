@@ -195,6 +195,7 @@ test("npm pack contains the skill content and excludes tests and dependencies", 
   });
   assert.equal(result.status, 0, result.stderr);
   const files = JSON.parse(result.stdout)[0].files.map((file) => file.path);
+  assert.ok(files.includes('integrations/agents/blender_native_host.py'));
   for (const required of ["SKILL.md", "README.md", "LICENSE", "package.json", "bin/blender-mcp-master.js", "src/server.js", "scripts/validate_asset.py", "scripts/specialist_plan.py", "scripts/specialist_orchestrator.py", "references/specialist-modules.json", "references/modeling-quality-loop.md", "assets/banner.svg", "assets/workflow.svg", "assets/architecture.svg", "integrations/agents/codex_reviewer.py", "integrations/agents/run_specialists.py", "integrations/godot/gltf_import_probe.gd", "integrations/godot/project.godot", "docs/QUICKSTART.md", "docs/ROADMAP-V2.md", "docs/V1.5-V2.0-MILESTONES.md", "CHANGELOG.md", "CONTRIBUTING.md"]) {
     assert.ok(files.includes(required), `missing from package: ${required}`);
   }

@@ -31,7 +31,8 @@ Blender MCP Master helps AI agents **plan, model, inspect, and validate** Blende
 **2.0 engineering candidate:** seven reusable specialist modules, executable
 host-adapter orchestration, independent QA handoffs, hashed evidence receipts
 and default dry-run. A concrete Codex CLI worker handles read-only reviews;
-the native host supplies live Blender probes and production tools.
+the bundled native bpy host supplies checkpoints, scene probes, writer leases
+and dispatch of explicitly inspected production callbacks.
 [Execution contract](references/specialist-orchestration.md) ·
 [Implementation and Agency Agents references](docs/V2-IMPLEMENTATION.md) ·
 [Validation status and release blockers](docs/V2-EVIDENCE.md).

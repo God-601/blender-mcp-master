@@ -86,3 +86,42 @@ with the embedding host. This is not a universal MCP-to-agent bridge.
 
 Unit tests exercise real JSON subprocess transport and timeout plus simulated
 scene failures. Those fixtures are not live Blender or LLM production trials.
+
+## Native Blender host
+
+`integrations/agents/blender_native_host.py` now supplies a concrete bpy host:
+
+```python
+with BlenderNativeHost(evidence_root, asset_id=asset_id,
+        owned_objects=owned_names, protected_objects=protected_names,
+        commit_sha=source_sha, actor_id=actual_client_agent_id,
+        callbacks=inspected_callbacks, reviewer=independent_reviewer) as host:
+    result = run(task, host.context, evidence_root, host, dry_run=False)
+```
+
+Run this inside Blender after inspecting the scene. Callbacks keyed by module
+receive the bounded request and return explicit status/evidence/metrics/errors;
+they are trusted code inspected by the calling agent, not Python from an
+untrusted brief. The host creates real saved-copy checkpoints and stage files,
+leaving the original filepath intact. It requires every existing unowned object
+to be protected and rejects shared mesh data and shader/image dependencies
+between owned and unowned objects. A per-process, per-scene exclusive file lease
+prevents concurrent native hosts. A crashed process can leave a stale lock;
+verify its PID/scene before removing it. Different Blender processes are separate
+scene sessions; this lease does not lock their common source file on disk.
+
+The host checks selected geometry/RNA/material/world properties before and
+after callbacks; read stages also compare owned-object properties. These are
+damage-detection checks with documented limits, not a complete .blend equality
+proof or Python sandbox. Image pixels, arbitrary collection/custom properties,
+some rig/deformation data and external files are not fully fingerprinted.
+Callbacks must bound synchronous work and terminate descendants they launch.
+On failure inspect the retained checkpoint; recovery never silently replaces
+the current scene. Save/reopen is exercised in a separate scratch Blender test.
+
+The Codex worker accepts actual text bytes and up to three explicitly selected
+hashed upstream PNGs, pins input hashes across the review, restricts evidence
+responses to actual input paths, retains parsed response/usage receipts, and
+keeps scoped notes distinct from errors. This allows independent inspection
+without granting shell access. A provider usage receipt is a measurement of that
+run, not proof of savings or a matched A/B benchmark.
