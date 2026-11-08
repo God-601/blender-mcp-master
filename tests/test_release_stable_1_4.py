@@ -19,6 +19,7 @@ class StableReleaseV14Tests(unittest.TestCase):
         for name in (
             "workflow_run:", "github.event.workflow_run.event == 'push'",
             "github.event.workflow_run.conclusion == 'success'",
+            "github.event.workflow_run.head_sha == '0f3fcc08202efe53d8e0b42ee0cb41e663631ec6'",
             'RELEASE_SHA:', 'VERSION: \'1.4.0\'', 'TAG: \'v1.4.0\'',
             "test \"$(git rev-parse HEAD)\" = \"$RELEASE_SHA\"",
             "Release readiness preflight (NO RELEASE)",
