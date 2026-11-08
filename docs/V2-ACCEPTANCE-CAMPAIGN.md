@@ -27,10 +27,13 @@ v1.5–2.0 release tags or give an agent permission to edit someone's scene.
    pivots, PBR maps, LOD counts, collision and material rendering. Record actual
    engine version, asset digest and screenshot/log. Do not confuse Studio
    existence with exact texture or physics certification.
-4. **Specialist QA (v1.7):** when connected client tools explicitly support it,
+4. **Specialist QA (v1.7):** use the executable [host contract](../references/specialist-orchestration.md)
+   and `scripts/specialist_orchestrator.py` (dry-run by default). When connected client tools explicitly support it,
    assign independent geometry, visual, material and export reviews. Verify
    reviewers inspect the actual artifacts; run `specialist_review_gate.py`
-   to catch unsupported self-approval. Otherwise note no real orchestration.
+   to catch unsupported self-approval. Without a configured live host note
+   orchestration NOT VERIFIED. Deterministic subprocess tests and an actual
+   CLI launch are separate from successful live Blender specialist work.
 5. **A/B trials (v1.8) and release readiness (v1.9):** for each case below run
    baseline vs skill **three times each**, same model, prompt, initial scene,
    Blender and MCP versions. Preserve failed trials, real provider usage and

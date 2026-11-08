@@ -68,6 +68,7 @@ class CleanInstallSmokeTests(unittest.TestCase):
             self.assertEqual(report["result"], "PASS")
             self.assertEqual(report["sha256"], checksum)
             self.assertEqual(report["protected_object_helper"], "PASS")
+            self.assertEqual(report["specialist_planning"], "PASS")
             self.assertGreater(report["python_scripts_parsed"], 20)
             self.assertEqual(report["actual_agent_discovery"], "NOT VERIFIED")
             self.assertEqual(report["live_blender_mcp_connection"], "NOT VERIFIED")

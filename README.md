@@ -28,6 +28,17 @@ Blender MCP Master helps AI agents **plan, model, inspect, and validate** Blende
 
 > **Important:** This skill does **not** control Blender by itself. Live editing needs a separate Blender-control MCP server and Blender addon. The optional MCP resource server here is *read-only*.
 
+**2.0 engineering candidate:** seven reusable specialist modules, executable
+host-adapter orchestration, independent QA handoffs, hashed evidence receipts
+and default dry-run. A concrete Codex CLI worker handles read-only reviews;
+the bundled native bpy host supplies checkpoints, scene probes, writer leases
+and dispatch of explicitly inspected production callbacks.
+[Execution contract](references/specialist-orchestration.md) ·
+[Implementation and Agency Agents references](docs/V2-IMPLEMENTATION.md) ·
+[Validation status and release blockers](docs/V2-EVIDENCE.md).
+The stable package remains **1.4.0**; these capabilities do not certify
+artistic quality, all engines, agent compatibility or token savings.
+
 | Define | Build | Inspect | Deliver |
 | :--- | :--- | :--- | :--- |
 | Establish style, purpose, proportions, and constraints. | Block out primary forms, then refine in reversible stages. | Verify actual mesh data and visual references. | Disclose measured results and what remains unverified. |
@@ -155,6 +166,13 @@ Some tests require a compatible `bpy` runtime. Passing tests is not proof of art
 - **Aprofundar:** [documentação oficial](references/official-blender-documentation.md) · [verificação e recuperação](references/evidence-first-workflow.md) · [padrões profissionais](references/professional-modeling-standards.md).
 
 **Versão estável v1.4.0.** Inclui verificações técnicas e exemplos reais de baking e importação no Godot. Um sofá com três LODs e mapas PBR também foi aprovado pelo usuário no Roblox Studio. Os testes não garantem qualidade artística universal, redução real de tokens ou compatibilidade com todas as engines.
+
+**Candidata de engenharia 2.0:** módulos especializados, executor por adaptador
+do cliente, um escritor por vez, QA independente e recibos com SHA256.
+Tarefas simples ficam com o coordenador. O adaptador deve fornecer as
+ferramentas reais do Blender; a ponte de revisão Codex é somente leitura.
+[Contrato e uso](references/specialist-orchestration.md) ·
+[Evidências e pendências](docs/V2-EVIDENCE.md). A 2.0 não foi publicada.
 
 [Notas da v1.4.0](docs/release-notes-1.4.md) · [Roadmap 2.0](docs/ROADMAP-V2.md) · [Guia Roblox Studio](integrations/roblox/README.md)
 

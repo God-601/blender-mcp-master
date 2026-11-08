@@ -47,6 +47,8 @@ For a selected task, if the optional resource MCP exposes `plan_blender_workflow
 
 ## Delivery receipt
 
+Delegation: `references/specialist-orchestration.md`.
+
 ```text
 Asset / Blender + MCP versions / destination:
 Original objects preserved / owned changes:

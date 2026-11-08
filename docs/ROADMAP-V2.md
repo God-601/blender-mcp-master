@@ -1,5 +1,11 @@
 # Blender MCP Master 2.0 — Auditoria, arquitetura e plano de entrega
 
+**Implementação por etapas (2026-11-08):** [plano e decisões](V2-IMPLEMENTATION.md),
+[contrato executável](../references/specialist-orchestration.md) e
+[evidências/limites atuais](V2-EVIDENCE.md). Módulos, planejamento e execução
+por host deixam de ser apenas proposta. A certificação 2.0 continua bloqueada
+pelas campanhas reais abaixo; versão estável e tags permanecem inalteradas.
+
 **Status:** proposta de engenharia, **não** release 2.0. O protocolo executável de testes por etapa está em [V2-ACCEPTANCE-CAMPAIGN.md](V2-ACCEPTANCE-CAMPAIGN.md); o script de comparação antes/depois de silhuetas exige evidência de preservação da cena e revisão independente, sem emitir aprovação artística automática. Não confundir documentação,
 scripts no repositório, CI bpy ou um importador smoke com uma demonstração de
 qualidade artística ou compatibilidade entre agentes.

@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync } from "node:fs";
 import { spawnSync } from "node:child_process";
-import { resolve } from "node:path";
+import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
@@ -123,7 +123,9 @@ test("MCP server reports the package.json version", async () => {
 test("every listed reference and script can be read through the MCP tools", async () => {
   await withClient(async (client) => {
     const listed = await client.callTool({ name: "list_blender_resources", arguments: {} });
-    const { references, scripts } = JSON.parse(listed.content[0].text);
+      const { references, scripts, specialist_modules } = JSON.parse(listed.content[0].text);
+      assert.equal(specialist_modules.schema_version, 1);
+      assert.equal(Object.keys(specialist_modules.modules).length, 7);
     assert.ok(references.length > 0 && scripts.length > 0);
     for (const name of references) {
       const result = await client.callTool({ name: "get_blender_reference", arguments: { name } });
@@ -133,13 +135,15 @@ test("every listed reference and script can be read through the MCP tools", asyn
     for (const name of scripts) {
       const result = await client.callTool({ name: "get_blender_script", arguments: { name } });
       assert.ok(!result.isError, `${name}: ${JSON.stringify(result.content)}`);
-      if (name === "workflow_router.py" || name === "reference_silhouette_compare.py") {
+      if (name === "specialist_plan.py") {
+        assert.match(result.content[0].text, /def build_plan\(/);
+      } else if (name === "workflow_router.py" || name === "reference_silhouette_compare.py") {
         // Pure Python tools use declared input and have no Blender runtime dependency.
         assert.match(result.content[0].text, /def (?:route|compare_masks)\(/);
       } else if (name === "game_delivery_manifest.py" || name === "specialist_review_gate.py" || name === "benchmark_suite_summary.py" || name === "release_gate_report.py" || name === "visual_iteration_gate.py") {
         // Pure evidence validators intentionally do not import bpy.
         assert.match(result.content[0].text, /def (?:evaluate|summarize)\(/);
-      } else if (name === "visual_iteration_audit.py") {
+      } else if (name === "visual_iteration_audit.py" || name === "specialist_orchestrator.py") {
         // Single-command orchestrator is pure Python and never starts Blender.
         assert.match(result.content[0].text, /def run\(/);
       } else if (name === "modeling_scorecard.py") {
@@ -182,14 +186,17 @@ test("file tools reject unknown names, path traversal and files from the other d
 });
 
 test("npm pack contains the skill content and excludes tests and dependencies", () => {
-  const result = spawnSync("npm", ["pack", "--dry-run", "--json", "--ignore-scripts"], {
+  const npmCli = process.env.npm_execpath ?? (process.platform === "win32"
+    ? resolve(dirname(process.execPath), "node_modules/npm/bin/npm-cli.js") : null);
+  const result = spawnSync(npmCli ? process.execPath : "npm", [...(npmCli ? [npmCli] : []), "pack", "--dry-run", "--json", "--ignore-scripts"], {
     cwd: root,
     encoding: "utf8",
     timeout: 60000
   });
   assert.equal(result.status, 0, result.stderr);
   const files = JSON.parse(result.stdout)[0].files.map((file) => file.path);
-  for (const required of ["SKILL.md", "README.md", "LICENSE", "package.json", "bin/blender-mcp-master.js", "src/server.js", "scripts/validate_asset.py", "references/modeling-quality-loop.md", "assets/banner.svg", "assets/workflow.svg", "assets/architecture.svg", "integrations/godot/gltf_import_probe.gd", "integrations/godot/project.godot", "docs/QUICKSTART.md", "docs/ROADMAP-V2.md", "docs/V1.5-V2.0-MILESTONES.md", "CHANGELOG.md", "CONTRIBUTING.md"]) {
+  assert.ok(files.includes('integrations/agents/blender_native_host.py'));
+  for (const required of ["SKILL.md", "README.md", "LICENSE", "package.json", "bin/blender-mcp-master.js", "src/server.js", "scripts/validate_asset.py", "scripts/specialist_plan.py", "scripts/specialist_orchestrator.py", "references/specialist-modules.json", "references/modeling-quality-loop.md", "assets/banner.svg", "assets/workflow.svg", "assets/architecture.svg", "integrations/agents/codex_reviewer.py", "integrations/agents/run_specialists.py", "integrations/godot/gltf_import_probe.gd", "integrations/godot/project.godot", "docs/QUICKSTART.md", "docs/ROADMAP-V2.md", "docs/V1.5-V2.0-MILESTONES.md", "CHANGELOG.md", "CONTRIBUTING.md"]) {
     assert.ok(files.includes(required), `missing from package: ${required}`);
   }
   // README links must resolve in the npm tarball, not just in the Git checkout.

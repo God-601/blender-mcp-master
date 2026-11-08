@@ -1,6 +1,8 @@
 """Release metadata never automatically authorizes publication."""
 import importlib.util
 import unittest
+import hashlib
+import tempfile
 from pathlib import Path
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "release_gate_report.py"
@@ -23,6 +25,31 @@ def sample():
 
 
 class ReleaseGateTests(unittest.TestCase):
+    def test_v2_requires_actual_exact_commit_hashed_artifacts(self):
+        mod = load()
+        data = sample()
+        data['version'] = '2.0.0'
+        self.assertEqual(mod.evaluate(data)['reported_gate_status'], 'HOLD')
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            for gate in mod.V2_GATES:
+                path = root / (gate + '.json')
+                path.write_text('{"test_fixture":true}', encoding='utf-8')
+                data['checks'][gate] = {'status': 'PASS', 'commit_sha': data['commit_sha'],
+                    'evidence': [path.name], 'sha256': {path.name: hashlib.sha256(path.read_bytes()).hexdigest()}}
+            result = mod.evaluate(data, evidence_root=root)
+            self.assertEqual(result['reported_gate_status'], 'REVIEW')
+            self.assertFalse(result['publication_authorized'])
+            (root / 'visual_review.json').write_text('tampered', encoding='utf-8')
+            self.assertIn('visual_review', mod.evaluate(data, evidence_root=root)['blockers'])
+
+    def test_v2_cannot_bypass_live_gates_with_na_or_other_commit(self):
+        data = sample()
+        data['version'] = '2.0.0'
+        for gate in data['checks']:
+            data['checks'][gate] = {'status': 'N/A', 'reason': 'not available'}
+        self.assertEqual(load().evaluate(data)['reported_gate_status'], 'HOLD')
+
     def test_even_all_claimed_pass_is_review_without_publish(self):
         r = load().evaluate(sample())
         self.assertEqual(r["reported_gate_status"], "REVIEW")

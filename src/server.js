@@ -45,6 +45,7 @@ server.tool(
     content: [{
       type: "text",
       text: JSON.stringify({
+        specialist_modules: JSON.parse(readFileSync(resolve(REFERENCE_DIR, "specialist-modules.json"), "utf8")),
         references,
         scripts,
         note: "Scripts use Blender's bpy API and must be run in Blender or through a Blender-control MCP server."
