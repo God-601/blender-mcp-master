@@ -22,7 +22,7 @@ If the user has already specified these, do not ask the same details again. For 
 5. **Inspect visually:** request a fresh view after meaningful changes. Use multiple angles for shape, solid/material shading for surface issues, and wireframe for topology. Frame the asset itself where supported.
 6. **Validate technically:** run the validation script and relevant model-specific checks. Treat the report as evidence, not as a substitute for looking at the mesh.
 7. **Record visual evidence:** when actual reviewed screenshots are available, use `scripts/visual_review_report.py` to track views and local defects. It does NOT inspect pixels or certify art; missing views stay NOT VERIFIED.
-8. **Correct:** fix the highest-impact issue first (silhouette/proportion, then geometry/shading, then materials/UVs, then minor polish). Reinspect after corrections.
+8. **Correct:** fix the highest-impact issue first (silhouette/proportion, then geometry/shading, then materials/UVs, then minor polish). Reinspect after corrections. For before/after transparent PNG silhouettes, use `scripts/reference_silhouette_compare.py` twice and `scripts/visual_iteration_gate.py` with matching views, protected-scene comparison and the independently completed visual review. `REVIEW_REQUIRED` means an improved measurable proxy, **not** visual PASS; a regression or changed protected object remains ISSUE.
 9. **Deliver:** save/export only when requested. Validate the actual output file or report explicitly that the export itself was not tested.
 
 Do not call visual-inspection tools after every trivial property change. Do call them after changes that can affect silhouette, shading, topology, composition, or export correctness.
