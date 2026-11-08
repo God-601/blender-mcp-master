@@ -2,6 +2,7 @@ name: Publish v1.4.0 GitHub Release (explicitly authorized)
 
 # Only runs after successful main-branch Static checks on the final SHA.
 # Enforces npm/preflight/real Godot checks on the same SHA. No npm publish.
+# Published v1.4.0 is immutable; later main changes must not retry its publisher.
 on:
   workflow_run:
     workflows: ["Static checks"]
@@ -21,7 +22,8 @@ jobs:
     if: >-
       github.repository == 'God-601/blender-mcp-master' &&
       github.event.workflow_run.event == 'push' &&
-      github.event.workflow_run.conclusion == 'success'
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_sha == '0f3fcc08202efe53d8e0b42ee0cb41e663631ec6'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
