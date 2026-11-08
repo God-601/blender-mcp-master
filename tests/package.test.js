@@ -143,7 +143,7 @@ test("every listed reference and script can be read through the MCP tools", asyn
       } else if (name === "game_delivery_manifest.py" || name === "specialist_review_gate.py" || name === "benchmark_suite_summary.py" || name === "release_gate_report.py" || name === "visual_iteration_gate.py") {
         // Pure evidence validators intentionally do not import bpy.
         assert.match(result.content[0].text, /def (?:evaluate|summarize)\(/);
-      } else if (name === "visual_iteration_audit.py") {
+      } else if (name === "visual_iteration_audit.py" || name === "specialist_orchestrator.py") {
         // Single-command orchestrator is pure Python and never starts Blender.
         assert.match(result.content[0].text, /def run\(/);
       } else if (name === "modeling_scorecard.py") {

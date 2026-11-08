@@ -21,6 +21,7 @@ def build_plan(task):
         module = {"pbr": "materials", "uv": "uv", "optimization": "optimization", "export": "export"}.get(need)
         if module and module not in selected:
             selected.append(module)
+    selected = [m for m in ('modeling', 'retopology', 'uv', 'materials', 'optimization', 'export') if m in selected]
     selected.append("validation")
     steps = []
     for module in selected:

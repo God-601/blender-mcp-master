@@ -16,3 +16,72 @@ time; reviewers inspect artifacts without editing the shared Blender scene.
 The coordinator owns the final result and recovery decision. A checkpoint
 reference alone does not prove recovery, and a JSON PASS does not establish
 artistic quality, physical collision or target-engine compatibility.
+
+## Execute through a host
+
+```sh
+python scripts/specialist_plan.py brief.json
+python integrations/agents/run_specialists.py brief.json
+python integrations/agents/run_specialists.py brief.json --context context.json --evidence-root ./evidence --adapter-config ./trusted-host.json --execute
+```
+
+The first two commands only plan. `--execute` is intentional host invocation;
+without a host the result is NOT VERIFIED. `trusted-host.json` is operator
+configuration: `{"command":["python","/absolute/path/to/my_host.py"],"timeout_seconds":60}`.
+It must not come from a model, downloaded asset or task brief. No shell is
+used. The standalone CLI exits nonzero on ISSUE/NOT VERIFIED.
+
+Context contains `asset_id`, `scene_id`, exact source `commit_sha`, nonempty
+`owned_objects`, disjoint `protected_objects`, and relative `checkpoint_ref`.
+The checkpoint must already exist under the evidence root. The host creates
+it using a compatible Blender save/copy operation; this runner never treats
+a random file as a validated/recoverable .blend. Before using it, the native
+host must verify save, reopen/recovery and source ownership.
+
+`CommandHost` sends one JSON object to stdin and expects one JSON object on
+stdout. Diagnostics go to stderr. Operations:
+
+- `probe`: payload is context. Return actual `scene_id`, live connection
+  `session_id`, `checkpoint_ref`, `protected` mapping of every protected name
+  to its SHA256 selected-property fingerprint, available `modules`, and
+  boolean `write`/`delegation` capabilities. Use the existing scoped Blender
+  baseline logic; never substitute static metadata for a live probe.
+- `dispatch`: payload includes fresh `request_id`, full original `task`,
+  destination, context, selected module/acceptance/resources, previous
+  hashed results and checkpoint digest. Invoke the actual named specialist
+  with only this stage's resources. Honor read/write scope. In single mode
+  all production stages use the coordinator; independent final QA must use
+  a different actual identity. In delegated mode choose suitable specialists.
+  Return `request_id`, actual `agent_id`/unique `run_id`, `status`
+  (PASS/ISSUE/NOT VERIFIED), relative `evidence` files, `errors`, `metrics`,
+  and a relative JSON `receipt`.
+
+`write_receipt(root, request, result)` creates a new exclusive receipt binding
+request/run/agent/module/asset/scene/source SHA/status to artifact SHA256s.
+The runner rehashes it and its evidence, rejects stale bindings and passes
+compact receipts onward. Host assertions remain a trust boundary: hashes
+prove bytes and correlation, not engineering/visual truth or agent honesty.
+
+Execution is serial, including reads, so this coordinator never has competing
+scene writers. Different coordinator processes are **not** a global lock:
+the native host must hold the session writer lease. It must also restrict
+shared datablocks/global edits and terminate descendant agents on timeout.
+Any stage failure stops dependent work. No mutation retries or automatic
+rollback occur; reconnect/protected/checkpoint drift requires recovery review.
+Rerunning an executed plan is a new run and may repeat writes; inspect the
+previous receipt and scene before explicitly restarting.
+
+## Concrete Codex review worker
+
+`integrations/agents/codex_reviewer.py` provides
+`CodexReviewer(evidence_root).dispatch(request)` for a native host's **read-only**
+steps. It actually launches Codex CLI, uses structured output, disables user
+configuration loading, selects its read-only sandbox, obtains agent/run
+identity from CLI events and writes the bound receipt in the coordinator.
+Write requests are rejected before launch. Installed/authenticated Codex CLI
+and its normal provider access are required; no model or token savings are
+assumed. Tool configuration, production writers and live scene probes stay
+with the embedding host. This is not a universal MCP-to-agent bridge.
+
+Unit tests exercise real JSON subprocess transport and timeout plus simulated
+scene failures. Those fixtures are not live Blender or LLM production trials.

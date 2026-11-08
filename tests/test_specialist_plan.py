@@ -29,7 +29,13 @@ class SpecialistPlanTests(unittest.TestCase):
 
     def test_material_edit_does_not_rebuild_geometry(self):
         plan = build_plan({'category': 'materials', 'needs': ['pbr', 'uv']})
-        self.assertEqual([s['module'] for s in plan['steps']], ['materials', 'uv', 'validation'])
+        self.assertEqual([s['module'] for s in plan['steps']], ['uv', 'materials', 'validation'])
+
+    def test_export_is_last_regardless_of_requirement_order(self):
+        first = build_plan({'category': 'game_asset', 'needs': ['export', 'pbr', 'uv', 'optimization']})
+        second = build_plan({'category': 'game_asset', 'needs': ['optimization', 'uv', 'pbr', 'export']})
+        self.assertEqual(first['steps'], second['steps'])
+        self.assertEqual(first['steps'][-2]['module'], 'export')
 
     def test_invalid_task_is_rejected(self):
         for task in ({'category': 'unknown'}, {'category': 'hard_surface', 'needs': ['unknown']}, None):

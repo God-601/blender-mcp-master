@@ -13,7 +13,7 @@ iteration checks, engine probes and read-only MCP tools remain supported.
   and guides, deterministic on-demand planner, read-only MCP discovery.
   Test actual resource resolution, simple single-agent routing, complex module
   selection and invalid briefs. No duplicated specialist manuals.
-- [ ] Stage 2: host-adapter execution, sequential scene writer, independent QA,
+- [x] Stage 2: host-adapter execution, sequential scene writer, independent QA,
   explicit capabilities, scene/checkpoint identity, local evidence hashes,
   default dry-run, fail-stop and structured handoffs. Test real subprocess
   dispatch with deterministic workers, malformed/missing evidence, timeout,

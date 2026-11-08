@@ -18,3 +18,4 @@ Additional v1.4 Python utilities: `scripts/workflow_router.py` · `scripts/refer
 - `specialist-orchestration.md`: host contracts and independent QA.
 - `specialist-modules.json`: seven modules, existing resources and acceptance.
 - `specialist_plan.py`: pure module planning with no scene access.
+- `specialist_orchestrator.py`: trusted host dispatch, dry-run and fail-stop receipts.
