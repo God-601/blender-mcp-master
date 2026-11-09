@@ -1,5 +1,10 @@
 # V2 engineering evidence and release hold
 
+The follow-up [recorded campaign](V2-CAMPAIGN-2026-11-08.md) now includes 30
+actual constrained agent generations, five canonical fixtures, Godot imports,
+real crash/restart and addon reconnect tests, and Roblox material/collision
+checks. Its scope and unresolved model/quality limits remain explicit.
+
 Status: staged implementation, **not a 2.0 release or complete production
 acceptance**. Review the stages in order: [#69](https://github.com/God-601/blender-mcp-master/pull/69),
 [#70](https://github.com/God-601/blender-mcp-master/pull/70), then the evidence/gates PR.

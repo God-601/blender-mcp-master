@@ -5,6 +5,8 @@ Callbacks are trusted, previously inspected code supplied by the agent client;
 this is accidental-damage detection, not a Python security sandbox.
 """
 import copy
+import errno
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -19,6 +21,23 @@ from scene_baseline_snapshot import capture_object, node_tree_signature
 from specialist_orchestrator import artifact, validate_context, write_receipt
 
 SESSION_ID = str(uuid.uuid4())
+
+
+def acquire_writer(path):
+    lease = os.fdopen(os.open(str(path), os.O_RDWR | os.O_CREAT, 0o600), 'r+b')
+    try:
+        if os.name == 'nt':
+            import msvcrt
+            msvcrt.locking(lease.fileno(), msvcrt.LK_NBLCK, 1)
+        else:
+            import fcntl
+            fcntl.flock(lease.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError as error:
+        lease.close()
+        if error.errno in (errno.EACCES, errno.EAGAIN, errno.EDEADLK):
+            raise FileExistsError(errno.EEXIST, 'Scene already has a writer', str(path)) from error
+        raise
+    return lease
 
 
 def material_dependencies(material):
@@ -53,7 +72,11 @@ class BlenderNativeHost:
                         'owned_objects': list(owned_objects), 'protected_objects': list(protected_objects),
                         'commit_sha': commit_sha, 'checkpoint_ref': 'checkpoint-' + str(uuid.uuid4()) + '.blend'}
         validate_context(self.context)
-        self.lease_path = Path(tempfile.gettempdir()) / ('blender-mcp-writer-%s-%s.lock' % (os.getpid(), self.scene_pointer))
+        source = os.path.normcase(str(Path(bpy.data.filepath).resolve())) if bpy.data.filepath else None
+        self.source_path = source
+        scope = 'source:' + source if source else 'unsaved:%s:%s:%s' % (self.root, SESSION_ID, self.scene_pointer)
+        key = hashlib.sha256(scope.encode('utf-8')).hexdigest()
+        self.lease_path = Path(tempfile.gettempdir()) / ('blender-mcp-writer-' + key + '.lock')
         self.lease = None
         self.baseline = None
         self.checkpoint = None
@@ -96,11 +119,15 @@ class BlenderNativeHost:
     def __enter__(self):
         if self.lease is not None:
             raise ValueError('Host already owns a writer lease')
+        source = os.path.normcase(str(Path(bpy.data.filepath).resolve())) if bpy.data.filepath else None
+        if bpy.context.scene.as_pointer() != self.scene_pointer or source != self.source_path:
+            raise ValueError('Scene or source changed before acquiring writer lease')
         self.root.mkdir(parents=True, exist_ok=True)
         self._scope()
-        self.lease = self.lease_path.open('x', encoding='utf-8')
+        self.lease = acquire_writer(self.lease_path)
         try:
-            self.lease.write(json.dumps({'pid': os.getpid(), 'scene': self.scene_pointer, 'session_id': SESSION_ID}))
+            self.lease.truncate(0)
+            self.lease.write(json.dumps({'pid': os.getpid(), 'scene': self.scene_pointer, 'session_id': SESSION_ID}).encode('utf-8'))
             self.lease.flush()
             self.baseline = self._fingerprints(self.context['protected_objects'])
             self.global_state = self._globals()
@@ -119,7 +146,7 @@ class BlenderNativeHost:
         if self.lease is not None:
             self.lease.close()
             self.lease = None
-            self.lease_path.unlink()
+            # Keep the inode: unlinking would let another opener bypass a current lock.
 
     def probe(self, context):
         if self.lease is None or context != self.context:

@@ -105,10 +105,14 @@ they are trusted code inspected by the calling agent, not Python from an
 untrusted brief. The host creates real saved-copy checkpoints and stage files,
 leaving the original filepath intact. It requires every existing unowned object
 to be protected and rejects shared mesh data and shader/image dependencies
-between owned and unowned objects. A per-process, per-scene exclusive file lease
-prevents concurrent native hosts. A crashed process can leave a stale lock;
-verify its PID/scene before removing it. Different Blender processes are separate
-scene sessions; this lease does not lock their common source file on disk.
+between owned and unowned objects. A normalized saved-source path selects a
+shared advisory OS lock across cooperating Blender processes; unsaved scenes
+use the evidence-root/session/scene scope. Windows uses `msvcrt.locking` and
+POSIX uses `flock`. Kernel locks release on close or process death. The small
+lock file intentionally remains: deleting its inode could allow competing
+writers to bypass an active lock. These locks do not stop external tools or
+coordinate different hard-link aliases. A host rejects scene/source changes
+between construction and acquiring the lease.
 
 The host checks selected geometry/RNA/material/world properties before and
 after callbacks; read stages also compare owned-object properties. These are

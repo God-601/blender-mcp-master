@@ -1,7 +1,15 @@
 # Roblox Studio real-world import inspection
 
-This is an operator-driven test, **not** a claim that ChatGPT has
-remote control of an open Roblox Studio window.
+An actual Studio MCP campaign is recorded in
+[V2-CAMPAIGN-2026-11-08.md](../../docs/V2-CAMPAIGN-2026-11-08.md).
+It found scalar shader-color loss on the tested Open Cloud path and a
+constant-texture encoding issue. The isolated `constant_pbr_fixture.py`
+example preserves the source and creates correctly encoded color/data maps
+for that controlled case; it does not bake arbitrary node graphs.
+
+The audit script is read-only. Run it from the Command Bar or a connected
+Studio MCP; it does not import or upload files by itself. The manual recipe
+below is a fallback when a compatible connector is unavailable.
 
 1. Export a real Blender model (ideally GLB) with fixed units, UVs,
    mesh/object names and triangle counts. Save file SHA256 separately.

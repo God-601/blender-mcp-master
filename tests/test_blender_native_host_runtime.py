@@ -37,7 +37,7 @@ class NativeHostTests(unittest.TestCase):
         (self.root / name).write_text(json.dumps({'module': request['step']['module'], 'actual_blender': bpy.app.version_string}), encoding='utf-8')
         return {'status': status, 'evidence': [name], 'errors': [], 'metrics': {}}
 
-    def host(self, callbacks=None):
+    def host(self, callbacks=None, root=None):
         def create(request):
             mesh = bpy.data.meshes.new('OwnedMesh')
             mesh.from_pydata([(0,0,0), (1,0,0), (0,1,0)], [], [(0,1,2)])
@@ -45,7 +45,7 @@ class NativeHostTests(unittest.TestCase):
             bpy.context.scene.collection.objects.link(obj)
             return self.evidence(request)
         callbacks = callbacks or {'modeling': create, 'validation': self.evidence}
-        return self.mod.BlenderNativeHost(self.root, asset_id='fixture', owned_objects=['Owned'],
+        return self.mod.BlenderNativeHost(root or self.root, asset_id='fixture', owned_objects=['Owned'],
             protected_objects=['Keep'], commit_sha='a' * 40, actor_id='actual-test-coordinator', callbacks=callbacks)
 
     def test_actual_checkpoint_production_stage_and_reopen(self):
@@ -69,7 +69,24 @@ class NativeHostTests(unittest.TestCase):
             with self.assertRaises(FileExistsError):
                 with self.host():
                     self.fail('a second writer acquired the same scene')
-        self.assertFalse(self.host().lease_path.exists())
+        with self.host() as reacquired:
+            self.assertIsNotNone(reacquired.lease)
+
+    def test_saved_source_lock_spans_evidence_directories(self):
+        bpy.ops.wm.save_as_mainfile(filepath=str(self.root / 'source.blend'))
+        first = self.host()
+        second = self.host(root=self.root / 'other')
+        self.assertEqual(first.lease_path, second.lease_path)
+        with first:
+            with self.assertRaises(FileExistsError):
+                second.__enter__()
+        with second:
+            self.assertIsNotNone(second.lease)
+
+    def test_unrelated_unsaved_scopes_do_not_contend(self):
+        with self.host() as first:
+            with self.host(root=self.root / 'other') as second:
+                self.assertNotEqual(first.lease_path, second.lease_path)
 
     def test_shared_owned_data_is_rejected_before_checkpoint(self):
         obj = bpy.data.objects.new('Owned', self.keep.data)
@@ -78,6 +95,19 @@ class NativeHostTests(unittest.TestCase):
             with self.host():
                 self.fail('shared data accepted')
         self.assertEqual(list(self.root.glob('*.blend')), [])
+
+    def test_changed_scene_rejects_stale_host_before_checkpoint(self):
+        host = self.host()
+        original = bpy.context.window.scene
+        other = bpy.data.scenes.new('Other')
+        try:
+            bpy.context.window.scene = other
+            with self.assertRaisesRegex(ValueError, 'Scene or source changed'):
+                with host:
+                    self.fail('stale host accepted')
+            self.assertIsNone(host.lease)
+        finally:
+            bpy.context.window.scene = original
 
     def test_all_unowned_objects_must_be_protected(self):
         extra = bpy.data.objects.new('Unlisted', None)
