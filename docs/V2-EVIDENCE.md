@@ -117,5 +117,6 @@ downgraded to NOT VERIFIED. The output contract now restricts evidence to
 actual supplied paths, separates scoped notes from errors and persists parsed
 responses and provider usage. The successful reviewer reported 33,281 input
 and 438 output tokens. These are actual single-run usage values, **not** an
-A/B savings claim. The full five-fixture campaign and remaining engine/client
-acceptance are still pending.
+A/B savings claim. The subsequent [five-fixture campaign](V2-CAMPAIGN-2026-11-08.md)
+supplies bounded generation, recovery and engine evidence, including retained
+failures. Full freeform-agent and release acceptance gates remain open.
