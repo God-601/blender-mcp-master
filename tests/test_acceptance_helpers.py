@@ -16,6 +16,17 @@ def load(path):
 
 
 class AcceptanceHelperTests(unittest.TestCase):
+    def test_requested_model_is_pinned_and_generation_reuse_checks_it(self):
+        module = load(ROOT / 'integrations/agents/production_benchmark.py')
+        command = module.provider_command('codex', Path('trial'), 'gpt-6.1-sol', 'medium')
+        self.assertEqual(command[command.index('--model') + 1], 'gpt-6.1-sol')
+        self.assertIn('model_reasoning_effort="medium"', command)
+        previous = {'actual_prompt_sha256': 'same', 'model_requested': 'gpt-6.1-sol', 'effort_requested': 'medium', 'thread_id': 'actual', 'provider_usage': {'input_tokens': 3}}
+        self.assertTrue(module.generation_matches(previous, dict(previous)))
+        for key, value in [('model_requested', 'other'), ('effort_requested', 'high'), ('actual_prompt_sha256', 'changed')]:
+            changed = dict(previous, **{key: value})
+            self.assertFalse(module.generation_matches(previous, changed))
+
     def test_bounded_generation_contract_rejects_invalid_inputs(self):
         module = load(ROOT / 'integrations/agents/production_benchmark.py')
         module.self_check()

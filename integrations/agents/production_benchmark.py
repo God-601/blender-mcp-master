@@ -121,6 +121,22 @@ def self_check():
     print("SELF_CHECK_PASS", flush=True)
 
 
+def provider_command(cli, out, model=None, effort=None):
+    command = [cli, 'exec', '--ignore-user-config', '--ephemeral', '--json', '--sandbox', 'read-only', '--skip-git-repo-check', '--cd', str(out), '--output-schema', str(out / 'schema.json'), '--output-last-message', str(out / 'generation.json')]
+    if model:
+        command.extend(['--model', model])
+    if effort:
+        command.extend(['--config', 'model_reasoning_effort=' + json.dumps(effort)])
+    return command + ['-']
+
+
+def generation_matches(previous, record):
+    return bool(previous and record.get('actual_prompt_sha256') and
+                all(previous.get(key) == record.get(key) for key in
+                    ('actual_prompt_sha256', 'model_requested', 'effort_requested')) and
+                previous.get('thread_id') and previous.get('provider_usage'))
+
+
 def run_campaign(args):
     self_check()
     repo = Path(__file__).resolve().parents[2]
@@ -133,6 +149,7 @@ def run_campaign(args):
         raise RuntimeError("Codex CLI or Blender unavailable")
     guides = {c: ["SKILL.md", CASES[c]["guide"]] for c in CASES}
     manifest = {"campaign_version": 1, "scope": "Constrained declarative parameter generation using real Codex CLI; trusted fixed Blender adapter, not freeform live MCP or full skill capability certification.", "cli": cli, "model_override": None, "model_identity": None, "model_identity_status": "NOT VERIFIED unless emitted by provider events", "cases": CASES, "guide_sources": {}, "adapter_sha256": digest(Path(__file__).read_bytes()), "limitations": ["No reference images or blind artistic scoring.", "Adapter guarantees components, UV creation, and export; these are not evidence of agent tool execution.", "Simple node materials only, no image-based PBR maps, rig, or deformation certification.", "Retopology is source-backed tube ring bridging/relaxation/projection, not arbitrary character retopology."]}
+    manifest.update(model_requested=args.model, effort_requested=args.effort)
     for rel in sorted({p for paths in guides.values() for p in paths}):
         src = repo / rel
         text = src.read_text(encoding="utf-8")
@@ -167,14 +184,14 @@ def run_campaign(args):
             for rel in guides[case]:
                 prompt += "\n--- " + rel + " ---\n" + (repo / rel).read_text(encoding="utf-8")
         (out / "prompt.txt").write_text(prompt, encoding="utf-8")
-        command = [cli, "exec", "--ignore-user-config", "--ephemeral", "--json", "--sandbox", "read-only", "--skip-git-repo-check", "--cd", str(out), "--output-schema", str(out / "schema.json"), "--output-last-message", str(out / "generation.json"), "-"]
+        command = provider_command(cli, out, args.model, args.effort)
         record = {"case_id": case, "arm": arm, "trial": number, "common_task_sha256": digest(task.encode()), "actual_prompt_sha256": digest(prompt.encode()), "scene_fixture_sha256": digest((out / "fixture.json").read_bytes()), "schema_sha256": digest((out / "schema.json").read_bytes()), "command": command, "thread_id": None, "provider_usage": None, "model_identity": None, "status": "started", "guide_sources": guides[case] if arm == "with_skill" else [], "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
         record['adapter_sha256'] = adapter_sha
+        record.update(model_requested=args.model, effort_requested=args.effort)
         write_json(receipt, record)
         start = time.monotonic()
         try:
-            reuse = (previous and previous.get('actual_prompt_sha256') == record['actual_prompt_sha256'] and
-                     previous.get('thread_id') and previous.get('provider_usage') and (out / 'generation.json').is_file())
+            reuse = generation_matches(previous, record) and (out / 'generation.json').is_file()
             if reuse:
                 validate(case, json.loads((out / 'generation.json').read_text(encoding='utf-8')))
                 completed = subprocess.CompletedProcess(command, 0)
@@ -518,6 +535,8 @@ if __name__ == "__main__":
         parser.add_argument("--blender",default="C:/Program Files/Blender Foundation/Blender 3.1/blender.exe")
         parser.add_argument("--workers",type=int,default=2)
         parser.add_argument("--timeout",type=int,default=600)
+        parser.add_argument("--model", help="Explicit public model ID for both arms; provider backend identity is recorded separately")
+        parser.add_argument("--effort", choices=['low', 'medium', 'high', 'xhigh', 'max', 'ultra'])
         parser.add_argument("--self-check",action="store_true")
         args=parser.parse_args()
         self_check() if args.self_check else run_campaign(args)

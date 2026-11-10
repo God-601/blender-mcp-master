@@ -127,3 +127,37 @@ user ownership, final file checksums, and explicit before/after visual views.
 
 Reference: [full roadmap](ROADMAP-V2.md) and
 [release ladder](V1.5-V2.0-MILESTONES.md).
+
+## Agent-authored production stages (opt-in)
+
+`integrations/agents/freeform_acceptance.py` records an actual Codex generation,
+including its requested model, thread identity, usage, prompt and code hashes.
+The operator must inspect the resulting `script.py` before approving its exact
+SHA256. Generated Python is trusted code after review, **not a Python sandbox**.
+Execution refuses live GUI Blender and runs in a disposable background process.
+
+```bash
+python integrations/agents/freeform_acceptance.py generate \
+  --prompt /absolute/brief.txt --model YOUR_CONFIGURED_MODEL \
+  --output /absolute/new-generation
+# Inspect script.py; compute its SHA256, then execute exactly those bytes.
+python integrations/agents/freeform_acceptance.py execute \
+  --generation /absolute/new-generation --approved-sha REVIEWED_SHA256 \
+  --asset-id chair --module modeling --blender /absolute/blender \
+  --output /absolute/new-stage
+```
+
+Later specialists can receive `--source /absolute/prior-stage.blend` on both
+commands. Declare all objects the stage may edit, using unique `V2_` names.
+Existing objects outside that declaration are protected by the native host.
+Stages retain checkpoints, measured geometry, dispatch receipts and source
+hashes. A successful dispatch is scoped execution evidence, not independent
+visual approval. Preserve failed stage directories and generate corrections
+in new directories; never overwrite their provenance.
+
+For matched bounded benchmarks, pass the same `--model` and `--effort` to
+`production_benchmark.py`. Cached generations are reusable only when those
+requests and the actual prompt match. The requested public model ID is recorded
+separately from the provider-reported backend identity, which may be unavailable.
+This benchmark still uses a fixed geometry adapter and cannot substitute for
+agent-authored production, independent image review or destination checks.
