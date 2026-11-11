@@ -12,6 +12,7 @@ import math
 import os
 from pathlib import Path
 import shutil
+from statistics import median
 import subprocess
 import sys
 import time
@@ -122,7 +123,7 @@ def self_check():
 
 
 def provider_command(cli, out, model=None, effort=None):
-    command = [cli, 'exec', '--ignore-user-config', '--ephemeral', '--json', '--sandbox', 'read-only', '--skip-git-repo-check', '--cd', str(out), '--output-schema', str(out / 'schema.json'), '--output-last-message', str(out / 'generation.json')]
+    command = [cli, '-a', 'never', 'exec', '--ignore-user-config', '--ephemeral', '--json', '--sandbox', 'read-only', '--skip-git-repo-check', '--cd', str(out), '--output-schema', str(out / 'schema.json'), '--output-last-message', str(out / 'generation.json')]
     if model:
         command.extend(['--model', model])
     if effort:
@@ -135,6 +136,33 @@ def generation_matches(previous, record):
                 all(previous.get(key) == record.get(key) for key in
                     ('actual_prompt_sha256', 'model_requested', 'effort_requested')) and
                 previous.get('thread_id') and previous.get('provider_usage'))
+
+
+def cached_generation_matches(directory, previous, record):
+    if not generation_matches(previous, record):
+        return False
+    for name, key in [('generation.json', 'generation_sha256'), ('provider.jsonl', 'provider_log_sha256')]:
+        path = directory / name
+        if not path.is_file() or digest(path.read_bytes()) != previous.get(key):
+            return False
+    return True
+
+
+def arm_observations(records):
+    usage = [r['provider_usage'] for r in records if isinstance(r.get('provider_usage'), dict)]
+    completed = [r for r in records if r['status'] == 'completed']
+    passed = [r for r in completed if r['geometry'].get('technical_status') == 'PASS']
+    timings = [r['cli_seconds'] + r['blender_seconds'] for r in completed
+               if r.get('cli_seconds') is not None and r.get('blender_seconds') is not None]
+    return {'attempts': len(records), 'completed': len(completed),
+            'failures': sum(r['status'] == 'failed' for r in records),
+            'technical_passes': len(passed),
+            'geometry_issues': sum(r['geometry'].get('technical_status') == 'ISSUE' for r in completed),
+            'usage_receipts': len(usage), 'input_tokens': sum(u['input_tokens'] for u in usage),
+            'cached_input_tokens': sum(u.get('cached_input_tokens', 0) for u in usage),
+            'output_tokens': sum(u['output_tokens'] for u in usage),
+            'timed_completed_trials': len(timings),
+            'median_provider_plus_blender_seconds': round(median(timings), 3) if timings else None}
 
 
 def run_campaign(args):
@@ -161,14 +189,17 @@ def run_campaign(args):
 
     def trial(case, arm, number):
         out = root / (case + "-" + arm + "-" + str(number))
-        out.mkdir(exist_ok=True)
         receipt = out / "receipt.json"
-        previous = None
+        previous, archive = None, None
         adapter_sha = digest(Path(__file__).read_bytes())
-        if receipt.exists():
-            previous = json.loads(receipt.read_text(encoding="utf-8"))
+        if out.exists():
             archive = root / 'attempts' / (out.name + '-' + str(uuid.uuid4()))
-            shutil.copytree(out, archive)
+            archive.parent.mkdir(exist_ok=True)
+            out.rename(archive)
+            archived_receipt = archive / receipt.name
+            if archived_receipt.is_file():
+                previous = json.loads(archived_receipt.read_text(encoding="utf-8"))
+        out.mkdir()
         scene = fixture(case)
         write_json(out / "fixture.json", scene)
         shape = schema(case)
@@ -191,10 +222,14 @@ def run_campaign(args):
         write_json(receipt, record)
         start = time.monotonic()
         try:
-            reuse = generation_matches(previous, record) and (out / 'generation.json').is_file()
+            reuse = archive is not None and cached_generation_matches(archive, previous, record)
             if reuse:
-                validate(case, json.loads((out / 'generation.json').read_text(encoding='utf-8')))
+                for name in ('generation.json', 'provider.jsonl', 'provider.stderr.txt'):
+                    if (archive / name).is_file():
+                        shutil.copyfile(archive / name, out / name)
                 completed = subprocess.CompletedProcess(command, 0)
+                if not cached_generation_matches(out, previous, record):
+                    raise ValueError('Archived provider output changed during reuse')
                 record['provider_generation_reused'] = True
                 record['prior_attempt_path'] = str(archive.relative_to(root))
             else:
@@ -216,22 +251,29 @@ def run_campaign(args):
                     record["model_identity"] = event["model"]
             record["provider_event_count"] = len(events)
             if reuse:
-                origins = [json.loads(p.read_text(encoding='utf-8')) for p in (root / 'attempts').glob('*/receipt.json')]
-                origin = next((r for r in origins if r.get('thread_id') == record['thread_id'] and not r.get('provider_generation_reused')), {})
-                record['cli_seconds'] = origin.get('cli_seconds')
+                record['cli_seconds'] = previous.get('cli_seconds')
             else:
                 record["cli_seconds"] = round(time.monotonic() - start, 3)
             if completed.returncode != 0:
                 raise RuntimeError("provider exit " + str(completed.returncode))
-            if not record["thread_id"] or not record["provider_usage"]:
-                raise RuntimeError("missing actual thread/turn.completed usage receipt")
-            generation = json.loads((out / "generation.json").read_text(encoding="utf-8"))
+            usage = record['provider_usage']
+            if (not record['thread_id'] or not isinstance(usage, dict) or
+                    any(type(usage.get(k)) is not int or usage[k] < 0 for k in ('input_tokens', 'output_tokens')) or
+                    any(type(usage[k]) is not int or usage[k] < 0 for k in ('cached_input_tokens',) if k in usage)):
+                record['provider_usage'] = None
+                raise RuntimeError('Missing or invalid actual thread/turn.completed usage receipt')
+            generation_path = out / 'generation.json'
+            generation = json.loads(generation_path.read_text(encoding='utf-8'))
             validate(case, generation)
+            record['generation_sha256'] = digest(generation_path.read_bytes())
+            record['provider_log_sha256'] = digest((out / 'provider.jsonl').read_bytes())
             write_json(out / "build_input.json", {"case": case, "generation": generation, "fixture": scene, "budget": CASES[case]["budget"]})
             blender_command = [args.blender, "--background", "--factory-startup", "--threads", "2", "--python-exit-code", "1", "--python", str(Path(__file__).resolve()), "--", "--build", str(out)]
             record["blender_command"] = blender_command
+            blender_started = time.monotonic()
             with (out / "blender.log").open("w", encoding="utf-8") as log:
                 built = subprocess.run(blender_command, stdout=log, stderr=subprocess.STDOUT, timeout=240)
+            record['blender_seconds'] = round(time.monotonic() - blender_started, 3)
             record["blender_exit_code"] = built.returncode
             if built.returncode != 0 or not (out / "geometry.json").is_file():
                 raise RuntimeError("Blender build failed: " + str(built.returncode))
@@ -253,11 +295,8 @@ def run_campaign(args):
         for future in concurrent.futures.as_completed(futures):
             records.append(future.result())
             write_json(root / "running_summary.json", records)
-    totals = {}
-    for arm in ("baseline", "with_skill"):
-        chosen = [r for r in records if r["arm"] == arm]
-        usage = [r["provider_usage"] for r in chosen if isinstance(r.get("provider_usage"), dict)]
-        totals[arm] = {"attempts": len(chosen), "completed": sum(r["status"] == "completed" for r in chosen), "failures": sum(r["status"] == "failed" for r in chosen), "usage_receipts": len(usage), "input_tokens": sum(u.get("input_tokens", 0) for u in usage), "cached_input_tokens": sum(u.get("cached_input_tokens", 0) for u in usage), "output_tokens": sum(u.get("output_tokens", 0) for u in usage), "geometry_issues": sum(bool(r.get("geometry", {}).get("issues")) for r in chosen)}
+    totals = {arm: arm_observations([r for r in records if r['arm'] == arm])
+              for arm in ('baseline', 'with_skill')}
     summary = {"scope": manifest["scope"], "arms": totals, "records": sorted(records, key=lambda r: (r["case_id"], r["trial"], r["arm"])), "limitations": manifest["limitations"], "model_identity": "NOT VERIFIED" if any(not r.get("model_identity") for r in records) else sorted({r["model_identity"] for r in records}), "artistic_quality": "NOT VERIFIED", "mcp_agent_control": "NOT VERIFIED — trusted local Blender adapter used", "engine_import": "NOT VERIFIED by this campaign"}
     if all(totals[a]["usage_receipts"] == 15 for a in totals):
         b = totals["baseline"]["input_tokens"] + totals["baseline"]["output_tokens"]
@@ -265,7 +304,8 @@ def run_campaign(args):
         summary["observed_token_delta"] = {"baseline": b, "with_skill": c, "delta": c-b, "percent": round(100*(c-b)/b, 3) if b else None, "caveat": "Observed provider receipts; model identity and full MCP equivalence remain unverified. No billing cost inference."}
     archived = [json.loads(p.read_text(encoding='utf-8')) for p in (root / 'attempts').glob('*/receipt.json')]
     unique_usage = {r['thread_id']: r['provider_usage'] for r in archived + records if r.get('thread_id') and r.get('provider_usage')}
-    summary.update({'counts_scope': 'latest attempt per logical trial', 'archived_attempts': len(archived),
+    summary.update({'runtime_metric': 'Median of the original provider duration plus the latest Blender build duration for completed trials; failures are counted separately.',
+        'counts_scope': 'latest attempt per logical trial', 'archived_attempts': len(archived),
         'archived_failed_attempts': sum(r.get('status') == 'failed' for r in archived),
         'distinct_provider_usage_receipts': len(unique_usage),
         'distinct_provider_input_tokens': sum(u.get('input_tokens', 0) for u in unique_usage.values()),

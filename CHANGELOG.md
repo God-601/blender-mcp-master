@@ -1,5 +1,18 @@
 # Changelog
 
+## Unreleased — 2.0.0 candidate
+
+- Consolidates modeling, retopology, optimization, UV, materials, export and
+  validation specialists with scoped handoffs, stage checkpoints and a native
+  Blender host. The installed skill retains its existing name and entrypoint.
+- Includes the 1.5–1.9 engineering milestones for PBR/UV, destination delivery,
+  independent reviews, matched A/B metrics and release evidence.
+- Adds a reviewed agent-authored stage runner and a Godot probe for imported
+  bone motion. Stage approval binds ownership and exact input bytes. Benchmark
+  retries preserve prior artifacts and verify any reused generation and log.
+- See [candidate notes and migration](docs/release-notes-2.0.md) for acceptance
+  scope and instructions for reviewing a preflight archive.
+
 ## 1.4.0 — verified quality gates and safe asset delivery (2026-11-06)
 
 - Introduced task-oriented MCP workflow guidance, conservative geometry/solid-containment diagnostics, and PNG silhouette reference measurements.

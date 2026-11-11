@@ -35,3 +35,17 @@ import tests; never substitute this Godot result for another engine.
 
 Reference:
 [Godot 4 GLTFDocument](https://docs.godotengine.org/en/4.5/classes/class_gltfdocument.html).
+
+## Animated fixture
+
+Export a weighted two-bone sample in disposable Blender and measure imported
+pose motion in Godot:
+
+```sh
+blender --background --factory-startup --python-exit-code 1 \
+  --python integrations/godot/blender_animation_fixture.py -- /absolute/path/animated.glb
+godot --headless --path integrations/godot --script res://animation_probe.gd -- /absolute/path/animated.glb
+```
+
+The probe reports imported skeleton and clip counts and sampled bone motion.
+Rendered skin deformation and physics require their own destination tests.
