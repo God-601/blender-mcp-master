@@ -42,13 +42,14 @@ func _initialize() -> void:
             for i in range(instance.mesh.get_surface_count()):
                 surfaces += 1
                 var arrays := instance.mesh.surface_get_arrays(i)
-                if arrays[Mesh.ARRAY_TEX_UV].size() > 0:
+                var uvs: Variant = arrays[Mesh.ARRAY_TEX_UV]
+                if uvs is PackedVector2Array and not uvs.is_empty():
                     uv_surfaces += 1
                 if instance.get_active_material(i) != null:
                     material_surfaces += 1
                 if instance.mesh.surface_get_primitive_type(i) == Mesh.PRIMITIVE_TRIANGLES:
-                    var indices: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
-                    if indices.size() > 0:
+                    var indices: Variant = arrays[Mesh.ARRAY_INDEX]
+                    if indices is PackedInt32Array and not indices.is_empty():
                         triangles += int(indices.size() / 3)
                     else:
                         triangles += int(arrays[Mesh.ARRAY_VERTEX].size() / 3)

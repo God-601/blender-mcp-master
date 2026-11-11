@@ -12,6 +12,7 @@ import math
 import os
 from pathlib import Path
 import shutil
+from statistics import median
 import subprocess
 import sys
 import time
@@ -84,6 +85,17 @@ def fixture(case):
     return data
 
 
+def retopology_context(source):
+    vertices = source['vertices']
+    height = [z for _, _, z in vertices]
+    radii = [math.hypot(x, y) for x, y, _ in vertices]
+    return {'source_sha256': digest(source), 'name': source['name'],
+            'vertices': len(vertices), 'quads': len(source['faces']),
+            'ordered_rings': source['rings'], 'vertices_per_ring': source['ring_size'],
+            'height_range_m': [min(height), max(height)],
+            'radius_range_m': [round(min(radii), 4), round(max(radii), 4)]}
+
+
 def schema(case):
     spec = CASES[case]
     props = {k: {"type": "integer" if k in spec.get("integer", []) else "number", "minimum": limits[0], "maximum": limits[1]} for k, limits in spec["params"].items()}
@@ -121,6 +133,49 @@ def self_check():
     print("SELF_CHECK_PASS", flush=True)
 
 
+def provider_command(cli, out, model=None, effort=None):
+    command = [cli, '-a', 'never', 'exec', '--ignore-user-config', '--ephemeral', '--json', '--sandbox', 'read-only', '--skip-git-repo-check', '--cd', str(out), '--output-schema', str(out / 'schema.json'), '--output-last-message', str(out / 'generation.json')]
+    if model:
+        command.extend(['--model', model])
+    if effort:
+        command.extend(['--config', 'model_reasoning_effort=' + json.dumps(effort)])
+    return command + ['-']
+
+
+def generation_matches(previous, record):
+    return bool(previous and record.get('actual_prompt_sha256') and
+                all(previous.get(key) == record.get(key) for key in
+                    ('actual_prompt_sha256', 'model_requested', 'effort_requested')) and
+                previous.get('thread_id') and previous.get('provider_usage'))
+
+
+def cached_generation_matches(directory, previous, record):
+    if not generation_matches(previous, record):
+        return False
+    for name, key in [('generation.json', 'generation_sha256'), ('provider.jsonl', 'provider_log_sha256')]:
+        path = directory / name
+        if not path.is_file() or digest(path.read_bytes()) != previous.get(key):
+            return False
+    return True
+
+
+def arm_observations(records):
+    usage = [r['provider_usage'] for r in records if isinstance(r.get('provider_usage'), dict)]
+    completed = [r for r in records if r['status'] == 'completed']
+    passed = [r for r in completed if r['geometry'].get('technical_status') == 'PASS']
+    timings = [r['cli_seconds'] + r['blender_seconds'] for r in completed
+               if r.get('cli_seconds') is not None and r.get('blender_seconds') is not None]
+    return {'attempts': len(records), 'completed': len(completed),
+            'failures': sum(r['status'] == 'failed' for r in records),
+            'technical_passes': len(passed),
+            'geometry_issues': sum(r['geometry'].get('technical_status') == 'ISSUE' for r in completed),
+            'usage_receipts': len(usage), 'input_tokens': sum(u['input_tokens'] for u in usage),
+            'cached_input_tokens': sum(u.get('cached_input_tokens', 0) for u in usage),
+            'output_tokens': sum(u['output_tokens'] for u in usage),
+            'timed_completed_trials': len(timings),
+            'median_provider_plus_blender_seconds': round(median(timings), 3) if timings else None}
+
+
 def run_campaign(args):
     self_check()
     repo = Path(__file__).resolve().parents[2]
@@ -133,6 +188,7 @@ def run_campaign(args):
         raise RuntimeError("Codex CLI or Blender unavailable")
     guides = {c: ["SKILL.md", CASES[c]["guide"]] for c in CASES}
     manifest = {"campaign_version": 1, "scope": "Constrained declarative parameter generation using real Codex CLI; trusted fixed Blender adapter, not freeform live MCP or full skill capability certification.", "cli": cli, "model_override": None, "model_identity": None, "model_identity_status": "NOT VERIFIED unless emitted by provider events", "cases": CASES, "guide_sources": {}, "adapter_sha256": digest(Path(__file__).read_bytes()), "limitations": ["No reference images or blind artistic scoring.", "Adapter guarantees components, UV creation, and export; these are not evidence of agent tool execution.", "Simple node materials only, no image-based PBR maps, rig, or deformation certification.", "Retopology is source-backed tube ring bridging/relaxation/projection, not arbitrary character retopology."]}
+    manifest.update(model_requested=args.model, effort_requested=args.effort)
     for rel in sorted({p for paths in guides.values() for p in paths}):
         src = repo / rel
         text = src.read_text(encoding="utf-8")
@@ -144,21 +200,25 @@ def run_campaign(args):
 
     def trial(case, arm, number):
         out = root / (case + "-" + arm + "-" + str(number))
-        out.mkdir(exist_ok=True)
         receipt = out / "receipt.json"
-        previous = None
+        previous, archive = None, None
         adapter_sha = digest(Path(__file__).read_bytes())
-        if receipt.exists():
-            previous = json.loads(receipt.read_text(encoding="utf-8"))
+        if out.exists():
             archive = root / 'attempts' / (out.name + '-' + str(uuid.uuid4()))
-            shutil.copytree(out, archive)
+            archive.parent.mkdir(exist_ok=True)
+            out.rename(archive)
+            archived_receipt = archive / receipt.name
+            if archived_receipt.is_file():
+                previous = json.loads(archived_receipt.read_text(encoding="utf-8"))
+        out.mkdir()
         scene = fixture(case)
         write_json(out / "fixture.json", scene)
         shape = schema(case)
         write_json(out / "schema.json", shape)
         task = "Controlled geometry parameter task v1.\n" + CASES[case]["brief"] + "\nUse the provided fixed adapter contract. Return only the schema JSON, no tools, files, commands, questions, or claimed visual inspection. The adapter constructs components and creates UV/materials. All source objects are protected. Choose values that satisfy brief proportions and budget.\nSchema:\n" + json.dumps(shape, sort_keys=True)
         if case == "retopology":
-            task += "\nActual source fixture, with vertices and ordered faces:\n" + json.dumps(scene["source"], separators=(",", ":"))
+            task += ("\nMeasured source mesh summary (the adapter reopens and uses the complete fixture):\n"
+                     + json.dumps(retopology_context(scene['source']), separators=(',', ':')))
         task += "\nAdapter geometry: " + {"chair": "Seat top=seat_height. Leg centers at +/- (seat size/2-leg_width/2-leg_inset), run from ground to seat underside. Back posts share rear leg XY, run from seat to back_height. Broad panel fits between posts. Support beams link legs at support_height. Bevel one segment.", "sword": "Pommel box z=0..pommel_height, grip above, guard above, blade above guard. Blade is an extruded six-point symmetrical tapered polygon. Bevel applies to boxes, not blade.", "tree": "Trunk cylinder at ground. Tiers: base_z=canopy_start+i*step, step=(height-canopy_start)/(tiers-1+1+overlap). tier_height=step*(1+overlap); radius=canopy_radius*(1-taper*i/(tiers-1)). Last apex is exactly height.", "modular_wall": "3 module origins at 0,width,2*width. Each occupies [origin,origin+width]. Posts are inset half their width; beams fit between posts. Stone panel fills between posts and beams, centered Y. Actual max panel depth must not exceed thickness. Bevel one segment.", "retopology": "Interpolate ordered source rings at evenly spaced z and angular samples. Construct each ring edges then bridge adjacent ordered equal-size loops with bmesh bridge_loops. Relax non-boundary vertices for requested iterations then project all vertices to nearest real source surface using BVH. Preserve source unchanged; two uncapped boundaries."}[case]
         (out / "common_task.txt").write_text(task, encoding="utf-8")
         prompt = task
@@ -167,17 +227,21 @@ def run_campaign(args):
             for rel in guides[case]:
                 prompt += "\n--- " + rel + " ---\n" + (repo / rel).read_text(encoding="utf-8")
         (out / "prompt.txt").write_text(prompt, encoding="utf-8")
-        command = [cli, "exec", "--ignore-user-config", "--ephemeral", "--json", "--sandbox", "read-only", "--skip-git-repo-check", "--cd", str(out), "--output-schema", str(out / "schema.json"), "--output-last-message", str(out / "generation.json"), "-"]
+        command = provider_command(cli, out, args.model, args.effort)
         record = {"case_id": case, "arm": arm, "trial": number, "common_task_sha256": digest(task.encode()), "actual_prompt_sha256": digest(prompt.encode()), "scene_fixture_sha256": digest((out / "fixture.json").read_bytes()), "schema_sha256": digest((out / "schema.json").read_bytes()), "command": command, "thread_id": None, "provider_usage": None, "model_identity": None, "status": "started", "guide_sources": guides[case] if arm == "with_skill" else [], "started_utc": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())}
         record['adapter_sha256'] = adapter_sha
+        record.update(model_requested=args.model, effort_requested=args.effort)
         write_json(receipt, record)
         start = time.monotonic()
         try:
-            reuse = (previous and previous.get('actual_prompt_sha256') == record['actual_prompt_sha256'] and
-                     previous.get('thread_id') and previous.get('provider_usage') and (out / 'generation.json').is_file())
+            reuse = archive is not None and cached_generation_matches(archive, previous, record)
             if reuse:
-                validate(case, json.loads((out / 'generation.json').read_text(encoding='utf-8')))
+                for name in ('generation.json', 'provider.jsonl', 'provider.stderr.txt'):
+                    if (archive / name).is_file():
+                        shutil.copyfile(archive / name, out / name)
                 completed = subprocess.CompletedProcess(command, 0)
+                if not cached_generation_matches(out, previous, record):
+                    raise ValueError('Archived provider output changed during reuse')
                 record['provider_generation_reused'] = True
                 record['prior_attempt_path'] = str(archive.relative_to(root))
             else:
@@ -199,22 +263,29 @@ def run_campaign(args):
                     record["model_identity"] = event["model"]
             record["provider_event_count"] = len(events)
             if reuse:
-                origins = [json.loads(p.read_text(encoding='utf-8')) for p in (root / 'attempts').glob('*/receipt.json')]
-                origin = next((r for r in origins if r.get('thread_id') == record['thread_id'] and not r.get('provider_generation_reused')), {})
-                record['cli_seconds'] = origin.get('cli_seconds')
+                record['cli_seconds'] = previous.get('cli_seconds')
             else:
                 record["cli_seconds"] = round(time.monotonic() - start, 3)
             if completed.returncode != 0:
                 raise RuntimeError("provider exit " + str(completed.returncode))
-            if not record["thread_id"] or not record["provider_usage"]:
-                raise RuntimeError("missing actual thread/turn.completed usage receipt")
-            generation = json.loads((out / "generation.json").read_text(encoding="utf-8"))
+            usage = record['provider_usage']
+            if (not record['thread_id'] or not isinstance(usage, dict) or
+                    any(type(usage.get(k)) is not int or usage[k] < 0 for k in ('input_tokens', 'output_tokens')) or
+                    any(type(usage[k]) is not int or usage[k] < 0 for k in ('cached_input_tokens',) if k in usage)):
+                record['provider_usage'] = None
+                raise RuntimeError('Missing or invalid actual thread/turn.completed usage receipt')
+            generation_path = out / 'generation.json'
+            generation = json.loads(generation_path.read_text(encoding='utf-8'))
             validate(case, generation)
+            record['generation_sha256'] = digest(generation_path.read_bytes())
+            record['provider_log_sha256'] = digest((out / 'provider.jsonl').read_bytes())
             write_json(out / "build_input.json", {"case": case, "generation": generation, "fixture": scene, "budget": CASES[case]["budget"]})
             blender_command = [args.blender, "--background", "--factory-startup", "--threads", "2", "--python-exit-code", "1", "--python", str(Path(__file__).resolve()), "--", "--build", str(out)]
             record["blender_command"] = blender_command
+            blender_started = time.monotonic()
             with (out / "blender.log").open("w", encoding="utf-8") as log:
                 built = subprocess.run(blender_command, stdout=log, stderr=subprocess.STDOUT, timeout=240)
+            record['blender_seconds'] = round(time.monotonic() - blender_started, 3)
             record["blender_exit_code"] = built.returncode
             if built.returncode != 0 or not (out / "geometry.json").is_file():
                 raise RuntimeError("Blender build failed: " + str(built.returncode))
@@ -236,11 +307,8 @@ def run_campaign(args):
         for future in concurrent.futures.as_completed(futures):
             records.append(future.result())
             write_json(root / "running_summary.json", records)
-    totals = {}
-    for arm in ("baseline", "with_skill"):
-        chosen = [r for r in records if r["arm"] == arm]
-        usage = [r["provider_usage"] for r in chosen if isinstance(r.get("provider_usage"), dict)]
-        totals[arm] = {"attempts": len(chosen), "completed": sum(r["status"] == "completed" for r in chosen), "failures": sum(r["status"] == "failed" for r in chosen), "usage_receipts": len(usage), "input_tokens": sum(u.get("input_tokens", 0) for u in usage), "cached_input_tokens": sum(u.get("cached_input_tokens", 0) for u in usage), "output_tokens": sum(u.get("output_tokens", 0) for u in usage), "geometry_issues": sum(bool(r.get("geometry", {}).get("issues")) for r in chosen)}
+    totals = {arm: arm_observations([r for r in records if r['arm'] == arm])
+              for arm in ('baseline', 'with_skill')}
     summary = {"scope": manifest["scope"], "arms": totals, "records": sorted(records, key=lambda r: (r["case_id"], r["trial"], r["arm"])), "limitations": manifest["limitations"], "model_identity": "NOT VERIFIED" if any(not r.get("model_identity") for r in records) else sorted({r["model_identity"] for r in records}), "artistic_quality": "NOT VERIFIED", "mcp_agent_control": "NOT VERIFIED — trusted local Blender adapter used", "engine_import": "NOT VERIFIED by this campaign"}
     if all(totals[a]["usage_receipts"] == 15 for a in totals):
         b = totals["baseline"]["input_tokens"] + totals["baseline"]["output_tokens"]
@@ -248,7 +316,8 @@ def run_campaign(args):
         summary["observed_token_delta"] = {"baseline": b, "with_skill": c, "delta": c-b, "percent": round(100*(c-b)/b, 3) if b else None, "caveat": "Observed provider receipts; model identity and full MCP equivalence remain unverified. No billing cost inference."}
     archived = [json.loads(p.read_text(encoding='utf-8')) for p in (root / 'attempts').glob('*/receipt.json')]
     unique_usage = {r['thread_id']: r['provider_usage'] for r in archived + records if r.get('thread_id') and r.get('provider_usage')}
-    summary.update({'counts_scope': 'latest attempt per logical trial', 'archived_attempts': len(archived),
+    summary.update({'runtime_metric': 'Median of the original provider duration plus the latest Blender build duration for completed trials; failures are counted separately.',
+        'counts_scope': 'latest attempt per logical trial', 'archived_attempts': len(archived),
         'archived_failed_attempts': sum(r.get('status') == 'failed' for r in archived),
         'distinct_provider_usage_receipts': len(unique_usage),
         'distinct_provider_input_tokens': sum(u.get('input_tokens', 0) for u in unique_usage.values()),
@@ -518,6 +587,8 @@ if __name__ == "__main__":
         parser.add_argument("--blender",default="C:/Program Files/Blender Foundation/Blender 3.1/blender.exe")
         parser.add_argument("--workers",type=int,default=2)
         parser.add_argument("--timeout",type=int,default=600)
+        parser.add_argument("--model", help="Explicit public model ID for both arms; provider backend identity is recorded separately")
+        parser.add_argument("--effort", choices=['low', 'medium', 'high', 'xhigh', 'max', 'ultra'])
         parser.add_argument("--self-check",action="store_true")
         args=parser.parse_args()
         self_check() if args.self_check else run_campaign(args)

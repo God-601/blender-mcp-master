@@ -38,6 +38,10 @@ REQUIRED = (
     "integrations/agents/codex_reviewer.py",
     "integrations/agents/run_specialists.py",
     "integrations/agents/blender_native_host.py",
+    "integrations/agents/freeform_acceptance.py",
+    "integrations/agents/production_benchmark.py",
+    "integrations/godot/animation_probe.gd",
+    "integrations/godot/blender_animation_fixture.py",
     "docs/QUICKSTART.md",
 )
 MAX_ENTRIES = 2500

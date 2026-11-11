@@ -39,11 +39,15 @@ for v in bm.verts:
     c = sum(angles) / len(angles) if angles else 0.0
     values.append(max(0.0, min(1.0, 0.5 + c * 0.5)))
 bm.free()
-attr = me.color_attributes.get("Curvature") or me.color_attributes.new("Curvature", 'FLOAT_COLOR', 'POINT')
-flat = []
-for g in values:
-    flat += [g, g, g, 1.0]
-attr.data.foreach_set("color", flat)
+if hasattr(me, "color_attributes"):
+    attr = me.color_attributes.get("Curvature") or me.color_attributes.new("Curvature", 'FLOAT_COLOR', 'POINT')
+    flat = [channel for g in values for channel in (g, g, g, 1.0)]
+    attr.data.foreach_set("color", flat)
+else:  # Blender 3.1 and earlier use per-corner legacy vertex colors.
+    layer = me.vertex_colors.get("Curvature") or me.vertex_colors.new(name="Curvature")
+    for loop, color in zip(me.loops, layer.data):
+        g = values[loop.vertex_index]
+        color.color = (g, g, g, 1.0)
 me.update()
 print("curvature range", round(min(values), 3), round(max(values), 3), "verts", len(values))
 ```

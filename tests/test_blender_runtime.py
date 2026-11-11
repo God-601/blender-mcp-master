@@ -362,7 +362,12 @@ class BlenderRuntimeTests(unittest.TestCase):
             out, err = run_script("pbr_material.py", NAME="Tex", TEXTURES=textures)
             self.assertIsNone(err, out)
         mat = bpy.data.materials["Tex"]
-        self.assertEqual(len(self._generated_nodes(mat)), 6)   # 3 images + normal map + alpha multiply/clip
+        shader_clip = hasattr(mat, 'surface_render_method')
+        # Older Blender applies its threshold through the material blend mode.
+        self.assertEqual(len(self._generated_nodes(mat)), 6 if shader_clip else 5)
+        if not shader_clip:
+            self.assertEqual(mat.blend_method, 'CLIP')
+            self.assertAlmostEqual(mat.alpha_threshold, .5)
         bsdf = mat.node_tree.nodes["Principled BSDF"]
         for socket in ("Base Color", "Roughness", "Normal"):
             self.assertEqual(len(bsdf.inputs[socket].links), 1, socket)

@@ -127,3 +127,50 @@ user ownership, final file checksums, and explicit before/after visual views.
 
 Reference: [full roadmap](ROADMAP-V2.md) and
 [release ladder](V1.5-V2.0-MILESTONES.md).
+
+## Agent-authored production stages (opt-in)
+
+`integrations/agents/freeform_acceptance.py` records an actual Codex generation,
+including its requested model, thread identity, usage, prompt and code hashes.
+The operator reviews `script.py`, the declared ownership in `generation.json`,
+and the source and prompt before supplying the SHA256 of `provider-receipt.json`.
+The receipt binds the script, ownership, prompt, provider log and runner bytes.
+Generated Python runs as trusted code in disposable background Blender, with
+Blender file auto-execution disabled.
+
+```bash
+python integrations/agents/freeform_acceptance.py generate \
+  --prompt /absolute/brief.txt --model YOUR_CONFIGURED_MODEL \
+  --output /absolute/new-generation
+# Inspect the packet and compare its receipt hash to review_sha256 from generate.
+python integrations/agents/freeform_acceptance.py execute \
+  --generation /absolute/new-generation --approved-sha REVIEWED_RECEIPT_SHA256 \
+  --asset-id chair --module modeling --blender /absolute/blender \
+  --output /absolute/new-stage
+```
+
+Later specialists can receive `--source /absolute/prior-stage.blend` on both
+commands. Pack relative external resources or convert them to absolute paths
+before generation. Include
+measured scene facts and authorized object names in the brief. Execution opens
+a byte-verified disposable copy. Declare all objects the stage may edit using
+unique `V2_` names. The host protects existing objects outside that declaration.
+From an extracted ZIP or tarball, pass `--source-commit` with the archive
+provenance SHA. Reports label that revision as operator-declared and include
+the runner hash. A Git checkout records whether tracked files were modified.
+Stages retain checkpoints, measured geometry, dispatch receipts and source
+hashes. A successful dispatch is scoped execution evidence, not independent
+visual approval. Preserve failed stage directories and generate corrections
+in new directories; never overwrite their provenance.
+
+For matched bounded benchmarks, pass the same `--model` and `--effort` to
+`production_benchmark.py`. Cached generations are reusable only when those
+requests, the actual prompt, the generation and the provider log match. Each
+attempt starts with a fresh output directory. Retopology prompts use a digest
+and measured source summary. The adapter still consumes the complete scene
+and verifies the rebuilt mesh against it. The summary keeps technical
+passes, failures, token usage and median provider-plus-build time per arm. The
+requested public model ID is recorded
+separately from the provider-reported backend identity, which may be unavailable.
+This benchmark still uses a fixed geometry adapter and cannot substitute for
+agent-authored production, independent image review or destination checks.
