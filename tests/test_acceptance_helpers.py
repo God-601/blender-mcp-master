@@ -113,3 +113,13 @@ class AcceptanceHelperTests(unittest.TestCase):
                 self.assertEqual(summary['arms'][arm]['failures'], 3)
                 self.assertEqual(summary['arms'][arm]['completed'], 0)
                 self.assertIsNone(summary['arms'][arm]['median_provider_plus_blender_seconds'])
+
+    def test_retopology_prompt_uses_a_bounded_summary_of_the_actual_mesh(self):
+        module = load(ROOT / 'integrations/agents/production_benchmark.py')
+        source = module.fixture('retopology')['source']
+        result = module.retopology_context(source)
+        self.assertEqual(result['source_sha256'], module.digest(source))
+        self.assertEqual(result['vertices'], 800)
+        self.assertEqual(result['quads'], 768)
+        self.assertEqual(result['height_range_m'], [0.0, 2.0])
+        self.assertLess(len(json.dumps(result)), 500)

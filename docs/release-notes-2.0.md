@@ -14,6 +14,9 @@ and the [milestone gates](V1.5-V2.0-MILESTONES.md).
 | 1.8 | Matched A/B harness with timing, provider usage, geometry results and preserved failures |
 | 1.9 | Isolated ZIP installation, source and artifact checks, release readiness gates |
 
+Blender 3.1 uses its legacy vertex-color and glTF APIs. The curvature recipe
+and animation fixture detect the available API before use.
+
 The native host coordinates protected-object fingerprints, one writer per
 source path and a saved checkpoint. Independently inspect real images before
 accepting visual quality. The Godot animation probe reports sampled bone

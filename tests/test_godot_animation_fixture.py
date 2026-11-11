@@ -30,7 +30,9 @@ class GodotAnimationFixtureTests(unittest.TestCase):
             json_length, chunk_type = struct.unpack_from('<I4s', glb, 12)
             self.assertEqual(chunk_type, b'JSON')
             document = json.loads(glb[20:20 + json_length])
-            self.assertEqual(len(document['scenes']), 1)
+            populated_scenes = [scene for scene in document['scenes'] if scene.get('nodes')]
+            self.assertEqual(len(populated_scenes), 1)
+            self.assertEqual(document['scenes'][document['scene']], populated_scenes[0])
             self.assertEqual(len(document['meshes']), 1)
             self.assertEqual(len(document['skins'][0]['joints']), 2)
             with self.assertRaises(FileExistsError):

@@ -42,7 +42,14 @@ def fresh_scene_with_cube():
 
 # Extra assertions keyed by a distinctive string inside the recipe source.
 def check_curvature(obj):
-    assert obj.data.color_attributes.get("Curvature") is not None
+    mesh = obj.data
+    if hasattr(mesh, 'color_attributes'):
+        data = mesh.color_attributes['Curvature'].data
+        assert len(data) == len(mesh.vertices)
+    else:
+        data = mesh.vertex_colors['Curvature'].data
+        assert len(data) == len(mesh.loops)
+    assert all(0 < item.color[0] <= 1 and item.color[3] > .99 for item in data)
 
 
 def check_stamps(obj):

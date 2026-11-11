@@ -166,7 +166,9 @@ in new directories; never overwrite their provenance.
 For matched bounded benchmarks, pass the same `--model` and `--effort` to
 `production_benchmark.py`. Cached generations are reusable only when those
 requests, the actual prompt, the generation and the provider log match. Each
-attempt starts with a fresh output directory. The summary keeps technical
+attempt starts with a fresh output directory. Retopology prompts use a digest
+and measured source summary. The adapter still consumes the complete scene
+and verifies the rebuilt mesh against it. The summary keeps technical
 passes, failures, token usage and median provider-plus-build time per arm. The
 requested public model ID is recorded
 separately from the provider-reported backend identity, which may be unavailable.

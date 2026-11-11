@@ -85,6 +85,17 @@ def fixture(case):
     return data
 
 
+def retopology_context(source):
+    vertices = source['vertices']
+    height = [z for _, _, z in vertices]
+    radii = [math.hypot(x, y) for x, y, _ in vertices]
+    return {'source_sha256': digest(source), 'name': source['name'],
+            'vertices': len(vertices), 'quads': len(source['faces']),
+            'ordered_rings': source['rings'], 'vertices_per_ring': source['ring_size'],
+            'height_range_m': [min(height), max(height)],
+            'radius_range_m': [round(min(radii), 4), round(max(radii), 4)]}
+
+
 def schema(case):
     spec = CASES[case]
     props = {k: {"type": "integer" if k in spec.get("integer", []) else "number", "minimum": limits[0], "maximum": limits[1]} for k, limits in spec["params"].items()}
@@ -206,7 +217,8 @@ def run_campaign(args):
         write_json(out / "schema.json", shape)
         task = "Controlled geometry parameter task v1.\n" + CASES[case]["brief"] + "\nUse the provided fixed adapter contract. Return only the schema JSON, no tools, files, commands, questions, or claimed visual inspection. The adapter constructs components and creates UV/materials. All source objects are protected. Choose values that satisfy brief proportions and budget.\nSchema:\n" + json.dumps(shape, sort_keys=True)
         if case == "retopology":
-            task += "\nActual source fixture, with vertices and ordered faces:\n" + json.dumps(scene["source"], separators=(",", ":"))
+            task += ("\nMeasured source mesh summary (the adapter reopens and uses the complete fixture):\n"
+                     + json.dumps(retopology_context(scene['source']), separators=(',', ':')))
         task += "\nAdapter geometry: " + {"chair": "Seat top=seat_height. Leg centers at +/- (seat size/2-leg_width/2-leg_inset), run from ground to seat underside. Back posts share rear leg XY, run from seat to back_height. Broad panel fits between posts. Support beams link legs at support_height. Bevel one segment.", "sword": "Pommel box z=0..pommel_height, grip above, guard above, blade above guard. Blade is an extruded six-point symmetrical tapered polygon. Bevel applies to boxes, not blade.", "tree": "Trunk cylinder at ground. Tiers: base_z=canopy_start+i*step, step=(height-canopy_start)/(tiers-1+1+overlap). tier_height=step*(1+overlap); radius=canopy_radius*(1-taper*i/(tiers-1)). Last apex is exactly height.", "modular_wall": "3 module origins at 0,width,2*width. Each occupies [origin,origin+width]. Posts are inset half their width; beams fit between posts. Stone panel fills between posts and beams, centered Y. Actual max panel depth must not exceed thickness. Bevel one segment.", "retopology": "Interpolate ordered source rings at evenly spaced z and angular samples. Construct each ring edges then bridge adjacent ordered equal-size loops with bmesh bridge_loops. Relax non-boundary vertices for requested iterations then project all vertices to nearest real source surface using BVH. Preserve source unchanged; two uncapped boundaries."}[case]
         (out / "common_task.txt").write_text(task, encoding="utf-8")
         prompt = task
