@@ -212,8 +212,11 @@ def inside(args):
     code = value['code']
     check_source_binding(args.source, provider['source_sha256'])
     check_source_binding(args.input_copy, provider['source_sha256'])
-    if args.source and Path(bpy.data.filepath).resolve() != args.input_copy.resolve():
-        raise ValueError('Blender did not open the reviewed source copy')
+    if args.source:
+        if Path(bpy.data.filepath).resolve() != args.input_copy.resolve():
+            raise ValueError('Blender did not open the reviewed source copy')
+        if any(path.startswith('//') for path in bpy.utils.blend_paths(packed=True)):
+            raise ValueError('Pack relative external resources or use absolute paths before generating the stage')
     out.mkdir(parents=True, exist_ok=False)
     if not args.source:
         bpy.ops.wm.read_factory_settings(use_empty=True)

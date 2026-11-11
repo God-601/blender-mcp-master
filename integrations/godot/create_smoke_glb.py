@@ -10,7 +10,7 @@ import struct
 from pathlib import Path
 
 
-def generate(path):
+def generate(path, *, bare=False):
     target = Path(path).resolve()
     if target.exists():
         raise FileExistsError("Refusing to overwrite existing fixture")
@@ -42,6 +42,10 @@ def generate(path):
             {"bufferView": 2, "componentType": 5123, "count": 3, "type": "SCALAR"},
         ],
     }
+    if bare:
+        primitive = document['meshes'][0]['primitives'][0]
+        primitive['attributes'].pop('TEXCOORD_0')
+        primitive.pop('indices')
     json_blob = json.dumps(document, separators=(",", ":"), sort_keys=True).encode("utf-8")
     json_blob += b" " * (-len(json_blob) % 4)
     total_length = 12 + 8 + len(json_blob) + 8 + len(binary)
@@ -50,13 +54,14 @@ def generate(path):
            + struct.pack("<I4s", len(binary), b"BIN\x00") + binary)
     with target.open("xb") as handle:
         handle.write(glb)
-    return {"bytes": len(glb), "triangles": 1, "has_uv": True, "has_material": True}
+    return {"bytes": len(glb), "triangles": 1, "has_uv": not bare, "has_material": True}
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("destination", help="Fresh absolute or relative .glb file path")
+    parser.add_argument("--bare", action="store_true", help="Omit optional UV and index arrays")
     args = parser.parse_args()
     if Path(args.destination).suffix.lower() != ".glb":
         parser.error("Destination must have .glb extension")
-    print(json.dumps(generate(args.destination), sort_keys=True))
+    print(json.dumps(generate(args.destination, bare=args.bare), sort_keys=True))

@@ -1,4 +1,6 @@
 import importlib.util
+import json
+import struct
 from pathlib import Path
 import tempfile
 import unittest
@@ -24,5 +26,12 @@ class GodotAnimationFixtureTests(unittest.TestCase):
             self.assertGreater(report['maximum_vertex_displacement'], .1)
             self.assertTrue(report['all_weight_sums_one'])
             self.assertGreater(target.stat().st_size, 100)
+            glb = target.read_bytes()
+            json_length, chunk_type = struct.unpack_from('<I4s', glb, 12)
+            self.assertEqual(chunk_type, b'JSON')
+            document = json.loads(glb[20:20 + json_length])
+            self.assertEqual(len(document['scenes']), 1)
+            self.assertEqual(len(document['meshes']), 1)
+            self.assertEqual(len(document['skins'][0]['joints']), 2)
             with self.assertRaises(FileExistsError):
                 module.generate(target)

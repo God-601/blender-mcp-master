@@ -57,6 +57,7 @@ def generate(path):
             for group, weight in zip(groups, (1 - upper_weight, upper_weight)):
                 if weight > 0:
                     group.add([vertex.index], weight, 'REPLACE')
+        obj.parent = rig
         modifier = obj.modifiers.new('Deform', 'ARMATURE')
         modifier.object = rig
         bone = rig.pose.bones['Upper']
@@ -79,7 +80,8 @@ def generate(path):
         for item in bpy.context.view_layer.objects:
             item.select_set(item in (obj, rig))
         bpy.context.view_layer.objects.active = obj
-        bpy.ops.export_scene.gltf(filepath=str(target), export_format='GLB', use_selection=True, export_animations=True)
+        bpy.ops.export_scene.gltf(filepath=str(target), export_format='GLB', use_selection=True,
+                                  use_active_scene=True, export_animations=True)
         assert target.is_file() and target.stat().st_size > 100
         return {'bones': len(rig_data.bones), 'maximum_vertex_displacement': displacement,
                 'all_weight_sums_one': weight_sums_one, 'blender_version': bpy.app.version_string}

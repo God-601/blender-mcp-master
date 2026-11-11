@@ -150,7 +150,8 @@ python integrations/agents/freeform_acceptance.py execute \
 ```
 
 Later specialists can receive `--source /absolute/prior-stage.blend` on both
-commands. Pack external textures into the source before generation and include
+commands. Pack relative external resources or convert them to absolute paths
+before generation. Include
 measured scene facts and authorized object names in the brief. Execution opens
 a byte-verified disposable copy. Declare all objects the stage may edit using
 unique `V2_` names. The host protects existing objects outside that declaration.

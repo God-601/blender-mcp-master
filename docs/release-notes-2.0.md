@@ -17,7 +17,8 @@ and the [milestone gates](V1.5-V2.0-MILESTONES.md).
 The native host coordinates protected-object fingerprints, one writer per
 source path and a saved checkpoint. Independently inspect real images before
 accepting visual quality. The Godot animation probe reports sampled bone
-motion in an imported clip. Roblox evidence applies to the particular assets
+motion in an imported clip. Static GLB inspection handles surfaces with optional
+UV and index buffers absent. Roblox evidence applies to the particular assets
 and Studio sessions recorded in the [campaign](V2-CAMPAIGN-2026-11-08.md).
 
 ## Upgrade and recovery
