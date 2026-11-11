@@ -46,6 +46,12 @@ def check_source_binding(source, expected_hash):
         raise ValueError('Specialist source bytes changed after generation')
 
 
+def check_relative_resources(bpy):
+    # In Blender 3.1 and 4.3, packed=False omits paths to embedded assets.
+    if any(path.startswith('//') for path in bpy.utils.blend_paths(packed=False)):
+        raise ValueError('Pack relative external resources or use absolute paths before generating the stage')
+
+
 def validate_generation(value):
     if not isinstance(value, dict) or set(value) != {'owned_objects', 'code', 'notes'}:
         raise ValueError('Unexpected generated response')
@@ -215,8 +221,7 @@ def inside(args):
     if args.source:
         if Path(bpy.data.filepath).resolve() != args.input_copy.resolve():
             raise ValueError('Blender did not open the reviewed source copy')
-        if any(path.startswith('//') for path in bpy.utils.blend_paths(packed=True)):
-            raise ValueError('Pack relative external resources or use absolute paths before generating the stage')
+        check_relative_resources(bpy)
     out.mkdir(parents=True, exist_ok=False)
     if not args.source:
         bpy.ops.wm.read_factory_settings(use_empty=True)

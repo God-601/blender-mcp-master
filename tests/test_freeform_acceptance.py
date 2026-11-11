@@ -5,6 +5,12 @@ import tempfile
 import unittest
 from unittest.mock import patch
 from types import SimpleNamespace
+from base64 import b64decode
+
+try:
+    import bpy
+except ImportError:
+    bpy = None
 
 SOURCE = Path(__file__).resolve().parents[1] / 'integrations/agents/freeform_acceptance.py'
 
@@ -127,3 +133,22 @@ class FreeformAcceptanceTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, '--source-commit'):
                 module.source_revision(None)
             self.assertEqual(module.source_revision('a' * 40), ('a' * 40, 'operator_declared'))
+
+    @unittest.skipUnless(bpy, 'Requires actual Blender bpy')
+    def test_relative_external_resource_rejected_but_packed_image_allowed(self):
+        module = self.module()
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / 'external.png'
+            path.write_bytes(b64decode('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jQioAAAAASUVORK5CYII='))
+            image = bpy.data.images.load(str(path))
+            try:
+                image.filepath = '//external.png'
+                with self.assertRaisesRegex(ValueError, 'Pack relative external resources'):
+                    module.check_relative_resources(bpy)
+                image.filepath = str(path)
+                image.pack()
+                image.filepath = '//external.png'
+                module.check_relative_resources(bpy)
+            finally:
+                bpy.data.images.remove(image)
