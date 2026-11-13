@@ -1,20 +1,22 @@
 # Changelog
 
-## Unreleased — 2.0.0 candidate
-
-Stable distribution: **1.4.0**.
+## 2.0.0 — specialist workflows, recoverable edits and scoped validation
 
 - Consolidates modeling, retopology, optimization, UV, materials, export and
   validation specialists with scoped handoffs, stage checkpoints and a native
   Blender host. The installed skill retains its existing name and entrypoint.
-- Integrates candidate tooling for the 1.5–1.9 milestones in PBR/UV,
+- Integrates tooling for the 1.5–1.9 milestones in PBR/UV,
   destination delivery, independent reviews, matched A/B metrics and release
   evidence. The [milestone ledger](docs/V1.5-V2.0-MILESTONES.md) tracks open gates.
 - Adds a reviewed agent-authored stage runner and a Godot probe for imported
   bone motion. Stage approval binds ownership and exact input bytes. Benchmark
   retries preserve prior artifacts and verify any reused generation and log.
-- See [candidate notes and migration](docs/release-notes-2.0.md) for acceptance
-  scope and [preflight archive review](docs/release-notes-2.0.md#review-a-preflight-archive).
+- Detects folded UV faces and edge-aligned positive-area overlaps, embeds FBX textures,
+  and checks stage dependencies before accepting specialist output. An unsaved
+  scene uses one writer lease per Blender process and scene.
+- Aligns material and UV routing across Python and the resource MCP. The
+  resource MCP declares its tools as read-only.
+- See the [release notes](docs/release-notes-2.0.md) for installation and verification scope.
 
 ## 1.4.0 — verified quality gates and safe asset delivery (2026-11-06)
 

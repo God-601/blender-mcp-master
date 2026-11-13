@@ -63,6 +63,32 @@ class P1UVDiagnosticTests(unittest.TestCase):
                        second=[(.50,.05),(.95,.05),(.95,.5),(.50,.5)])
         self.assertEqual(self.analyze()["reports"][0]["overlap_pairs"],0)
 
+    def test_overlap_when_all_vertices_lie_on_or_outside_other_triangle(self):
+        mesh = bpy.data.meshes.new("UV_Test_Mesh")
+        mesh.from_pydata([(0, 0, 0), (1, 0, 0), (0, 1, 0),
+                          (2, 0, 0), (3, 0, 0), (2, 1, 0)], [], [(0, 1, 2), (3, 4, 5)])
+        layer = mesh.uv_layers.new(name="UV_Main")
+        for loop, uv in zip(layer.data, [(2, 0), (0, 1), (0, 0), (0, 1), (1, 0), (3, 0)]):
+            loop.uv = (uv[0] / 4, uv[1] / 4)
+        bpy.context.scene.collection.objects.link(bpy.data.objects.new("UV_Test", mesh))
+        bpy.context.view_layer.update()
+        item = self.analyze()["reports"][0]
+        self.assertEqual(item["overlap_status"], "ISSUE")
+        self.assertEqual(item["overlap_pairs"], 1)
+
+    def test_folded_uv_inside_one_quad_is_an_overlap(self):
+        obj = self.two_quads()
+        mesh = obj.data
+        mesh.calc_loop_triangles()
+        first, second = [t for t in mesh.loop_triangles if t.polygon_index == 0]
+        first_corner = next(i for i in first.loops if i not in second.loops)
+        second_corner = next(i for i in second.loops if i not in first.loops)
+        layer = mesh.uv_layers.active
+        layer.data[second_corner].uv = layer.data[first_corner].uv.copy()
+        item = self.analyze()["reports"][0]
+        self.assertEqual(item["overlap_status"], "ISSUE")
+        self.assertIn([0, 0], item["overlap_examples"])
+
     def test_stacking_can_be_intentional_but_must_be_reviewed(self):
         self.two_quads(second=[(.05,.05),(.45,.05),(.45,.45),(.05,.45)])
         d=self.analyze(ALLOW_STACKING=True)["reports"][0]

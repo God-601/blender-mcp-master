@@ -1,4 +1,5 @@
 """Stable 1.0 publication must be manually authorized and evidence-grounded."""
+import json
 import os
 import re
 import shutil
@@ -96,6 +97,19 @@ class ReleaseReadinessStaticTests(unittest.TestCase):
                      "Tag exists at a DIFFERENT SHA"):
             self.assertIn(item, workflow)
         self.assertIn("github.event.workflow_run.head_sha == 'dae006042b5274de8dce83268cb66870dae868bf'", workflow)
+
+    def test_v20_publisher_is_github_only_and_exact_source_gated(self):
+        workflow = (ROOT / ".github/workflows/release-stable-2.0.yml").read_text(encoding="utf-8")
+        for required in ("github.event.workflow_run.event == 'push'", "github.event.workflow_run.conclusion == 'success'",
+                         "git log -1 --format=%s", "Publish Blender MCP Master v2.0.0",
+                         "steps.release.outputs.authorized == 'true'", "actions/runs?head_sha=$RELEASE_SHA",
+                         "git archive", "scripts/clean_install_smoke.py", 'gh release create "$TAG"',
+                         "git/ref/tags/$TAG", "SHA256SUMS.txt"):
+            self.assertIn(required, workflow)
+        self.assertNotRegex(workflow, r"(?m)^\s*npm publish\b")
+        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
+        lock = json.loads((ROOT / "package-lock.json").read_text(encoding="utf-8"))
+        self.assertEqual((package["version"], lock["version"], lock["packages"][""]["version"]), ("2.0.0",) * 3)
 
     def test_release_evidence_does_not_fabricate_agent_or_engine_pass(self):
         evidence = (ROOT / "docs/RELEASE-1.0-EVIDENCE.md").read_text(encoding="utf-8")

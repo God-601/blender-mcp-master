@@ -1,8 +1,8 @@
 # V2 acceptance campaign — execute, measure, then promote
 
-Status: **engineering test protocol, NOT a passed end-to-end Blender/agent
-campaign**. v1.4.0 is the latest stable release. This record does not create
-v1.5–2.0 release tags or give an agent permission to edit someone's scene.
+This protocol defines full production acceptance. See the
+[2.0 release notes](release-notes-2.0.md) for the verification scope of the
+distributed build. Edit only scenes and objects the user has authorized.
 
 ## Order of execution and safety
 
@@ -113,7 +113,7 @@ Run against a **scratch copy**. Include image references with attribution,
 exact asset hashes, blender/runtime versions, original user constraints,
 user ownership, final file checksums, and explicit before/after visual views.
 
-## Release blockers and signoff
+## Production acceptance and signoff
 
 - No **automatic** artistic PASS from IoU or a JSON report.
 - No actual multi-agent execution from specialist review receipts alone.

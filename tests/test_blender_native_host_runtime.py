@@ -164,10 +164,49 @@ class NativeHostTests(unittest.TestCase):
         with second:
             self.assertIsNotNone(second.lease)
 
-    def test_unrelated_unsaved_scopes_do_not_contend(self):
+    def test_unsaved_scene_lock_spans_evidence_directories(self):
         with self.host() as first:
-            with self.host(root=self.root / 'other') as second:
-                self.assertNotEqual(first.lease_path, second.lease_path)
+            second = self.host(root=self.root / 'other')
+            with self.assertRaises(FileExistsError):
+                with second:
+                    self.fail('a second writer acquired the same unsaved scene')
+            self.assertEqual(first.lease_path, second.lease_path)
+        with second:
+            self.assertIsNotNone(second.lease)
+
+    def test_dirty_texture_cannot_be_recorded_as_approved_production_stage(self):
+        def edit(request):
+            image = bpy.data.images.new('UncommittedTexture', width=1, height=1, alpha=True)
+            image.use_fake_user = True
+            image.pixels[:] = (0, 1, 0, 1)
+            self.assertTrue(image.is_dirty)
+            return self.evidence(request)
+        with self.host({'modeling': edit, 'validation': self.evidence}) as host:
+            result = run({'category': 'hard_surface'}, host.context, self.root, host, dry_run=False)
+            self.assertEqual(result['status'], 'ISSUE')
+            self.assertIn('cannot preserve unsaved image pixels', result['errors'][0])
+            self.assertTrue(result['recovery_required'])
+            self.assertEqual(list(self.root.glob('stage-*.blend')), [])
+            self.assertEqual(list(self.root.glob('receipt-*.json')), [])
+            self.assertEqual(tuple(bpy.data.images['UncommittedTexture'].pixels), (0, 1, 0, 1))
+
+    def test_production_stage_reopens_after_external_texture_removed(self):
+        image, texture = self.add_external_texture()
+        pixels = tuple(image.pixels)
+        source = self.root / 'source.blend'
+        bpy.ops.wm.save_as_mainfile(filepath=str(source))
+        image.filepath = '//outside.png'
+        with self.host() as host:
+            result = run({'category': 'hard_surface'}, host.context, self.root, host, dry_run=False)
+            self.assertEqual(result['status'], 'REVIEW')
+            stage = next(entry['path'] for entry in result['steps'][0]['evidence']
+                         if entry['path'].endswith('.blend'))
+            self.assertFalse(image.packed_file)
+        texture.unlink()
+        bpy.ops.wm.open_mainfile(filepath=str(self.root / stage))
+        recovered = bpy.data.images['outside.png']
+        self.assertTrue(recovered.packed_file)
+        self.assertEqual(tuple(recovered.pixels), pixels)
 
     def test_shared_owned_data_is_rejected_before_checkpoint(self):
         obj = bpy.data.objects.new('Owned', self.keep.data)

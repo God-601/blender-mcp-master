@@ -107,7 +107,7 @@ leaving the original filepath intact. It requires every existing unowned object
 to be protected and rejects shared mesh data and shader/image dependencies
 between owned and unowned objects. A normalized saved-source path selects a
 shared advisory OS lock across cooperating Blender processes; unsaved scenes
-use the evidence-root/session/scene scope. Windows uses `msvcrt.locking` and
+use the Blender process and scene identity regardless of evidence directory. Windows uses `msvcrt.locking` and
 POSIX uses `flock`. Kernel locks release on close or process death. The small
 lock file intentionally remains: deleting its inode could allow competing
 writers to bypass an active lock. These locks do not stop external tools or
@@ -123,8 +123,9 @@ External bytes, simulation state and some nested settings remain outside the
 fingerprint. The host checks selected scene globals separately.
 
 When Blender reports external dependencies, the host creates a disposable
-copy, packs supported assets in a separate Blender process and reopens the
-result. A missing file, unsaved image pixels or a dependency Blender cannot pack stops startup. The
+copy for a checkpoint or production stage, packs supported assets in a
+separate Blender process and reopens the result. A missing file, unsaved
+image pixels or a dependency Blender cannot pack blocks the write. The
 live scene keeps its original paths and packing state. The probe exposes the
 checkpoint dependency status. After an interruption, inspect the retained
 checkpoint before resuming. Callbacks must bound synchronous work and terminate

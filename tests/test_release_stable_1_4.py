@@ -1,5 +1,4 @@
 """v1.4 GitHub release must be authorized, exact-SHA-gated and non-npm."""
-import json
 import unittest
 from pathlib import Path
 
@@ -7,13 +6,6 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 class StableReleaseV14Tests(unittest.TestCase):
-    def test_manifest_and_lock_versions_match(self):
-        package = json.loads((ROOT / "package.json").read_text(encoding="utf-8"))
-        lock = json.loads((ROOT / "package-lock.json").read_text(encoding="utf-8"))
-        self.assertEqual(package["version"], "1.4.0")
-        self.assertEqual(lock["version"], "1.4.0")
-        self.assertEqual(lock["packages"][""]["version"], "1.4.0")
-
     def test_release_is_exact_commit_after_successful_real_CI(self):
         source = (ROOT / ".github/workflows/release-stable-1.4.yml").read_text(encoding="utf-8")
         for name in (

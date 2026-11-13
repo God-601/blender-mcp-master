@@ -8,12 +8,12 @@ Blender-control MCP and Blender addon.
 ## Windows: install the Agent Skill from ZIP
 
 1. Open [GitHub Releases](https://github.com/God-601/blender-mcp-master/releases)
-   and download `blender-mcp-master-1.4.0.zip` and `SHA256SUMS.txt`
+   and download `blender-mcp-master-2.0.0.zip` and `SHA256SUMS.txt`
    from the same tagged release.
 2. Verify the SHA256 against the checksum file (PowerShell):
 
    ```powershell
-   (Get-FileHash .\blender-mcp-master-1.4.0.zip -Algorithm SHA256).Hash
+   (Get-FileHash .\blender-mcp-master-2.0.0.zip -Algorithm SHA256).Hash
    ```
 
    Compare the printed hash with the ZIP's entry in `SHA256SUMS.txt`.
@@ -22,7 +22,7 @@ Blender-control MCP and Blender addon.
 3. Extract the ZIP:
 
    ```powershell
-   Expand-Archive .\blender-mcp-master-1.4.0.zip -DestinationPath .\blender-release
+   Expand-Archive .\blender-mcp-master-2.0.0.zip -DestinationPath .\blender-release
    ```
 
 4. Copy the **inner** `blender-mcp-master` folder to a skills root supported by
@@ -32,7 +32,8 @@ Blender-control MCP and Blender addon.
    $Source = (Resolve-Path ".\blender-release\blender-mcp-master").Path
    $Dest = Join-Path $HOME ".agents\skills\blender-mcp-master"
    New-Item -ItemType Directory -Force (Split-Path $Dest) | Out-Null
-   Copy-Item -Path $Source -Destination $Dest -Recurse -Force
+   if (Test-Path $Dest) { throw "Back up and move the previous skill folder first." }
+   Copy-Item -Path $Source -Destination $Dest -Recurse
    ```
 
    This example installs in `~\.agents\skills`, a cross-agent convention;
@@ -46,25 +47,22 @@ Blender-control MCP and Blender addon.
    replacing the folder. The ZIP contains source scripts, not an executable
    Blender addon.
 
-## Install stable v1.4.0 using Skills CLI
+## Install v2.0.0 using Skills CLI
 
 ```powershell
-npx skills add God-601/blender-mcp-master@v1.4.0 --skill blender-mcp-master -g
+npx skills add God-601/blender-mcp-master@v2.0.0 --skill blender-mcp-master -g
 ```
 
 The [current Skills CLI](https://github.com/vercel-labs/skills/blob/main/docs/commands.md)
 supports GitHub tag pins and requires Node.js 22.20 or newer. The ZIP method
-works without Node.js. An unpinned GitHub source uses the default branch,
-which contains the 2.0 engineering preview. See the
-[preflight instructions](release-notes-2.0.md#review-a-preflight-archive)
-to try that preview in a separate installation.
+works without Node.js. An unpinned GitHub source follows the default branch.
 
 ## Optional read-only MCP resource server
 
 Start the server from the stable GitHub tag:
 
 ```powershell
-npx -y "github:God-601/blender-mcp-master#v1.4.0"
+npx -y "github:God-601/blender-mcp-master#v2.0.0"
 ```
 
 Configure that command in the agent's **MCP server config** as a stdio server

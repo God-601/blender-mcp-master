@@ -28,17 +28,16 @@ Blender MCP Master helps AI agents **plan, model, inspect, and validate** Blende
 
 > **Important:** This skill does **not** control Blender by itself. Live editing needs a separate Blender-control MCP server and Blender addon. The optional MCP resource server here is *read-only*.
 
-**2.0 engineering candidate:** seven reusable specialist modules, executable
+**Blender MCP Master 2.0:** seven reusable specialist modules, executable
 host-adapter orchestration, independent QA handoffs, hashed evidence receipts
 and default dry-run. A concrete Codex CLI worker handles read-only reviews;
 the bundled native bpy host supplies checkpoints, scene probes, writer leases
 and dispatch of explicitly inspected production callbacks.
 [Execution contract](references/specialist-orchestration.md) ·
 [Implementation and Agency Agents references](docs/V2-IMPLEMENTATION.md) ·
-[Validation status and release blockers](docs/V2-EVIDENCE.md).
-The stable package remains **1.4.0**. See the
-[2.0 candidate notes](docs/release-notes-2.0.md) for validation scope and
-the preflight procedure.
+[Validation record](docs/V2-EVIDENCE.md).
+See the [2.0 release notes](docs/release-notes-2.0.md) for migration and
+the scope of verified behavior.
 
 | Define | Build | Inspect | Deliver |
 | :--- | :--- | :--- | :--- |
@@ -48,19 +47,15 @@ the preflight procedure.
 
 **1. Install the stable skill**
 
-**[Download v1.4.0 · Installable ZIP](https://github.com/God-601/blender-mcp-master/releases/download/v1.4.0/blender-mcp-master-1.4.0.zip)**
+**[Download v2.0.0 · Installable ZIP](https://github.com/God-601/blender-mcp-master/releases/download/v2.0.0/blender-mcp-master-2.0.0.zip)**
 
-Get [SHA256SUMS.txt](https://github.com/God-601/blender-mcp-master/releases/download/v1.4.0/SHA256SUMS.txt) from the same release, verify the hash, extract the ZIP and copy its inner `blender-mcp-master` folder to your agent's skills directory. Full [Windows and agent setup instructions](docs/QUICKSTART.md).
+Get [SHA256SUMS.txt](https://github.com/God-601/blender-mcp-master/releases/download/v2.0.0/SHA256SUMS.txt) from the same release, verify the hash, extract the ZIP and copy its inner `blender-mcp-master` folder to your agent's skills directory. Full [Windows and agent setup instructions](docs/QUICKSTART.md).
 
 With a current Skills CLI, pin the same release tag:
 
 ```bash
-npx skills add God-601/blender-mcp-master@v1.4.0 --skill blender-mcp-master -g
+npx skills add God-601/blender-mcp-master@v2.0.0 --skill blender-mcp-master -g
 ```
-
-The repository's default branch contains the **2.0 engineering preview**.
-Use the [candidate preflight](docs/release-notes-2.0.md#review-a-preflight-archive)
-to review an exact source build in a separate installation.
 
 **2. Set up Blender control separately**
 
@@ -72,7 +67,7 @@ Connect a compatible Blender-control MCP and its addon; discover the actual tool
 Start the optional read-only MCP resource server from the stable GitHub tag:
 
 ```bash
-npx -y "github:God-601/blender-mcp-master#v1.4.0"
+npx -y "github:God-601/blender-mcp-master#v2.0.0"
 ```
 
 Configure Blender scene control separately.
@@ -80,7 +75,7 @@ Configure Blender scene control separately.
 
 <p align="center"><img src="assets/workflow.svg" width="100%" alt="Clarify, plan, build, inspect and correct workflow diagram"></p>
 
-**v1.4.0 stable:** The skill adapts its design questions to the brief, plans
+The skill adapts its design questions to the brief, plans
 modeling by task, and checks evaluated geometry, scene preservation, UVs,
 materials and game-asset budgets. The quality toolkit includes conservative
 component-fit and containment diagnostics, PNG silhouette measurements,
@@ -92,9 +87,9 @@ Roblox Studio acceptance:** Sofa V3 LOD meshes and PBR maps were inspected
 and the user approved the visible result. This does *not* certify universal
 Roblox/Unity compatibility or artistic quality.
 
-See the [v1.4.0 release notes](docs/release-notes-1.4.md),
+See the [v2.0.0 release notes](docs/release-notes-2.0.md),
 [game export guidance](references/game-ready-export.md), and the
-[v1.5–1.9 candidate milestone status](docs/V1.5-V2.0-MILESTONES.md).
+[v1.5–1.9 milestone status](docs/V1.5-V2.0-MILESTONES.md).
 
 ## Workflow
 
@@ -163,23 +158,22 @@ Some tests require a compatible `bpy` runtime. Passing tests is not proof of art
 
 **Uma skill para agentes de IA modelarem no Blender com método e evidências.** Ajuda a planejar, modelar, verificar topologia, UVs, materiais PBR e preparar assets para jogos. Ela orienta o agente; não instala nem substitui o Blender-control MCP.
 
-- **Instalar v1.4.0:** [baixe o ZIP da release](https://github.com/God-601/blender-mcp-master/releases/download/v1.4.0/blender-mcp-master-1.4.0.zip) ou use `npx skills add God-601/blender-mcp-master@v1.4.0 --skill blender-mcp-master -g`.
-- **Servidor de recursos opcional:** `npx -y "github:God-601/blender-mcp-master#v1.4.0"` inicia o servidor de recursos somente leitura.
-- **Prévia 2.0:** a branch padrão contém a candidata. Use o [arquivo de preflight](docs/release-notes-2.0.md#review-a-preflight-archive) em uma instalação separada.
+- **Instale a v2.0.0 pelo** [ZIP da release](https://github.com/God-601/blender-mcp-master/releases/download/v2.0.0/blender-mcp-master-2.0.0.zip) ou com `npx skills add God-601/blender-mcp-master@v2.0.0 --skill blender-mcp-master -g`.
+- **Servidor de recursos opcional** de somente leitura via `npx -y "github:God-601/blender-mcp-master#v2.0.0"`.
 - **Configurar:** conectar separadamente um Blender-control MCP. Veja o [guia para Windows e agentes](docs/QUICKSTART.md).
 - **Fluxo:** esclarecer → planejar → modelar → inspecionar → corrigir → relatar o que foi verificado.
 - **Aprofundar:** [documentação oficial](references/official-blender-documentation.md) · [verificação e recuperação](references/evidence-first-workflow.md) · [padrões profissionais](references/professional-modeling-standards.md).
 
-**Versão estável v1.4.0.** Inclui verificações técnicas e exemplos reais de baking e importação no Godot. Um sofá com três LODs e mapas PBR também foi aprovado pelo usuário no Roblox Studio. Os testes não garantem qualidade artística universal, redução real de tokens ou compatibilidade com todas as engines.
+Inclui verificações técnicas e exemplos reais de baking e importação no Godot. Um sofá com três LODs e mapas PBR foi aprovado pelo usuário em uma campanha anterior no Roblox Studio.
 
-**Candidata de engenharia 2.0:** módulos especializados, executor por adaptador
+A 2.0 reúne módulos especializados, executor por adaptador
 do cliente, um escritor por vez, QA independente e recibos com SHA256.
 Tarefas simples ficam com o coordenador. O adaptador deve fornecer as
 ferramentas reais do Blender; a ponte de revisão Codex é somente leitura.
 [Contrato e uso](references/specialist-orchestration.md) ·
-[Evidências e pendências](docs/V2-EVIDENCE.md). A 2.0 não foi publicada.
+[Evidências e pendências](docs/V2-EVIDENCE.md).
 
-[Notas da v1.4.0](docs/release-notes-1.4.md) · [Roadmap 2.0](docs/ROADMAP-V2.md) · [Guia Roblox Studio](integrations/roblox/README.md)
+[Notas da v2.0.0](docs/release-notes-2.0.md) · [Roadmap 2.0](docs/ROADMAP-V2.md) · [Guia Roblox Studio](integrations/roblox/README.md)
 
 <p align="center">
   <a href="LICENSE">MIT License</a> ·

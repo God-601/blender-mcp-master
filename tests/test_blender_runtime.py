@@ -513,6 +513,14 @@ class BlenderRuntimeTests(unittest.TestCase):
         self.assertTrue(os.path.isfile(path), out)
         self.assertEqual(os.listdir(output_dir), ["textured.fbx"], out)
 
+        os.remove(texture_path)
+        bpy.ops.wm.read_factory_settings(use_empty=True)
+        self.assertIn("FINISHED", bpy.ops.import_scene.fbx(filepath=path))
+        imported = bpy.data.objects["TexturedCrate"]
+        images = [node.image for slot in imported.material_slots for node in slot.material.node_tree.nodes
+                  if node.type == "TEX_IMAGE" and node.image]
+        self.assertTrue(any(image.packed_file and image.has_data for image in images))
+
     def test_export_relative_path_does_not_crash(self):
         add_mesh("Crate", cube)
         previous = os.getcwd()
@@ -583,6 +591,28 @@ class BlenderRuntimeTests(unittest.TestCase):
         with open(path, "rb") as stream:
             self.assertEqual(stream.read(), b"preserve existing export")
         self.assertEqual([o.name for o in bpy.data.objects], ["Crate"])
+
+    def test_export_overwrite_preserves_directory_at_destination(self):
+        add_mesh("Crate", cube)
+        path = Path(self.tmp.name) / "folder.fbx"
+        path.mkdir()
+        (path / "keep.txt").write_text("keep", encoding="utf-8")
+        out, err = run_script("export_asset.py", OBJECTS=["Crate"], PATH=str(path), OVERWRITE=True)
+        self.assertIsInstance(err, IsADirectoryError, out)
+        self.assertEqual((path / "keep.txt").read_text(encoding="utf-8"), "keep")
+
+    def test_export_refuses_to_overwrite_dangling_symlink(self):
+        add_mesh("Crate", cube)
+        path = Path(self.tmp.name) / "link.fbx"
+        missing = path.with_name("missing.fbx")
+        try:
+            path.symlink_to(missing)
+        except (NotImplementedError, OSError):
+            self.skipTest("symlink creation unavailable")
+        out, err = run_script("export_asset.py", OBJECTS=["Crate"], PATH=str(path))
+        self.assertIsInstance(err, FileExistsError, out)
+        self.assertEqual(path.readlink(), missing)
+        self.assertFalse(missing.exists())
 
     def test_apply_and_origin_skips_shape_key_mesh(self):
         obj = add_mesh("Morph", cube)

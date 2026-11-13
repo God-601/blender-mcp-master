@@ -56,6 +56,10 @@ test("MCP server starts over stdio and exposes the expected tools", async () => 
     await client.connect(transport);
     const result = await client.listTools();
     const names = result.tools.map((tool) => tool.name);
+    for (const tool of result.tools) {
+      assert.equal(tool.annotations?.readOnlyHint, true, tool.name);
+      assert.equal(tool.annotations?.openWorldHint, false, tool.name);
+    }
     assert.deepEqual(names.sort(), [
       "plan_blender_workflow",
       "get_blender_mcp_setup",
@@ -118,6 +122,25 @@ test("advisory MCP route chooses only relevant guides and skips repeat questions
 test("MCP server reports the package.json version", async () => {
   await withClient(async (client) => {
     assert.equal(client.getServerVersion().version, pkg.version);
+  });
+});
+
+test("MCP route keeps a materials brief's destination and separate UV guide", async () => {
+  await withClient(async (client) => {
+    const route = (destination) => client.callTool({
+      name: "plan_blender_workflow",
+      arguments: { category: "materials", destination, needs: ["uv", "pbr"],
+                   known: ["purpose"], delegated: ["materials", "purpose"] }
+    });
+    const response = await route("roblox");
+    assert.ok(!response.isError);
+    const plan = JSON.parse(response.content[0].text);
+    assert.equal(plan.category, "materials");
+    assert.equal(plan.destination, "roblox");
+    assert.equal(plan.primary, "references/materials.md");
+    assert.deepEqual(plan.optional, ["references/uv-baking.md"]);
+    assert.deepEqual(plan.questions_already_known_or_delegated, ["materials", "purpose"]);
+    assert.equal((await route("unrecognized_destination")).isError, true);
   });
 });
 

@@ -10,6 +10,7 @@ Reports success only when the output file exists; otherwise it raises an error.
 """
 import os
 import shutil
+import stat
 import tempfile
 import bpy
 import bmesh
@@ -23,6 +24,18 @@ TRIANGULATE = True                     # triangulate export copies
 APPLY_MODIFIERS = True                 # bake modifier stack into the exported copy
 OVERWRITE = False                      # refuse to replace an existing file unless explicitly enabled
 # ----------------------------------------------------------------------------
+
+def validate_destination(path):
+    try:
+        mode = os.lstat(path).st_mode
+    except FileNotFoundError:
+        return False
+    if stat.S_ISDIR(mode):
+        raise IsADirectoryError(f"Export destination is a directory: {path}")
+    if not OVERWRITE or not stat.S_ISREG(mode):
+        raise FileExistsError(f"Refusing to replace export destination: {path}. OVERWRITE=True permits regular files only.")
+    return True
+
 
 if FORMAT not in ("FBX", "GLB", "OBJ"):
     raise ValueError(f"Unknown FORMAT {FORMAT!r}; use FBX, GLB or OBJ")
@@ -46,10 +59,9 @@ out_path = os.path.abspath(bpy.path.abspath(PATH))
 expected_extension = {"FBX": ".fbx", "GLB": ".glb", "OBJ": ".obj"}[FORMAT]
 if os.path.splitext(out_path)[1].lower() != expected_extension:
     raise ValueError("Export PATH must end in " + expected_extension + " for FORMAT=" + FORMAT)
-if os.path.exists(out_path) and not OVERWRITE:
-    raise FileExistsError(f"Refusing to overwrite existing export: {out_path}. Set OVERWRITE=True to replace it.")
-if FORMAT == "OBJ" and os.path.exists(os.path.splitext(out_path)[0] + ".mtl") and not OVERWRITE:
-    raise FileExistsError(f"Refusing to overwrite existing OBJ material file: {os.path.splitext(out_path)[0] + '.mtl'}. Set OVERWRITE=True to replace it.")
+validate_destination(out_path)
+if FORMAT == "OBJ":
+    validate_destination(os.path.splitext(out_path)[0] + ".mtl")
 os.makedirs(os.path.dirname(out_path), exist_ok=True)
 extension = expected_extension
 fd, temp_path = tempfile.mkstemp(prefix="._blender_mcp_export_", suffix=extension, dir=os.path.dirname(out_path))
@@ -126,7 +138,7 @@ try:
     if FORMAT == "FBX":
         kw = dict(filepath=temp_path, use_selection=True, object_types={'MESH'},
                   use_mesh_modifiers=False, mesh_smooth_type='FACE', add_leaf_bones=False,
-                  bake_anim=False, path_mode='COPY', embed_textures=False)
+                  bake_anim=False, path_mode='COPY', embed_textures=True)
         if ENGINE == "UNITY":
             kw.update(apply_scale_options='FBX_SCALE_ALL', axis_forward='-Z', axis_up='Y', apply_unit_scale=True)
         elif ENGINE == "UNREAL":
@@ -167,7 +179,7 @@ try:
     committed = False
     try:
         for _src, _dest in pending:
-            if os.path.lexists(_dest):
+            if validate_destination(_dest):
                 fd, _backup = tempfile.mkstemp(
                     prefix="._blender_mcp_original_", dir=os.path.dirname(_dest))
                 os.close(fd)
