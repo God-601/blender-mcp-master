@@ -10,12 +10,20 @@ export function excerptLines(source, {startLine = 1, maxLines = 40, maxChars = 6
     throw new RangeError("line window must be between 1 and 80");
   if (!Number.isInteger(maxChars) || maxChars < 100 || maxChars > 6000)
     throw new RangeError("character window must be between 100 and 6000");
-  const endLine = Math.min(totalLines, startLine + maxLines - 1);
-  const original = lines.slice(startLine - 1, endLine).join("\n");
+  const requestedEnd = Math.min(totalLines, startLine + maxLines - 1);
+  let endLine = startLine;
+  let text = lines[startLine - 1].slice(0, maxChars);
+  const firstLineWasTruncated = text.length < lines[startLine - 1].length;
+  while (!firstLineWasTruncated && endLine < requestedEnd) {
+    const next = lines[endLine];
+    if (text.length + 1 + next.length > maxChars) break;
+    text += "\n" + next;
+    endLine++;
+  }
   return {
     startLine, endLine, totalLines,
-    text: original.slice(0, maxChars),
-    truncatedChars: original.length > maxChars,
+    text,
+    truncatedChars: firstLineWasTruncated || endLine < requestedEnd,
     nextLine: endLine < totalLines ? endLine + 1 : null
   };
 }

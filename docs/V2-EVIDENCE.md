@@ -1,17 +1,13 @@
-# V2 engineering evidence and release hold
+# V2 engineering evidence
 
 The follow-up [recorded campaign](V2-CAMPAIGN-2026-11-08.md) now includes 30
 actual constrained agent generations, five canonical fixtures, Godot imports,
 real crash/restart and addon reconnect tests, and Roblox material/collision
 checks. Its scope and unresolved model/quality limits remain explicit.
 
-Status: staged implementation, **not a 2.0 release or complete production
-acceptance**. Review the stages in order: [#69](https://github.com/God-601/blender-mcp-master/pull/69),
-[#70](https://github.com/God-601/blender-mcp-master/pull/70), then the evidence/gates PR.
-Stable manifest and lock remain 1.4.0. No release tags, npm publication or
-merges were part of the initial delivery. The user's follow-up explicitly
-authorizes review and merge; the complete 2.0 production acceptance and
-publication gates remain separate and are not waived by merge authorization.
+The [2.0.0 release notes](release-notes-2.0.md) state the shipped scope. The
+entries below preserve the engineering campaign, including what each run
+established and the production acceptance work still open.
 
 ## Reproduce engineering checks
 

@@ -120,7 +120,7 @@ def campaign(args):
             'campaign': digest(Path(__file__))}, 'checks': {}, 'limits': [
         'Process restart from an explicit saved checkpoint; no addon, socket, or MCP reconnect tested.',
         'Advisory OS locks coordinate cooperating hosts on this machine; external tools can ignore the lock.',
-        'Lock identity uses normalized source path; different hard links or unsaved evidence scopes are separate.',
+        'Lock identity uses the normalized saved-source path or the unsaved scene within its Blender process. Different hard links are separate.',
         'Selected object fingerprints and source/checkpoint hashes do not certify every Blender property.']}
     child = None
     logs = []

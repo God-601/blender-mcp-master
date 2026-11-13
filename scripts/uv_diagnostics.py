@@ -16,7 +16,7 @@ TARGETS = []                      # required; never fall back to selection
 UV_LAYER_NAME = ""                # empty = active layer
 TEXTURE_WIDTH = 1024              # intended map size (px), not read from shader
 TEXTURE_HEIGHT = 1024
-ALLOW_STACKING = False            # mirrored/staked layouts: explicit review
+ALLOW_STACKING = False            # mirrored/stacked layouts: explicit review
 ALLOW_TILING = False              # UDIM/tiling may deliberately leave 0-1
 DENSITY_REVIEW_RATIO = 2.0       # review large differences; not hard failure
 MAX_PAIRWISE_TRIANGLES = 1200     # cap quadratic overlap checks
@@ -26,41 +26,31 @@ MAX_OVERLAP_EXAMPLES = 15
 def signed_area(a, b, c):
     return (b[0]-a[0])*(c[1]-a[1])-(b[1]-a[1])*(c[0]-a[0])
 
-def point_inside_strict(point, tri, eps=1e-10):
-    d = [signed_area(tri[i], tri[(i+1)%3], point) for i in range(3)]
-    return all(value > eps for value in d) or all(value < -eps for value in d)
+def triangle_bounds(points):
+    u, v = zip(*points)
+    return min(u), max(u), min(v), max(v)
 
-def properly_cross(a, b, c, d, eps=1e-10):
-    ab1, ab2 = signed_area(a,b,c), signed_area(a,b,d)
-    cd1, cd2 = signed_area(c,d,a), signed_area(c,d,b)
-    return ((ab1 > eps and ab2 < -eps or ab1 < -eps and ab2 > eps)
-            and (cd1 > eps and cd2 < -eps or cd1 < -eps and cd2 > eps))
 
 def positive_overlap(first, second):
-    """Overlap of non-zero 2D area. Border contact alone is not an overlap."""
-    x1=[p[0] for p in first]
-    x2=[p[0] for p in second]
-    y1=[p[1] for p in first]
-    y2=[p[1] for p in second]
-    eps=1e-10
-    if min(max(x1),max(x2)) - max(min(x1),min(x2)) <= eps:
+    """Nondegenerate triangles overlap in area if no edge normal separates them."""
+    eps = 1e-10
+    first_u_min, first_u_max, first_v_min, first_v_max = first["bounds"]
+    second_u_min, second_u_max, second_v_min, second_v_max = second["bounds"]
+    if (min(first_u_max, second_u_max) - max(first_u_min, second_u_min) <= eps or
+            min(first_v_max, second_v_max) - max(first_v_min, second_v_min) <= eps):
         return False
-    if min(max(y1),max(y2)) - max(min(y1),min(y2)) <= eps:
-        return False
-    for i in range(3):
-        a,b=first[i],first[(i+1)%3]
-        for j in range(3):
-            if properly_cross(a,b,second[j],second[(j+1)%3],eps):
-                return True
-    if any(point_inside_strict(v,second,eps) for v in first):
-        return True
-    if any(point_inside_strict(v,first,eps) for v in second):
-        return True
-    # Coincident/rotated triangles can share boundaries with no strictly
-    # contained vertex: centroid interior test catches real area stacking.
-    center1=(sum(v[0] for v in first)/3,sum(v[1] for v in first)/3)
-    center2=(sum(v[0] for v in second)/3,sum(v[1] for v in second)/3)
-    return point_inside_strict(center1,second,eps) or point_inside_strict(center2,first,eps)
+    a, b = first["uv"], second["uv"]
+    for triangle in (a, b):
+        for i in range(3):
+            start, end = triangle[i], triangle[(i + 1) % 3]
+            u, v = start[1] - end[1], end[0] - start[0]
+            projection_a = [u * x + v * y for x, y in a]
+            projection_b = [u * x + v * y for x, y in b]
+            depth = min(max(projection_a), max(projection_b)) - max(min(projection_a), min(projection_b))
+            if depth <= eps * math.hypot(u, v):
+                # Touching at an edge or vertex does not cover any area.
+                return False
+    return True
 
 def analyze(obj):
     mesh=obj.data
@@ -101,7 +91,8 @@ def analyze(obj):
         world_area_total+=wa
         uv_area_total+=ua
         densities.append(math.sqrt(ua*TEXTURE_WIDTH*TEXTURE_HEIGHT/wa))
-        triangles.append({"polygon":int(tri.polygon_index),"uv":uv})
+        triangles.append({"polygon": int(tri.polygon_index), "uv": uv,
+                          "bounds": triangle_bounds(uv)})
     report["uv_layer"]=layer.name
     report["triangles_measured"]=len(triangles)
     report["degenerate_uv_or_world_triangles"]=degenerates
@@ -133,9 +124,7 @@ def analyze(obj):
         for i in range(len(triangles)):
             for j in range(i+1,len(triangles)):
                 a,b=triangles[i],triangles[j]
-                if a["polygon"]==b["polygon"]:
-                    continue  # triangles tessellating the same n-gon/quad
-                if positive_overlap(a["uv"],b["uv"]):
+                if positive_overlap(a, b):
                     pairs+=1
                     if len(report["overlap_examples"]) < MAX_OVERLAP_EXAMPLES:
                         report["overlap_examples"].append([a["polygon"],b["polygon"]])

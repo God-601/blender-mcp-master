@@ -40,6 +40,15 @@ test("even one excessively long line is capped and explicitly marked", () => {
   assert.equal(chunk.nextLine, null);
 });
 
+test("a character-limited excerpt resumes at the first omitted line", () => {
+  const text = ["a".repeat(80), "b".repeat(50), "next guidance"].join("\n");
+  const first = excerptLines(text, {maxLines: 3, maxChars: 100});
+  assert.deepEqual([first.endLine, first.nextLine, first.truncatedChars], [1, 2, true]);
+  assert.equal(first.text, "a".repeat(80));
+  const rest = excerptLines(text, {startLine: first.nextLine, maxLines: 3, maxChars: 100});
+  assert.equal(rest.text, "b".repeat(50) + "\nnext guidance");
+});
+
 test("outline caps headings without claiming full coverage", () => {
   const large = Array.from({ length: 90 }, (_, i) => "## Heading" + i).join("\n");
   const result = markdownOutline(large, { maxHeadings: 10 });

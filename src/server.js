@@ -5,7 +5,7 @@ import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
 import { z } from "zod";
 import { excerptLines, markdownOutline } from "./resource-excerpts.js";
-import { planWorkflow, PRIMARY, OPTIONAL } from "./workflow-routing.js";
+import { planWorkflow, DESTINATIONS, PRIMARY, OPTIONAL, TOPICS } from "./workflow-routing.js";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const PACKAGE_VERSION = JSON.parse(readFileSync(resolve(ROOT, "package.json"), "utf8")).version;
@@ -28,7 +28,15 @@ const server = new McpServer({
   version: PACKAGE_VERSION
 });
 
-server.tool(
+function registerReadOnlyTool(name, description, inputSchema, callback) {
+  server.registerTool(name, {
+    description,
+    inputSchema,
+    annotations: { readOnlyHint: true, openWorldHint: false }
+  }, callback);
+}
+
+registerReadOnlyTool(
   "get_blender_skill",
   "Return the Blender MCP Master agent skill instructions (SKILL.md).",
   {},
@@ -37,7 +45,7 @@ server.tool(
   })
 );
 
-server.tool(
+registerReadOnlyTool(
   "list_blender_resources",
   "List the skill reference guides and reusable Blender Python scripts bundled with this package.",
   {},
@@ -54,7 +62,7 @@ server.tool(
   })
 );
 
-server.tool(
+registerReadOnlyTool(
   "get_blender_reference",
   "Read one bundled modeling reference guide by exact filename.",
   { name: z.string().describe("Exact .md filename from list_blender_resources.references") },
@@ -63,7 +71,7 @@ server.tool(
   })
 );
 
-server.tool(
+registerReadOnlyTool(
   "get_blender_reference_outline",
   "List only section headings and their line numbers from one guide. Low-context alternative to reading the full document.",
   { name: z.string().describe("Exact .md guide filename") },
@@ -77,7 +85,7 @@ server.tool(
   }
 );
 
-server.tool(
+registerReadOnlyTool(
   "get_blender_reference_excerpt",
   "Read only a bounded line window from a reference. Returns continuation line; use before requesting full text.",
   {
@@ -96,7 +104,7 @@ server.tool(
   }
 );
 
-server.tool(
+registerReadOnlyTool(
   "get_blender_script",
   "Return one reusable Blender Python script by exact filename. Review its configuration and safety notes before execution.",
   { name: z.string().describe("Exact .py filename from list_blender_resources.scripts") },
@@ -105,7 +113,7 @@ server.tool(
   })
 );
 
-server.tool(
+registerReadOnlyTool(
   "get_blender_mcp_setup",
   "Explain how this skill/resource server relates to a separate MCP server that controls a live Blender session.",
   {},
@@ -123,14 +131,15 @@ server.tool(
   })
 );
 
-server.tool(
+registerReadOnlyTool(
   "plan_blender_workflow",
   "Recommend minimal on-demand guides and unanswered design topics without touching Blender.",
   {
     category: z.enum(Object.keys(PRIMARY)),
+    destination: z.enum(DESTINATIONS).default("other"),
     needs: z.array(z.enum(Object.keys(OPTIONAL))).max(8).default([]),
-    known: z.array(z.enum(["reference", "silhouette", "materials", "purpose", "technical"])).max(5).default([]),
-    delegated: z.array(z.enum(["reference", "silhouette", "materials", "purpose", "technical"])).max(5).default([]),
+    known: z.array(z.enum(TOPICS)).max(5).default([]),
+    delegated: z.array(z.enum(TOPICS)).max(5).default([]),
     continuation: z.boolean().default(false)
   },
   async (args) => ({

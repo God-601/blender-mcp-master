@@ -59,6 +59,7 @@ def material_dependencies(material):
 
 
 def save_recovery_checkpoint(path):
+    """Save a recoverable Blender copy for an initial checkpoint or production stage."""
     dirty_images = sorted(image.name for image in bpy.data.images if image.is_dirty)
     if dirty_images:
         raise ValueError('Checkpoint cannot preserve unsaved image pixels. Save or pack these images first: '
@@ -118,7 +119,7 @@ class BlenderNativeHost:
         validate_context(self.context)
         source = os.path.normcase(str(Path(bpy.data.filepath).resolve())) if bpy.data.filepath else None
         self.source_path = source
-        scope = 'source:' + source if source else 'unsaved:%s:%s:%s' % (self.root, SESSION_ID, self.scene_pointer)
+        scope = 'source:' + source if source else 'unsaved:%s:%s' % (os.getpid(), self.scene_pointer)
         key = hashlib.sha256(scope.encode('utf-8')).hexdigest()
         self.lease_path = Path(tempfile.gettempdir()) / ('blender-mcp-writer-' + key + '.lock')
         self.lease = None
@@ -245,8 +246,7 @@ class BlenderNativeHost:
                 if path.exists():
                     raise ValueError('Stage file already exists')
                 try:
-                    if bpy.ops.wm.save_as_mainfile(filepath=str(path), copy=True) != {'FINISHED'}:
-                        raise ValueError('Could not save production stage')
+                    save_recovery_checkpoint(path)
                     self.probe(self.context)
                 except Exception:
                     path.unlink(missing_ok=True)
