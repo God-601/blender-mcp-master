@@ -1,9 +1,10 @@
-"""Read-only asset diagnostics. Empty TARGETS validates selected meshes only."""
+"""Read-only asset diagnostics for named meshes or explicitly opted-in selection."""
 import bpy
 import bmesh
 import math
 
-TARGETS = []  # Explicit object names; empty = selected mesh objects ONLY.
+TARGETS = []  # Explicit mesh object names.
+USE_SELECTION = False  # With empty TARGETS, explicitly validate only selected meshes.
 MAX_TRIS = 5000
 MAX_MATERIALS = 2
 MAX_TEX_SIZE = 2048
@@ -32,10 +33,10 @@ def pick_objects():
             else:
                 result.append(obj)
         return result
+    if USE_SELECTION is not True:
+        return []
     result = [obj for obj in bpy.context.selected_objects if obj.type == "MESH"]
-    if not result:
-        print("INFO: TARGETS is empty and no mesh is selected. Scene-wide fallback is disabled.")
-    else:
+    if result:
         print("INFO: validating selected mesh object(s): " + ", ".join(repr(obj.name) for obj in result))
     return result
 
@@ -158,7 +159,7 @@ for name, kind in INVALID_TARGETS:
     print(f"WARN: target object is not a mesh: {name!r} (type: {kind})")
 if not objects:
     counts["WARN"] += 1
-    print("WARN: no mesh targets. Set TARGETS or select intended meshes; no scene-wide fallback.")
+    print("WARN: no mesh targets. Set TARGETS to explicit mesh names. Scene-wide fallback is disabled.")
 
 for obj in objects:
     print(f"\n[{obj.name}]")

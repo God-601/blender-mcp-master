@@ -47,7 +47,8 @@ jobs:
           set -euo pipefail
           mkdir -p dist/blender-mcp-master
           cp -R SKILL.md README.md LICENSE CHANGELOG.md CONTRIBUTING.md references scripts integrations assets docs dist/blender-mcp-master/
-          (cd dist && zip -q -r "$PREFLIGHT_NAME" blender-mcp-master)
+          # Sync the archive so rebuilding also drops entries from previous packages.
+          (cd dist && zip -q -r -FS "$PREFLIGHT_NAME" blender-mcp-master -x '*/__pycache__/*' '*.py[co]')
           python - <<'PY'
           from pathlib import Path
           from zipfile import ZipFile

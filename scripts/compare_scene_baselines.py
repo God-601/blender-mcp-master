@@ -7,8 +7,15 @@ The JSON status is authoritative; the script does not terminate the Blender host
 import argparse
 import json
 from pathlib import Path
+import re
 
 SCOPE = "explicit_protected_objects_selected_properties"
+MATCHED_SCOPE = "PASS (escopo parcial)"
+LEGACY_LIMITS = (
+    "Legacy schema v1 omits vertex weights, shape key settings, constraints, animation, "
+    "rigs, curves, embedded pixels, custom properties and some mesh attributes.",
+    "Only the selected properties of the named objects are compared.",
+)
 
 
 def compare(before, after):
@@ -21,20 +28,47 @@ def compare(before, after):
         "added_to_scope": [],
         "reason": [],
         "scope": SCOPE,
+        "scope_status": "NOT VERIFIED",
+        "limitations": [],
         "scene_global_integrity": "NOT VERIFIED",
         "visual_integrity": "NOT VERIFIED",
     }
     if not isinstance(before, dict) or not isinstance(after, dict):
         result["reason"].append("Two JSON object snapshots are required")
         return result
-    if any(record.get("scope") != SCOPE or record.get("schema_version") != 1
-           or record.get("status") != "MEASURED" for record in (before, after)):
-        result["reason"].append("Missing, incomplete, or incompatible baseline snapshot")
+    version = before.get("schema_version")
+    if (type(version) is not int or version not in (1, 2)
+            or type(after.get("schema_version")) is not int or after["schema_version"] != version
+            or any(record.get("scope") != SCOPE for record in (before, after))):
+        result["reason"].append("Missing or incompatible baseline schema or scope")
         return result
-    for stage, record in (("before", before), ("after", after)):
-        if record.get("missing_names") or record.get("errors"):
-            result["reason"].append(stage + " snapshot has missing names or capture errors")
+    if version == 1:
+        result["limitations"] = list(LEGACY_LIMITS)
+    else:
+        blender_version = before.get("blender_version")
+        if (not isinstance(blender_version, str) or not blender_version
+                or after.get("blender_version") != blender_version):
+            result["reason"].append("Schema v2 requires matching Blender versions")
             return result
+    for stage, record in (("before", before), ("after", after)):
+        limits = record.get("limitations", [])
+        if version == 2 and (not isinstance(limits, list) or not limits
+                             or any(not isinstance(item, str) or not item.strip() for item in limits)):
+            result["reason"].append(stage + " snapshot has no valid coverage limitations")
+        elif isinstance(limits, list):
+            for item in limits:
+                if isinstance(item, str) and item not in result["limitations"]:
+                    result["limitations"].append(item)
+        for key in ("missing_names", "errors"):
+            issues = record.get(key, [])
+            if not isinstance(issues, list) or any(not isinstance(item, str) for item in issues):
+                result["reason"].append(stage + " snapshot has invalid " + key)
+            elif issues:
+                result["reason"].extend(stage + " " + key + ": " + item for item in issues)
+        if record.get("status") != "MEASURED":
+            result["reason"].append(stage + " snapshot did not measure every protected object")
+    if result["reason"]:
+        return result
     original = before.get("objects")
     final = after.get("objects")
     if not isinstance(original, list) or not isinstance(final, list) or not original:
@@ -43,10 +77,11 @@ def compare(before, after):
     names_a = [x.get("name") for x in original if isinstance(x, dict)]
     names_b = [x.get("name") for x in final if isinstance(x, dict)]
     if (len(names_a) != len(original) or len(names_b) != len(final)
+            or any(not isinstance(name, str) or not name.strip() for name in names_a + names_b)
             or len(set(names_a)) != len(original) or len(set(names_b)) != len(final)
-            or any(not isinstance(name, str) or not name for name in names_a + names_b)
             or any(not isinstance(x.get("fingerprint_sha256"), str)
-                   or len(x["fingerprint_sha256"]) != 64 for x in original + final)):
+                   or re.fullmatch(r"[0-9a-f]{64}", x["fingerprint_sha256"]) is None
+                   for x in original + final)):
         result["reason"].append("Invalid object entry, duplicate name or fingerprint")
         return result
     by_name_a = {x["name"]: x for x in original}
@@ -65,11 +100,15 @@ def compare(before, after):
         result["reason"].append("The protected-name set changed between snapshots")
     if result["removed_or_missing"] or result["changed"]:
         result["status"] = "ISSUE"
+        result["scope_status"] = "ISSUE"
         result["reason"].append("At least one protected object is missing or has changed")
     elif result["added_to_scope"]:
         result["status"] = "NOT VERIFIED"
     else:
-        result["status"] = "PASS"
+        # Legacy consumers can still read schema v1 receipts. New captures carry
+        # partial coverage in the authoritative status as well.
+        result["status"] = "PASS" if version == 1 else MATCHED_SCOPE
+        result["scope_status"] = MATCHED_SCOPE
         result["reason"].append("All captured protected-object properties match")
     return result
 
@@ -95,7 +134,7 @@ def main():
         print(json.dumps({"status": "NOT VERIFIED", "error": str(error)}, indent=2))
         return 2
     print(json.dumps(result, sort_keys=True, indent=2, ensure_ascii=False))
-    return 0 if result["status"] == "PASS" else 1
+    return 0 if result["scope_status"] == MATCHED_SCOPE else 1
 
 
 if __name__ == "__main__":

@@ -2,20 +2,23 @@
 
 **P0 new-project decision gate.** Before substantial geometry, exporting,
 irreversible changes, or paid generation, determine what the user actually
-wants the model to look like. The goal is a **useful multi-question design
-conversation**, NOT a perfunctory "can I proceed?" permission request.
-Read the complete user brief, references and already-answered constraints first.
-Read-only discovery of Blender and existing scenes is allowed at any point. **Before any scene mutation**, collect the necessary answers. Always **do not repeat answered requirements** from the user's brief or prior discussion.
+wants the asset to look like and how it will be used. Read the complete
+brief, references and already-answered constraints first. Read-only discovery
+of Blender and the scene is allowed at any point. **Before any scene mutation**,
+resolve material ambiguities. **Do not repeat answered requirements** from the
+user's brief or prior discussion.
 
-## GENERAL KICKOFF — several useful questions on every NEW project
+## GENERAL KICKOFF — resolve gaps in a new brief
 
-For a genuinely NEW modeling assignment, summarize the known requirements in
-two lines, then ask **multiple specific, independent design questions in a
-conversational numbered or compact grouped format**. Default to **4–6**
-questions for a moderately complex asset; **2–3** for a simple prop and
-**5–8 across one or two rounds** for characters, architecture, hero assets
-and multi-part scenes. Do not send 20 mechanical questions in a single wall
-of text. Questions must improve the expected 3D result, not just fill a quota.
+Ask zero questions when the brief resolves every consequential choice or the
+user delegates the remaining design decisions. Record any editable defaults
+and proceed through scene protection and planning.
+
+When the brief leaves a consequential gap, ask a specific question. If several
+independent choices are open, group multiple specific questions in a short list. Typical ranges for
+underspecified briefs are **2–3** for a simple prop, **4–6** for a moderately
+complex asset and **5–8 across one or two rounds** for a character, building,
+hero asset or multi-part scene. The actual gaps determine the number.
 
 Choose the most important *unanswered* dimensions:
 1. **Purpose and target:** gameplay/Roblox/other engine, animation, static
@@ -32,19 +35,15 @@ Choose the most important *unanswered* dimensions:
 6. **Priority/tradeoffs:** accuracy vs performance, silhouette vs details,
    hero object vs background, must-have/must-avoid visual traits.
 
-**No duplicate questions:** remove any category already answered. A brief
-can be complete on engine, dimensions and triangle budget but still have
-unanswered color, material and silhouette preferences. Ask the *remaining*
-artistic questions rather than repeating specs. If truly every meaningful
-choice is covered, or the user explicitly says "choose everything / surprise
-me / no questions", make a brief editable plan and proceed. A new project
-does not require pointless questions to satisfy a number.
+**No duplicate questions.** Remove any category already answered. Engine,
+dimensions and triangle budget may be settled while color, material or
+silhouette preferences still need input. Ask only about the remaining gaps
+that would materially change the asset.
 
 **Never ask "posso seguir?", "pode prosseguir?", "is that OK?" or equivalent
-as the sole design question.** The user's replies to the actual questions
-are the design input, not an administrative approval ritual. If they say
-"you choose", propose a coherent choice and move on. Do not repeatedly
-ask for permission to start after the design details are known.
+as a design question.** If the user says "you choose", make a coherent choice
+and record it in the brief. Ask for approval only when an action separately
+requires authorization.
 
 Wait for answers to the initial meaningful questions before scene mutation.
 Then update a compact **Design Brief**: known values, user choices, agent
@@ -67,7 +66,7 @@ new high-impact questions.
 | Realtime target, purpose unclear | "Vai aparecer de perto ou como cenário? Precisa de colisão ou animação?" | Determines scale/detail/pivots |
 | Mechanical prop without dimensions | "Quais medidas e folgas precisam ser exatas?" | Prevents fictional fits |
 | Character | "Qual anatomia/silhueta, roupa, expressão e pose? Vai animar?" | Shape + topology + rig |
-| Full brief, one visual choice missing | "O metal deve parecer novo, pintado ou envelhecido? Qual cor predomina?" | Genuine user preference |
+| Finish unspecified | "O metal deve parecer novo, pintado ou envelhecido?" | Affects surface appearance |
 | Delegation | No new question if meaningful choices explicitly delegated | Respect user autonomy |
 
 ### Example — low-poly Roblox tree
@@ -97,7 +96,7 @@ Do not finish with "posso começar?" — take the answers into the plan.
 | Class | Meaning | Action |
 | --- | --- | --- |
 | **BLOCKER** | Contradictory scope, required fit/tolerances, unknown export target that changes deliverable, paid cost or overwrite | Stop. Ask focused questions, record answers. |
-| **QUALITY-RISK** | Missing reference, silhouette, material or priority that would produce materially different assets | Include in the multi-question design interview. |
+| **QUALITY-RISK** | Missing reference, silhouette, material or priority that would produce materially different assets | Ask about it if the user has left the decision open. |
 | **OPTIONAL** | Small decorative/bevel/camera details after core brief resolved | Use editable defaults and report them. |
 
 Explicit approval is **still required for destructive edits, overwrites,
@@ -106,8 +105,8 @@ authorization is never substituted by answered artistic questions.
 
 ## Acceptance
 
-- A new ambiguous 3D project elicits several specific, nonredundant design
-  questions before mutation, rather than one generic permission question.
+- An ambiguous brief elicits specific questions before mutation. A complete
+  brief or explicit delegation elicits zero design questions.
 - If the user has answered an element already, it does not reappear.
 - Responses change a written design plan and modeling choices.
 - Repeat instructions/follow-ups use the existing brief without resetting it.

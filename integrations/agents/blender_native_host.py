@@ -10,14 +10,16 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import subprocess
 import sys
 import tempfile
 import uuid
 
 import bpy
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'scripts'))
-from scene_baseline_snapshot import capture_object, node_tree_signature
+sys.path[:0] = [str(Path(__file__).resolve().parents[2] / 'scripts'), str(Path(__file__).resolve().parent)]
+from checkpoint_pack import checkpoint_paths
+from scene_baseline_snapshot import PROTECTION_LIMITS, capture_object, node_tree_signature
 from specialist_orchestrator import artifact, validate_context, write_receipt
 
 SESSION_ID = str(uuid.uuid4())
@@ -56,6 +58,48 @@ def material_dependencies(material):
     return found
 
 
+def save_recovery_checkpoint(path):
+    dirty_images = sorted(image.name for image in bpy.data.images if image.is_dirty)
+    if dirty_images:
+        raise ValueError('Checkpoint cannot preserve unsaved image pixels. Save or pack these images first: '
+                         + ', '.join(dirty_images))
+    dependencies = checkpoint_paths()
+    missing = [name for name in dependencies if not Path(name).is_file()]
+    if missing:
+        raise ValueError('Checkpoint has missing or unsupported external dependencies: ' + ', '.join(missing))
+    if not dependencies:
+        if bpy.ops.wm.save_as_mainfile(filepath=str(path), copy=True) != {'FINISHED'}:
+            raise ValueError('Could not save recovery checkpoint')
+        return ('BLENDER_RUNTIME_ASSETS_ONLY' if bpy.utils.blend_paths(absolute=True, packed=False)
+                else 'NO_EXTERNAL_PATHS_REPORTED')
+
+    # Work in a child process so packing cannot change live images, preferences or paths.
+    worker = Path(__file__).with_name('checkpoint_pack.py').resolve()
+    with tempfile.TemporaryDirectory(prefix='.checkpoint-', dir=path.parent) as folder:
+        staged = Path(folder) / 'source.blend'
+        packed = Path(folder) / 'packed.blend'
+        if bpy.ops.wm.save_as_mainfile(filepath=str(staged), copy=True, relative_remap=True) != {'FINISHED'}:
+            raise ValueError('Could not save checkpoint copy for packing')
+        if bpy.app.binary_path:
+            command = [bpy.app.binary_path, '--background', '--factory-startup', '--disable-autoexec',
+                       '--threads', '1', '--python-exit-code', '1', '--python', str(worker)]
+        else:
+            command = [sys.executable, str(worker)]
+        try:
+            process = subprocess.run([*command, '--', str(staged), str(packed)],
+                                     capture_output=True, text=True, timeout=60, check=False)
+        except (OSError, subprocess.TimeoutExpired) as error:
+            raise ValueError('Checkpoint dependency packing could not run: ' + str(error)) from error
+        if (process.returncode or not packed.is_file()
+                or 'PACKED_CHECKPOINT_VERIFIED' not in process.stdout.splitlines()):
+            detail = (process.stderr or process.stdout).strip()[-2000:]
+            raise ValueError('Checkpoint dependencies could not be packed and verified: ' + detail)
+        # Validate the same limits as the orchestrator before promoting the staged file.
+        artifact(Path(folder), packed.name)
+        os.replace(packed, path)
+    return 'PACKED_AND_REOPENED'
+
+
 class BlenderNativeHost:
     def __init__(self, root, *, asset_id, owned_objects, protected_objects,
                  commit_sha, actor_id, callbacks, reviewer=None):
@@ -80,6 +124,7 @@ class BlenderNativeHost:
         self.lease = None
         self.baseline = None
         self.checkpoint = None
+        self.checkpoint_dependencies = None
         self.global_state = None
 
     def _scope(self):
@@ -134,7 +179,7 @@ class BlenderNativeHost:
             path = self.root / self.context['checkpoint_ref']
             if path.exists():
                 raise ValueError('Checkpoint already exists')
-            bpy.ops.wm.save_as_mainfile(filepath=str(path), copy=True)
+            self.checkpoint_dependencies = save_recovery_checkpoint(path)
             self.checkpoint = artifact(self.root, path.name)
             self.probe(self.context)
             return self
@@ -164,8 +209,9 @@ class BlenderNativeHost:
             modules.append('validation')
         return {'scene_id': self.context['scene_id'], 'session_id': SESSION_ID,
                 'protection_scope': 'selected_object_rna_geometry_and_world_properties',
-                'limits': ['Image pixels, arbitrary collection/custom properties and external files are not fully fingerprinted.',
+                'limits': [*PROTECTION_LIMITS, 'The host checks selected globals, including the world, in addition to object fingerprints.',
                            'Trusted synchronous callbacks must bound work and terminate any descendants they launch.'],
+                'checkpoint_dependencies': self.checkpoint_dependencies,
                 'checkpoint_ref': self.context['checkpoint_ref'], 'protected': fingerprints,
                 'modules': modules, 'write': True, 'delegation': self.reviewer is not None}
 
@@ -174,7 +220,8 @@ class BlenderNativeHost:
         step = request['step']
         request = copy.deepcopy(request)
         read_before = self._fingerprints(list(bpy.data.objects.keys())) if step['access'] == 'read' else None
-        if step['access'] == 'read' and request['mode'] == 'delegated':
+        delegated_review = step['access'] == 'read' and request['mode'] == 'delegated'
+        if delegated_review:
             if self.reviewer is None:
                 raise ValueError('No actual independent reviewer configured')
             result = self.reviewer(request)
@@ -183,6 +230,10 @@ class BlenderNativeHost:
             if callback is None:
                 raise ValueError('No inspected callback for ' + step['module'])
             result = callback(request)
+        self.probe(self.context)
+        if read_before is not None and read_before != self._fingerprints(list(bpy.data.objects.keys())):
+            raise ValueError('Read-only specialist changed scene objects')
+        if not delegated_review:
             if not isinstance(result, dict) or result.get('status') not in ('PASS', 'ISSUE', 'NOT VERIFIED'):
                 raise ValueError('Callback must return explicit measured status and evidence')
             result = copy.deepcopy(result)
@@ -193,10 +244,13 @@ class BlenderNativeHost:
                 path = self.root / name
                 if path.exists():
                     raise ValueError('Stage file already exists')
-                bpy.ops.wm.save_as_mainfile(filepath=str(path), copy=True)
+                try:
+                    if bpy.ops.wm.save_as_mainfile(filepath=str(path), copy=True) != {'FINISHED'}:
+                        raise ValueError('Could not save production stage')
+                    self.probe(self.context)
+                except Exception:
+                    path.unlink(missing_ok=True)
+                    raise
                 result['evidence'] = list(result.get('evidence', [])) + [name]
             result['receipt'] = write_receipt(self.root, request, result)
-        self.probe(self.context)
-        if read_before is not None and read_before != self._fingerprints(list(bpy.data.objects.keys())):
-            raise ValueError('Read-only specialist changed scene objects')
         return result

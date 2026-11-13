@@ -36,8 +36,9 @@ and dispatch of explicitly inspected production callbacks.
 [Execution contract](references/specialist-orchestration.md) ·
 [Implementation and Agency Agents references](docs/V2-IMPLEMENTATION.md) ·
 [Validation status and release blockers](docs/V2-EVIDENCE.md).
-The stable package remains **1.4.0**; these capabilities do not certify
-artistic quality, all engines, agent compatibility or token savings.
+The stable package remains **1.4.0**. See the
+[2.0 candidate notes](docs/release-notes-2.0.md) for validation scope and
+the preflight procedure.
 
 | Define | Build | Inspect | Deliver |
 | :--- | :--- | :--- | :--- |
@@ -45,17 +46,21 @@ artistic quality, all engines, agent compatibility or token savings.
 
 ## Get started
 
-**1. Install the skill using the CLI**
-
-```bash
-npx skills add God-601/blender-mcp-master -g
-```
-
-**Or download the release ZIP**
+**1. Install the stable skill**
 
 **[Download v1.4.0 · Installable ZIP](https://github.com/God-601/blender-mcp-master/releases/download/v1.4.0/blender-mcp-master-1.4.0.zip)**
 
 Get [SHA256SUMS.txt](https://github.com/God-601/blender-mcp-master/releases/download/v1.4.0/SHA256SUMS.txt) from the same release, verify the hash, extract the ZIP and copy its inner `blender-mcp-master` folder to your agent's skills directory. Full [Windows and agent setup instructions](docs/QUICKSTART.md).
+
+With a current Skills CLI, pin the same release tag:
+
+```bash
+npx skills add God-601/blender-mcp-master@v1.4.0 --skill blender-mcp-master -g
+```
+
+The repository's default branch contains the **2.0 engineering preview**.
+Use the [candidate preflight](docs/release-notes-2.0.md#review-a-preflight-archive)
+to review an exact source build in a separate installation.
 
 **2. Set up Blender control separately**
 
@@ -64,13 +69,13 @@ Connect a compatible Blender-control MCP and its addon; discover the actual tool
 <details>
 <summary><strong>Optional: read-only MCP resource server</strong></summary>
 
-The optional read-only MCP resource server is available from the GitHub source (the v1.4.0 package has not been published to the npm registry):
+Start the optional read-only MCP resource server from the stable GitHub tag:
 
 ```bash
-npx -y github:God-601/blender-mcp-master
+npx -y "github:God-601/blender-mcp-master#v1.4.0"
 ```
 
-Neither command provides Blender scene-control tools.
+Configure Blender scene control separately.
 </details>
 
 <p align="center"><img src="assets/workflow.svg" width="100%" alt="Clarify, plan, build, inspect and correct workflow diagram"></p>
@@ -89,7 +94,7 @@ Roblox/Unity compatibility or artistic quality.
 
 See the [v1.4.0 release notes](docs/release-notes-1.4.md),
 [game export guidance](references/game-ready-export.md), and the
-[v1.5–1.9 milestone plan](docs/V1.5-V2.0-MILESTONES.md).
+[v1.5–1.9 candidate milestone status](docs/V1.5-V2.0-MILESTONES.md).
 
 ## Workflow
 
@@ -132,7 +137,7 @@ Supported workflows include hard-surface props, organic modeling, stylized and l
 | [Production recipes](references/production-recipes.md) | Concrete modeling examples |
 | [Skill comparisons](docs/ECOSYSTEM-COMPARISON.md) | Reference patterns, including Superpowers |
 | [Roadmap v2.0](docs/ROADMAP-V2.md) | Production architecture, staged acceptance gates and remaining validation |
-| [v1.5–v1.9 milestones](docs/V1.5-V2.0-MILESTONES.md) | Planned upgrades and the boundaries of experimental foundations |
+| [v1.5–v1.9 milestones](docs/V1.5-V2.0-MILESTONES.md) | Candidate capabilities and open acceptance gates |
 | [Roblox Studio inspection](integrations/roblox/README.md) | Read-only MeshPart/PBR/LOD inspection procedure |
 | [Godot GLB import](integrations/godot/README.md) | Executable import probe, scope and limitations |
 | [Agent efficiency](references/token-efficient-agent-execution.md) | Tool-first, bounded reads and progressive context loading |
@@ -158,9 +163,9 @@ Some tests require a compatible `bpy` runtime. Passing tests is not proof of art
 
 **Uma skill para agentes de IA modelarem no Blender com método e evidências.** Ajuda a planejar, modelar, verificar topologia, UVs, materiais PBR e preparar assets para jogos. Ela orienta o agente; não instala nem substitui o Blender-control MCP.
 
-- **Instalar:** `npx skills add God-601/blender-mcp-master -g` ou [baixar o ZIP da Release](https://github.com/God-601/blender-mcp-master/releases/download/v1.4.0/blender-mcp-master-1.4.0.zip).
-- **Alternativa sem npm:** `npx -y github:God-601/blender-mcp-master` inicia o servidor de recursos somente leitura.
-- **CLI:** `npx skills add God-601/blender-mcp-master -g` instala a skill.
+- **Instalar v1.4.0:** [baixe o ZIP da release](https://github.com/God-601/blender-mcp-master/releases/download/v1.4.0/blender-mcp-master-1.4.0.zip) ou use `npx skills add God-601/blender-mcp-master@v1.4.0 --skill blender-mcp-master -g`.
+- **Servidor de recursos opcional:** `npx -y "github:God-601/blender-mcp-master#v1.4.0"` inicia o servidor de recursos somente leitura.
+- **Prévia 2.0:** a branch padrão contém a candidata. Use o [arquivo de preflight](docs/release-notes-2.0.md#review-a-preflight-archive) em uma instalação separada.
 - **Configurar:** conectar separadamente um Blender-control MCP. Veja o [guia para Windows e agentes](docs/QUICKSTART.md).
 - **Fluxo:** esclarecer → planejar → modelar → inspecionar → corrigir → relatar o que foi verificado.
 - **Aprofundar:** [documentação oficial](references/official-blender-documentation.md) · [verificação e recuperação](references/evidence-first-workflow.md) · [padrões profissionais](references/professional-modeling-standards.md).

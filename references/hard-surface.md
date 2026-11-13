@@ -2,7 +2,7 @@
 
 Use this guide for furniture, tools, weapons, vehicles, machinery, armor, props, and other objects defined by controlled edges, planes, joints, and mechanical forms.
 
-For dimensioned examples of a sedan, decorative sword and table, use `references/measured-proportion-recipes.md` and their three scripts. The measurements are **example starting points**, not universal rules.
+For dimensioned examples, use `references/measured-proportion-recipes.md` and its two scripts. `scripts/vehicle_proportion_example.py` builds the sedan. Set `EXAMPLE` to `"SWORD"` or `"TABLE"` in `scripts/prop_proportion_example.py`. Treat the measurements as starting points for the current brief.
 
 ## 1. Plan the object
 

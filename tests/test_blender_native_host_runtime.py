@@ -64,6 +64,87 @@ class NativeHostTests(unittest.TestCase):
         self.assertIn('Keep', bpy.data.objects)
         self.assertNotIn('Owned', bpy.data.objects)
 
+    def add_external_texture(self):
+        texture = self.root / 'outside.png'
+        generated = bpy.data.images.new('CheckpointSource', width=1, height=1, alpha=True)
+        generated.pixels[:] = (0.125, 0.5, 0.75, 1.0)
+        generated.filepath_raw = str(texture)
+        generated.file_format = 'PNG'
+        generated.save()
+        bpy.data.images.remove(generated)
+        image = bpy.data.images.load(str(texture))
+        material = bpy.data.materials.new('ExternalMaterial')
+        material.use_nodes = True
+        material.node_tree.nodes.new('ShaderNodeTexImage').image = image
+        self.keep.data.materials.append(material)
+        return image, texture
+
+    def test_checkpoint_reopens_with_external_texture_removed(self):
+        image, texture = self.add_external_texture()
+        pixels = tuple(image.pixels)
+        self.assertTrue(pixels)
+        source = self.root / 'source.blend'
+        bpy.ops.wm.save_as_mainfile(filepath=str(source))
+        image.filepath = '//outside.png'
+        source_bytes = source.read_bytes()
+        with self.host(root=self.root / 'evidence') as host:
+            checkpoint = host.root / host.context['checkpoint_ref']
+            self.assertEqual(host.probe(host.context)['checkpoint_dependencies'], 'PACKED_AND_REOPENED')
+            self.assertEqual(bpy.data.filepath, str(source))
+            self.assertEqual(image.filepath, '//outside.png')
+            self.assertFalse(image.packed_file)
+        self.assertEqual(source.read_bytes(), source_bytes)
+        texture.unlink()
+        bpy.ops.wm.open_mainfile(filepath=str(checkpoint))
+        recovered = bpy.data.images['outside.png']
+        self.assertTrue(recovered.packed_file)
+        self.assertEqual(tuple(recovered.pixels), pixels)
+
+    def test_missing_external_texture_blocks_writer_before_checkpoint(self):
+        _, texture = self.add_external_texture()
+        texture.unlink()
+        host = self.host()
+        with self.assertRaisesRegex(ValueError, 'Checkpoint.*dependenc'):
+            with host:
+                self.fail('writer started with an incomplete checkpoint')
+        self.assertIsNone(host.lease)
+        self.assertFalse((host.root / host.context['checkpoint_ref']).exists())
+
+    def test_unsaved_texture_pixels_block_checkpoint_without_losing_edits(self):
+        for packed in (False, True):
+            with self.subTest(packed=packed):
+                image, texture = self.add_external_texture()
+                if packed:
+                    image.pack()
+                original = texture.read_bytes()
+                pixels = (0, 1, 0, 1)
+                image.pixels[:] = pixels
+                self.assertTrue(image.is_dirty)
+                host = self.host()
+                with self.assertRaisesRegex(ValueError, 'unsaved image pixels.*' + image.name):
+                    with host:
+                        self.fail('writer started with unsaved texture pixels')
+                self.assertEqual(tuple(image.pixels), pixels)
+                self.assertEqual(texture.read_bytes(), original)
+                self.assertIsNone(host.lease)
+                self.assertFalse((host.root / host.context['checkpoint_ref']).exists())
+                bpy.data.images.remove(image)
+
+    def test_unsaved_generated_pixels_block_checkpoint(self):
+        image = bpy.data.images.new('GeneratedTexture', width=1, height=1, alpha=True)
+        image.pixels[:] = (0, 1, 0, 1)
+        self.assertTrue(image.is_dirty)
+        with self.assertRaisesRegex(ValueError, 'unsaved image pixels.*GeneratedTexture'):
+            with self.host():
+                self.fail('writer started with unsaved generated pixels')
+
+    def test_factory_startup_checkpoint_allows_installed_essentials_brush(self):
+        bpy.ops.wm.read_factory_settings(use_empty=False)
+        checkpoint = self.root / 'factory.blend'
+        status = self.mod.save_recovery_checkpoint(checkpoint)
+        self.assertIn(status, {'NO_EXTERNAL_PATHS_REPORTED', 'BLENDER_RUNTIME_ASSETS_ONLY'})
+        self.assertTrue(checkpoint.is_file())
+
     def test_second_writer_lease_is_rejected(self):
         with self.host():
             with self.assertRaises(FileExistsError):
@@ -125,6 +206,8 @@ class NativeHostTests(unittest.TestCase):
             self.assertEqual(result['status'], 'ISSUE')
             self.assertTrue(result['recovery_required'])
             self.assertTrue((self.root / host.context['checkpoint_ref']).is_file())
+            self.assertEqual(list(self.root.glob('stage-*.blend')), [])
+            self.assertEqual(list(self.root.glob('receipt-*.json')), [])
 
     def test_read_stage_cannot_modify_owned_geometry(self):
         host = self.host()
@@ -136,6 +219,19 @@ class NativeHostTests(unittest.TestCase):
             result = run({'category': 'hard_surface'}, host.context, self.root, host, dry_run=False)
             self.assertEqual(result['status'], 'ISSUE')
             self.assertIn('Read-only specialist', result['errors'][0])
+
+    def test_read_stage_does_not_approve_changed_protected_custom_property(self):
+        host = self.host()
+        def mutate(request):
+            self.keep['fixture_owner'] = 'tampered'
+            return self.evidence(request)
+        host.callbacks['validation'] = mutate
+        with host:
+            result = run({'category': 'hard_surface'}, host.context, self.root, host, dry_run=False)
+            self.assertEqual(result['status'], 'ISSUE')
+            self.assertTrue(result['recovery_required'])
+            self.assertIn('Protected object properties changed', result['errors'][0])
+            self.assertEqual(len(list(self.root.glob('receipt-*.json'))), 1)
 
     def test_world_content_change_is_detected(self):
         bpy.context.scene.world = bpy.data.worlds.new('World')

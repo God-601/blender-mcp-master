@@ -7,7 +7,9 @@ a valid scene-preservation PASS for the interrupted run.
 
 ## Before substantial changes, baking or rendering
 
-1. Complete the one-time GENERAL KICKOFF. Read-only discovery may precede it.
+1. Apply `references/clarification-gate.md` to consequential gaps in a new
+   brief. Read-only discovery may proceed before answers. Reuse the existing
+   brief during crash recovery.
 2. Inspect scene ownership and `bpy.data.filepath`. If the current scene has
    user-owned work and no saved baseline, **do not begin risky mutation**.
    Propose saving a separate uniquely named checkpoint; never overwrite
@@ -26,9 +28,8 @@ a valid scene-preservation PASS for the interrupted run.
    .blend. Capture the same protected names as `scene_after.json`.
 6. Compare JSON snapshots using:
    `python scripts/compare_scene_baselines.py scene_before.json scene_after.json`.
-   PASS means only the selected captured properties agree; it does NOT
-   guarantee identical project files, untracked global properties or that
-   unrelated unnamed objects were untouched.
+   `PASS (escopo parcial)` confirms that the measured properties agree.
+   Check the reported limits before relying on the result.
 
 ## After a crash, disconnect or tool failure
 
@@ -98,10 +99,17 @@ refuses missing/contradictory metadata rather than inventing comparability.
 
 ## Limits of the scene baseline script
 
-The tool hashes selected object identity, collection membership, transforms,
-mesh vertices/edges/faces, material slot assignments, selected material
-node properties, UV coordinates, light/camera essentials and modifier
-types/visibility. It does NOT exhaustively fingerprint scene-global settings,
-all third-party properties, drivers, animations, linked-library data, image
-pixel contents or every possible Blender datablock. Save a .blend fixture and
-inspect differences directly for higher-confidence preservation claims.
+The capture includes selected object and data properties, geometry, UVs,
+vertex weights, shape keys, constraints, animation, rigs and supported
+embedded image pixels. The report lists limits including external asset
+bytes, unnamed objects, global scene settings and simulation state. A
+legacy v1 comparison retains its original `PASS` status for compatibility
+and labels its scope separately. Compare snapshots from the same Blender
+version and schema.
+
+The native host packs supported external dependencies in a disposable
+checkpoint, then reopens it before enabling writes. Missing or unportable
+dependencies and unsaved image pixels block that host run. The original
+scene retains its file paths and packing state.
+The factory Grease Pencil Essentials brush can remain a runtime dependency
+from the installed Blender distribution.

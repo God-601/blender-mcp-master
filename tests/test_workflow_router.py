@@ -1,5 +1,9 @@
-"""Pure Python routing tests: no file access, Blender or optional dependencies."""
+"""Pure Python routing and command-line tests without Blender."""
 import importlib.util
+import json
+import subprocess
+import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -37,9 +41,40 @@ class RouterTests(unittest.TestCase):
         for task in ({}, {"category": "fake"}, {"category": "organic", "needs": "visual"},
                      {"category": "organic", "needs": ["visual", "visual"]},
                      {"category": "organic", "known": ["nonsense"]},
-                     {"category": "organic", "continuation": "yes"}):
+                     {"category": "organic", "continuation": "yes"},
+                     {"category": []}, {"category": "organic", "destination": {}},
+                     {"category": "organic", "continuation": 1}):
             with self.subTest(task=task), self.assertRaises(ValueError):
                 m.route(task)
+
+    def test_cli_routes_the_supplied_json_brief(self):
+        with tempfile.TemporaryDirectory() as directory:
+            brief = Path(directory) / "brief.json"
+            brief.write_text(json.dumps({
+                "category": "organic", "destination": "animation", "needs": ["visual"],
+                "continuation": True,
+            }), encoding="utf-8")
+            result = subprocess.run([sys.executable, str(SCRIPT), str(brief)],
+                                    capture_output=True, text=True)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        routed = json.loads(result.stdout)
+        self.assertEqual(routed["destination"], "animation")
+        self.assertEqual(routed["primary"], "references/organic.md")
+        self.assertEqual(routed["optional"], ["references/visual-inspection.md"])
+        self.assertEqual(routed["questions_to_consider"], [])
+
+    def test_cli_reports_invalid_briefs_without_routing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            brief = Path(directory) / "brief.json"
+            for contents in ('{"category":', '{"category": []}'):
+                with self.subTest(contents=contents):
+                    brief.write_text(contents, encoding="utf-8")
+                    result = subprocess.run([sys.executable, str(SCRIPT), str(brief)],
+                                            capture_output=True, text=True)
+                    self.assertEqual(result.returncode, 2)
+                    self.assertEqual(result.stdout, "")
+                    self.assertIn("error:", result.stderr)
+                    self.assertNotIn("Traceback", result.stderr)
 
 
 if __name__ == "__main__":

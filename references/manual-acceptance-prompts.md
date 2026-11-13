@@ -6,15 +6,15 @@ Esta é uma **prévia de teste**, não a release 1.0. Faça backup dos projetos;
 
 **Preflight (sempre em sessão nova)**
 
-> Ative a Blender MCP Master. Informe sua versão real do Blender, as ferramentas do Blender-control MCP disponíveis e os objetos existentes. Inspecione somente por leitura. Para um projeto NOVO, faça várias perguntas úteis sobre estilo, forma, materiais, detalhes e uso final antes de alterar a cena. Não repita os dados já informados nem pergunte apenas se pode continuar.
+> Ative a Blender MCP Master. Informe sua versão real do Blender, as ferramentas do Blender-control MCP disponíveis e os objetos existentes. Inspecione somente por leitura. Se o briefing deixar decisões importantes em aberto, esclareça essas decisões antes de alterar a cena.
 
 **Aprovação:** a IA não inventa uma conexão MCP e não muda nada antes de receber as respostas às perguntas relevantes.
 
-## T01 — Cadeira low-poly e briefing completo
+## T01 — Cadeira low-poly e briefing com decisões em aberto
 
-> Crie uma cadeira medieval low-poly para jogos, com quatro pernas, assento a 0,45 m, largura 0,5 m, encosto, material de madeira e limite de 1.500 triângulos. Entrega em .blend. Preserve os objetos existentes. Primeiro execute o GENERAL KICKOFF exigido pela skill.
+> Crie uma cadeira medieval low-poly para jogos, com quatro pernas, assento a 0,45 m, largura 0,5 m, encosto, material de madeira e limite de 1.500 triângulos. Entrega em .blend. Preserve os objetos existentes.
 
-Aprovado se fizer várias perguntas de design não redundantes (ex.: encosto, acabamento da madeira, proporções visuais), esperar as respostas e usar essas escolhas na cadeira; não basta perguntar "pode seguir?".
+Aprovado se esclarecer as decisões em aberto que mudam o resultado, como a forma do encosto ou o acabamento da madeira, e usar as respostas. Repita o teste com um briefing completo ou com essas decisões delegadas. A segunda variante deve avançar com zero perguntas de design.
 
 ## T02 — Castelo e inspeção artística
 
@@ -64,13 +64,13 @@ Aprovado com entradas reproduzíveis e análise de qualidade junto de custo.
 
 ## T09 — Encaixes estruturais, sem atravessamento arbitrário
 
-> Use a skill Blender MCP Master para construir uma cadeira low-poly de teste com assento, quatro pernas e duas travessas. Faça o GENERAL KICKOFF. Projete explicitamente o plano de contato entre topo das pernas e parte inferior do assento e entre ponta das travessas e faces dos postes. Não deixe peças atravessarem outras somente para esconder a junção. Se usar encaixe embutido, desenhe/documente a cavidade e a profundidade. Inspecione cada junta em vista frontal, lateral, inferior e três-quartos, antes e depois do chanfro. Use scripts/inspect_component_fit.py somente em pares de objetos separados para encontrar candidatos, e indique seus limites; se você consolidar tudo em um mesh, avalie visualmente as ilhas internas. Corrija encaixes ruins em cópias próprias, sem alterar objetos preexistentes.
+> Use a skill Blender MCP Master para construir uma cadeira low-poly de teste com assento, quatro pernas e duas travessas. Projete explicitamente o plano de contato entre topo das pernas e parte inferior do assento e entre ponta das travessas e faces dos postes. Não deixe peças atravessarem outras somente para esconder a junção. Se usar encaixe embutido, desenhe/documente a cavidade e a profundidade. Inspecione cada junta em vista frontal, lateral, inferior e três-quartos, antes e depois do chanfro. Use scripts/inspect_component_fit.py somente em pares de objetos separados para encontrar candidatos, e indique seus limites; se você consolidar tudo em um mesh, avalie visualmente as ilhas internas. Corrija encaixes ruins em cópias próprias, sem alterar objetos preexistentes.
 
 **Esperado:** o agente descreve as superfícies de apoio e distingue contato intencional de interseção problemática. Exibir imagens reais de juntas em close-up, geometria/transformações nomeadas e sem declarar PASS só por AABB/BVH. Registrar se houve correção e evidência antes/depois. Para comparação, produza um exemplo descartável de uma viga atravessando uma parede para demonstrar que o agente **sinaliza REVIEW/ISSUE**, em vez de aprovar automaticamente. A auditoria deve ser não destrutiva.
 
 ## T10 — Excessive editable face triangulation / X across flat panels
 
-> Use Blender MCP Master. After GENERAL KICKOFF, create three separate named editable mesh tests: A one completely planar quad face; B two planar triangles sharing one diagonal that make the same quad; C one planar quad-shaped patch split by a center vertex into four triangles making an X. Run `scripts/topology_face_diagnostics.py` with explicit `TARGETS` for all three. Report native Blender face count and render triangle count separately. Demonstrate that A and B have two render triangles, C has four; C should yield a REVIEW candidate while B is not an X fan. Inspect the C patch in Edit Mode, and on an owned COPY only, remove the redundant center vertex/edges if UVs, normals and shape remain safe. Validate before/after UV and shading. Do not edit the original or treat every triangulation/glTF vertex split as a defect.
+> Use Blender MCP Master. Create three separate named editable mesh tests: A one completely planar quad face; B two planar triangles sharing one diagonal that make the same quad; C one planar quad-shaped patch split by a center vertex into four triangles making an X. Run `scripts/topology_face_diagnostics.py` with explicit `TARGETS` for all three. Report native Blender face count and render triangle count separately. Demonstrate that A and B have two render triangles, C has four; C should yield a REVIEW candidate while B is not an X fan. Inspect the C patch in Edit Mode, and on an owned COPY only, remove the redundant center vertex/edges if UVs, normals and shape remain safe. Validate before/after UV and shading. Do not edit the original or treat every triangulation/glTF vertex split as a defect.
 
 **Esperado:** A one quad/two render tris, B two triangular faces/two render tris, C four triangular faces/four render tris. Analyzer marks C REVIEW but never auto-modifies. Correction on a copy is visually and technically verified, or stays NOT VERIFIED with a reason. Check Blender version before executing the new script.
 

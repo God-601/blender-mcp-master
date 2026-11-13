@@ -86,9 +86,10 @@ def evaluate(before, after, scene_check=None, visual_review=None,
                          "after_render_sha256": b["render_sha256"]})
         if delta < -max_view_regression:
             regressions.append(view)
-    if isinstance(scene_check, dict) and scene_check.get("status") == "ISSUE":
+    scene_status = scene_check.get("status") if isinstance(scene_check, dict) else None
+    if scene_status == "ISSUE":
         reasons.append("protected_scene_integrity_issue")
-    elif not isinstance(scene_check, dict) or scene_check.get("status") != "PASS":
+    elif scene_status not in ("PASS", "PASS (escopo parcial)"):
         reasons.append("protected_scene_integrity_not_verified")
     if visual_review is not None:
         if not isinstance(visual_review, dict):
@@ -114,6 +115,8 @@ def evaluate(before, after, scene_check=None, visual_review=None,
     return {
         "status": status,
         "visual_quality": "NOT VERIFIED",
+        "protected_scene_check": scene_status,
+        "scene_global_integrity": "NOT VERIFIED",
         "recommendation": ("REVERT_OR_INSPECT_OWNED_COPY" if issue else
                            "INDEPENDENT_REVIEW_BEFORE_ACCEPT" if status == "REVIEW_REQUIRED"
                            else "DO_NOT_ACCEPT_UNTIL_EVIDENCE_COMPLETE"),

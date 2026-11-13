@@ -3,9 +3,17 @@ import argparse
 import json
 from pathlib import Path
 
-from workflow_router import route
+from workflow_router import EXTRAS, route
 
 REGISTRY = Path(__file__).resolve().parents[1] / "references/specialist-modules.json"
+MODULE_BY_NEED = {
+    "pbr": "materials", "uv": "uv", "optimization": "optimization", "export": "export",
+}
+MODULE_BY_GUIDE = {
+    **{EXTRAS[need]: module for need, module in MODULE_BY_NEED.items()},
+    EXTRAS["fit"]: "validation",
+    EXTRAS["visual"]: "validation",
+}
 
 
 def load_modules():
@@ -18,7 +26,7 @@ def build_plan(task):
     primary = {"materials": "materials", "retopology": "retopology"}.get(routed["category"], "modeling")
     selected = [primary]
     for need in task.get("needs", []):
-        module = {"pbr": "materials", "uv": "uv", "optimization": "optimization", "export": "export"}.get(need)
+        module = MODULE_BY_NEED.get(need)
         if module and module not in selected:
             selected.append(module)
     selected = [m for m in ('modeling', 'retopology', 'uv', 'materials', 'optimization', 'export') if m in selected]
@@ -30,15 +38,14 @@ def build_plan(task):
             "depends_on": [steps[-1]["id"]] if steps else [],
             "access": "read" if module == "validation" else "write",
             "acceptance": modules[module]["acceptance"],
-            "guides": modules[module]["guides"], "scripts": modules[module]["scripts"],
+            "guides": [], "scripts": modules[module]["scripts"],
         })
-    for guide in [routed['primary']] + routed['optional']:
-        module = {'uv-baking.md': 'uv', 'materials.md': 'materials',
-                  'model-performance-strategy.md': 'optimization',
-                  'game-ready-export.md': 'export', 'visual-inspection.md': 'validation'}.get(guide.split('/')[-1])
-        target = next((step for step in steps if step['module'] == module), steps[0])
-        if guide not in target['guides']:
-            target['guides'] = target['guides'] + [guide]
+    steps_by_module = {step["module"]: step for step in steps}
+    for guide in [routed["primary"], *routed["optional"]]:
+        step = steps_by_module.get(MODULE_BY_GUIDE.get(guide), steps_by_module[primary])
+        step["guides"].append(guide)
+    if not steps_by_module[primary]["guides"]:
+        steps_by_module[primary]["guides"].append(modules[primary]["guides"][0])
     return {"schema_version": 1, "mode": "delegated" if len(selected) > 3 else "single",
             "destination": routed["destination"], "route": routed, "steps": steps}
 

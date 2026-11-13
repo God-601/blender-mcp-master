@@ -39,7 +39,9 @@
     "CHANGELOG.md",
     "CONTRIBUTING.md",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "!**/__pycache__/**",
+    "!**/*.py[co]"
   ],
   "scripts": {
     "start": "node ./bin/blender-mcp-master.js",

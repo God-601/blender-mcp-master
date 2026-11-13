@@ -11,7 +11,7 @@ Before creating geometry, identify:
 - **Budget:** triangle count, material slots, texture dimensions, and scene/render constraints appropriate to the target.
 - **Required deliverable:** .blend only, or a specific export format plus any textures.
 
-If the user has already specified these, do not ask the same details again. For a NEW project run the adaptive **multi-question GENERAL KICKOFF** in `clarification-gate.md` before mutation. Ask only about genuine unresolved visual/functional decisions; do not repeat supplied specifications. If all relevant choices were explicitly delegated, state editable defaults and proceed. A consequential new blocker may need one follow-up round.
+Use `clarification-gate.md` before scene mutation. Ask only about consequential decisions the user has left open, and reuse the established brief during refinements.
 
 ## 2. Use an explicit quality loop
 

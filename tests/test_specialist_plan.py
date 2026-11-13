@@ -21,6 +21,23 @@ class SpecialistPlanTests(unittest.TestCase):
         self.assertEqual([s['module'] for s in plan['steps']], ['modeling', 'validation'])
         self.assertEqual(plan['steps'][1]['depends_on'], ['modeling'])
 
+    def test_simple_task_recommends_only_its_primary_guide(self):
+        plan = build_plan({'category': 'hard_surface'})
+        modeling, validation = plan['steps']
+        self.assertEqual(modeling['guides'], ['references/hard-surface.md'])
+        self.assertEqual(validation['guides'], [])
+        self.assertEqual(validation['access'], 'read')
+        self.assertIn('absent measurements are NOT VERIFIED', validation['acceptance'])
+        self.assertIn('scripts/inspection_report.py', validation['scripts'])
+
+    def test_fit_and_visual_guides_go_to_validation_once(self):
+        plan = build_plan({'category': 'organic', 'needs': ['fit', 'visual']})
+        modeling, validation = plan['steps']
+        self.assertEqual(modeling['guides'], ['references/organic.md'])
+        self.assertEqual(validation['guides'], [
+            'references/component-fit-and-joints.md', 'references/visual-inspection.md',
+        ])
+
     def test_complex_task_has_only_requested_specialists(self):
         plan = build_plan({'category': 'game_asset', 'destination': 'roblox', 'needs': ['uv', 'pbr', 'optimization', 'export']})
         self.assertEqual(plan['mode'], 'delegated')
@@ -28,8 +45,19 @@ class SpecialistPlanTests(unittest.TestCase):
         self.assertEqual(plan['route']['loaded_reference_count'], 0)
 
     def test_material_edit_does_not_rebuild_geometry(self):
-        plan = build_plan({'category': 'materials', 'needs': ['pbr', 'uv']})
-        self.assertEqual([s['module'] for s in plan['steps']], ['uv', 'materials', 'validation'])
+        for needs in ([], ['uv'], ['pbr', 'uv']):
+            with self.subTest(needs=needs):
+                plan = build_plan({'category': 'materials', 'needs': needs})
+                expected = ['uv'] if 'uv' in needs else []
+                self.assertEqual([s['module'] for s in plan['steps']], expected + ['materials', 'validation'])
+                self.assertEqual(plan['steps'][-2]['guides'], ['references/materials.md'])
+                if 'uv' in needs:
+                    self.assertEqual(plan['steps'][0]['guides'], ['references/uv-baking.md'])
+
+    def test_game_asset_with_export_retains_modeling_guide(self):
+        modeling, export, _ = build_plan({'category': 'game_asset', 'needs': ['export']})['steps']
+        self.assertEqual(modeling['guides'], ['references/modeling-decision-framework.md'])
+        self.assertEqual(export['guides'], ['references/game-ready-export.md'])
 
     def test_export_is_last_regardless_of_requirement_order(self):
         first = build_plan({'category': 'game_asset', 'needs': ['export', 'pbr', 'uv', 'optimization']})

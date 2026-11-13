@@ -114,14 +114,21 @@ writers to bypass an active lock. These locks do not stop external tools or
 coordinate different hard-link aliases. A host rejects scene/source changes
 between construction and acquiring the lease.
 
-The host checks selected geometry/RNA/material/world properties before and
-after callbacks; read stages also compare owned-object properties. These are
-damage-detection checks with documented limits, not a complete .blend equality
-proof or Python sandbox. Image pixels, arbitrary collection/custom properties,
-some rig/deformation data and external files are not fully fingerprinted.
-Callbacks must bound synchronous work and terminate descendants they launch.
-On failure inspect the retained checkpoint; recovery never silently replaces
-the current scene. Save/reopen is exercised in a separate scratch Blender test.
+The host compares protected geometry, weights, shape keys, constraints, rigs,
+keyframes, custom properties and supported embedded image pixels before and
+after callbacks. Read stages also compare the owned objects. A detected change
+stops the run before the stage receives a successful receipt. New baseline
+comparisons report `PASS (escopo parcial)` when the measured scope matches.
+External bytes, simulation state and some nested settings remain outside the
+fingerprint. The host checks selected scene globals separately.
+
+When Blender reports external dependencies, the host creates a disposable
+copy, packs supported assets in a separate Blender process and reopens the
+result. A missing file, unsaved image pixels or a dependency Blender cannot pack stops startup. The
+live scene keeps its original paths and packing state. The probe exposes the
+checkpoint dependency status. After an interruption, inspect the retained
+checkpoint before resuming. Callbacks must bound synchronous work and terminate
+descendants they launch.
 
 The Codex worker accepts actual text bytes and up to three explicitly selected
 hashed upstream PNGs, pins input hashes across the review, restricts evidence
