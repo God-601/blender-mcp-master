@@ -4,7 +4,7 @@ This is the source-backed reference for `scripts/retopology_advanced.py`. It pro
 
 ## Preconditions
 
-1. Run the GENERAL KICKOFF for a new project, then identify the requested topology outcome and required deformation / export constraints.
+1. Identify the requested topology outcome and deformation and export constraints. Apply `clarification-gate.md` to any consequential gaps in a new brief.
 2. Use read-only scene inspection first. `TARGETS` must name mesh objects explicitly. The script has no fallback to selected objects or all scene meshes.
 3. Provide ordered vertex indices from the **base mesh**, confirmed in Blender. Never guess vertices from screen coordinates.
 4. Input meshes must be in Object mode, with no modifiers or shape keys. To use a modifier result, create an owned, inspected applied intermediate first.

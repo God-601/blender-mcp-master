@@ -10,7 +10,7 @@ import math
 from mathutils import Vector
 
 # ---- CONFIG ----------------------------------------------------------------
-TARGET_NAMES = ["MCP_HS_Panel"]
+TARGET_NAMES = []  # Explicit mesh object names.
 POLICIES = {}
 RELATIONSHIPS = []
 # ----------------------------------------------------------------------------
@@ -215,7 +215,8 @@ def inspect_relationship(spec, reports):
 
 
 def main():
-    depsgraph = bpy.context.evaluated_depsgraph_get()
+    errors = [] if TARGET_NAMES else ["Set TARGET_NAMES to explicit mesh object names."]
+    depsgraph = bpy.context.evaluated_depsgraph_get() if TARGET_NAMES else None
     reports, missing, invalid = {}, [], []
     for name in dict.fromkeys(TARGET_NAMES):
         obj = bpy.data.objects.get(name)
@@ -240,6 +241,7 @@ def main():
         "targets": list(reports.values()),
         "missing_targets": missing,
         "non_mesh_targets": invalid,
+        "errors": errors,
         "relationships": relations,
         "overall_technical": overall,
         "overall_visual": "NOT VERIFIED",

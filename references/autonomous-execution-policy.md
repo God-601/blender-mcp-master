@@ -7,7 +7,7 @@ This is a **decision policy for agents**, not a new Blender-control API. A conne
 | Tier | Examples | Agent behavior |
 | --- | --- | --- |
 | AUTO / read-only | Discover scene, tool schemas and version; inspect named objects; calculate budgets; capture safe views | Proceed, record observations, avoid duplicate discovery |
-| AUTO / reversible owned edits | Create new objects in the explicitly owned collection, adjust a newly created duplicate, non-destructive modifiers on owned copies | Proceed after the new-project design interview, checkpoint and plan; verify at meaningful gates |
+| AUTO / reversible owned edits | Create new objects in the explicitly owned collection, adjust a newly created duplicate, non-destructive modifiers on owned copies | Resolve any consequential gaps in the brief, verify checkpoint and plan, then verify at meaningful gates |
 | ASK / consequential | Modify existing unowned objects, apply destructive modifiers, overwrite files, purge data, change global scene/render settings affecting other assets, paid operations or external publishing | Stop and ask for the specific decision; no blanket permission |
 | STOP / unsafe or unclear | MCP returns unknown target, unexpected scene change, failed baseline, post-crash unsaved-scene uncertainty, unavailable required checkpoint | Do not retry mutation; inspect or recover read-only and escalate |
 
@@ -17,7 +17,7 @@ A user explicitly requesting an edit is **not** permission to alter unrelated ob
 
 Maintain the following facts internally or in an owned, non-destructive project note:
 
-- Brief ID; whether GENERAL KICKOFF was already completed; answered requirements and delegated defaults
+- Brief ID, open decisions, answered requirements and delegated defaults
 - Blender and Blender-control MCP versions and schema discovery fingerprint
 - Source scene checkpoint path/identity and protected-object baseline status (never fabricate)
 - Owned collection/object identifiers, target output path and destination
@@ -28,7 +28,7 @@ Do not assume this ledger persists across agents or restarts. Re-read the minimu
 
 ## Execution loop
 
-1. **Clarify only missing design choices on a new project** (normally 2–3 simple / 4–6 complex questions). If all choices are explicitly delegated, document editable defaults and proceed; never ask a generic permission question.
+1. **Resolve consequential gaps in the brief.** Use `references/clarification-gate.md` to decide whether questions are needed. Reuse answered requirements and delegated defaults.
 2. **Discover once, invalidate when needed.** Inspect available tool schemas, Blender version, active scene and object ownership. Re-discover after reconnect, change of client/MCP/version, a schema error or evidence of scene replacement.
 3. **Plan one measurable milestone.** Define affected owned objects, changes, acceptance checks and rollback/checkpoint. Separate technical evidence from image-based judgement.
 4. **Execute a small bounded operation.** A single logical mutation per step, unless a safely reversible operation requires an atomic group. Never chain a blind series of destructive operations to save tokens.

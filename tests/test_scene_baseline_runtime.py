@@ -105,7 +105,7 @@ class BaselineRuntimeTests(unittest.TestCase):
         before = run_snapshot(names)
         self.assertEqual(before["status"], "MEASURED")
         self.assertEqual(original_count, len(bpy.data.objects))
-        self.assertEqual(compare_module().compare(before, run_snapshot(names))["status"], "PASS")
+        self.assertEqual(compare_module().compare(before, run_snapshot(names))["status"], "PASS (escopo parcial)")
 
     def test_mutated_mesh_and_light_are_caught(self):
         names = ["USER_Keep_Mesh", "USER_Keep_Light"]

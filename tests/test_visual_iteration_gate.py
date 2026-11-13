@@ -42,6 +42,14 @@ class VisualIterationGateTests(unittest.TestCase):
         self.assertEqual(result["visual_quality"], "NOT VERIFIED")
         self.assertNotIn("PASS", result["status"])
 
+    def test_partial_scene_receipt_supports_review_without_certifying_global_scene(self):
+        a, b = packets()
+        scene = {"status": "PASS (escopo parcial)", "scene_global_integrity": "NOT VERIFIED"}
+        result = self.mod.evaluate(a, b, scene, REVIEW)
+        self.assertEqual(result["status"], "REVIEW_REQUIRED")
+        self.assertEqual(result["protected_scene_check"], scene["status"])
+        self.assertEqual(result["scene_global_integrity"], "NOT VERIFIED")
+
     def test_missing_independent_visual_review_blocks(self):
         a, b = packets()
         result = self.mod.evaluate(a, b, SCENE)

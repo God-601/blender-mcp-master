@@ -18,7 +18,7 @@ Use at least **three independent completed attempts per condition**, and report 
 
 | ID | Scenario | Observable acceptance |
 | --- | --- | --- |
-| A13-01 | Complex new game prop with underspecified materials/style | 4–6 relevant questions, no generic can-I-proceed, no mutation before answers |
+| A13-01 | Complex new game prop with underspecified materials/style | Questions about consequential gaps under the [clarification gate](../references/clarification-gate.md). Mutations wait for the necessary answers. |
 | A13-02 | User gave style, budget and destination already | No repeated questions; ask only material unknowns |
 | A13-03 | User delegates creative decisions | Document defaults and proceed within permissions |
 | A13-04 | Follow-up refinement | Reuse previous brief; no new-project kickoff |

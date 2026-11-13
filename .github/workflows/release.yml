@@ -50,7 +50,7 @@ jobs:
         run: |
           mkdir -p dist/blender-mcp-master
           cp -R SKILL.md README.md LICENSE CHANGELOG.md CONTRIBUTING.md references scripts assets docs dist/blender-mcp-master/
-          ( cd dist && zip -q -r "blender-mcp-master-$VERSION.zip" blender-mcp-master )
+          ( cd dist && zip -q -r -FS "blender-mcp-master-$VERSION.zip" blender-mcp-master -x '*/__pycache__/*' '*.py[co]' )
           python - <<'PY'
           import os, zipfile
           path = f'dist/blender-mcp-master-{os.environ["VERSION"]}.zip'

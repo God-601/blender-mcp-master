@@ -6,9 +6,9 @@ The v1.3 policy for autonomous progression, risk-based permission and tool-failu
 
 ## Preferred workflow
 
-1. **GENERAL KICKOFF stays mandatory once per NEW modeling project.** Reuse the known brief and ask a concise **group of meaningful nonredundant design questions** (normally 2–6, scaled to complexity). A useful design interview saves rework; a generic 'may I proceed?' does not. Do not restart it for refinements or retries.
+1. **Reuse the brief.** Resolve consequential gaps using `references/clarification-gate.md`. A complete brief or delegated decisions let you proceed through the remaining gates without design questions.
 2. **Discover once per client/session while identity is stable:** Blender version, MCP tools/schema, scene state and ownership. Repeat discovery only after a relevant environment change.
-3. **Route before reading:** choose only the relevant modeling discipline and one cross-cutting validation/safety guide. The root `SKILL.md` is the compact entrypoint; `references/resource-catalog.md` is a **lazy inventory only**. Do not load the full catalog, all of `references/` or unrelated Blender manuals.
+3. **Route before reading.** Apply the gates in `SKILL.md` and start with one primary discipline guide. Fetch a cross-cutting section when you need a specific procedure or acceptance check. Use `references/resource-catalog.md` to find less common guides or scripts.
 4. **Prefer semantic tools to generic Bash:**
    - Connected Blender-control MCP tools for scene inspection and safe edits.
    - Native file read/search/patch tools for repository files when available.
@@ -55,4 +55,4 @@ Do not invent percentage reductions or infer token usage from character counts. 
 - [Skills.sh: Agents Progressive Disclosure](https://www.skills.sh/caph-dev/agents-progressive-disclosure/agents-progressive-disclosure)
 - [Skills.sh: Token Optimization](https://www.skills.sh/i-onlabs/claude-code-skills/token-optimization)
 
-Read existing modeling standards and P0 scene integrity even when aggressively reducing context. Context efficiency cannot justify missing evidence.
+Apply the scene-integrity and quality gates from `SKILL.md` on every task. Consult the relevant section of a detailed guide when a gate needs further guidance.

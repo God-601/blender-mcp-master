@@ -21,6 +21,23 @@ class SpecialistPlanTests(unittest.TestCase):
         self.assertEqual([s['module'] for s in plan['steps']], ['modeling', 'validation'])
         self.assertEqual(plan['steps'][1]['depends_on'], ['modeling'])
 
+    def test_simple_task_recommends_only_its_primary_guide(self):
+        plan = build_plan({'category': 'hard_surface'})
+        modeling, validation = plan['steps']
+        self.assertEqual(modeling['guides'], ['references/hard-surface.md'])
+        self.assertEqual(validation['guides'], [])
+        self.assertEqual(validation['access'], 'read')
+        self.assertIn('absent measurements are NOT VERIFIED', validation['acceptance'])
+        self.assertIn('scripts/inspection_report.py', validation['scripts'])
+
+    def test_fit_and_visual_guides_go_to_validation_once(self):
+        plan = build_plan({'category': 'organic', 'needs': ['fit', 'visual']})
+        modeling, validation = plan['steps']
+        self.assertEqual(modeling['guides'], ['references/organic.md'])
+        self.assertEqual(validation['guides'], [
+            'references/component-fit-and-joints.md', 'references/visual-inspection.md',
+        ])
+
     def test_complex_task_has_only_requested_specialists(self):
         plan = build_plan({'category': 'game_asset', 'destination': 'roblox', 'needs': ['uv', 'pbr', 'optimization', 'export']})
         self.assertEqual(plan['mode'], 'delegated')

@@ -1,7 +1,13 @@
 """Stable 1.0 publication must be manually authorized and evidence-grounded."""
+import os
 import re
+import shutil
+import subprocess
+import tempfile
 import unittest
+import zipfile
 from pathlib import Path
+from textwrap import dedent
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -24,6 +30,38 @@ class ReleaseReadinessStaticTests(unittest.TestCase):
         self.assertIn("Packaged README contains broken local links", text)
         self.assertIn("CHANGELOG.md CONTRIBUTING.md", text)
         self.assertNotRegex(text, r"(?m)^\s*(?:gh release create|npm publish|git push)\b")
+
+    @unittest.skipUnless(all(shutil.which(tool) for tool in ("bash", "zip", "sha256sum")),
+                         "Requires the release runner's shell and ZIP utilities")
+    def test_readiness_zip_excludes_python_caches_even_on_rebuild(self):
+        workflow = (ROOT / ".github/workflows/release-readiness.yml").read_text(encoding="utf-8")
+        build = workflow.split("- name: Build and verify standalone nonpublishing readiness ZIP\n", 1)[1]
+        script = dedent(build.split("        run: |\n", 1)[1].split("\n      - ", 1)[0])
+        name = "blender-mcp-master-test-PREFLIGHT-NOT-A-RELEASE.zip"
+        with tempfile.TemporaryDirectory() as directory:
+            checkout = Path(directory)
+            for source in ("SKILL.md", "README.md", "LICENSE", "CHANGELOG.md", "CONTRIBUTING.md"):
+                shutil.copyfile(ROOT / source, checkout / source)
+            for source in ("references", "scripts", "integrations", "assets", "docs"):
+                shutil.copytree(ROOT / source, checkout / source)
+            cache = checkout / "integrations/agents/__pycache__"
+            cache.mkdir(exist_ok=True)
+            (cache / "metadata.txt").touch()
+            (checkout / "scripts/stale.pyc").touch()
+            (checkout / "scripts/optimized.pyo").touch()
+            archive = checkout / "dist" / name
+            archive.parent.mkdir()
+            with zipfile.ZipFile(archive, "w") as zf:
+                zf.writestr("blender-mcp-master/scripts/previous-build.pyc", "stale bytecode")
+
+            subprocess.run(["bash", "-ec", script], cwd=checkout,
+                           env={**os.environ, "PREFLIGHT_NAME": name}, check=True, timeout=30)
+
+            with zipfile.ZipFile(archive) as zf:
+                names = zf.namelist()
+            self.assertIn("blender-mcp-master/scripts/scene_baseline_snapshot.py", names)
+            self.assertEqual([entry for entry in names if "__pycache__" in entry.split("/")
+                              or entry.endswith((".pyc", ".pyo"))], [])
 
     def test_stable_v1_release_is_one_time_and_pinned_to_published_sha(self):
         source = (ROOT / ".github/workflows/release-stable-1.0.yml").read_text(encoding="utf-8")

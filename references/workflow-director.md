@@ -1,6 +1,6 @@
 # Lightweight workflow director
 
-For each genuinely new modeling project, use the **multi-question GENERAL KICKOFF design interview** from `clarification-gate.md`: ask meaningful questions about missing style, silhouette, materials and intended use, not a generic permission to proceed. Reuse known requirements, respect delegated creative choices, and do not restart the interview on iterations.
+Use `clarification-gate.md` to resolve consequential gaps in a new brief. Reuse answered requirements and delegated choices in later iterations.
 
 Use this after the core clarification/planning gate. It adapts a useful
 specialist-routing idea to a **single portable skill** without duplicating

@@ -101,7 +101,7 @@ jobs:
           set -euo pipefail
           mkdir -p dist/blender-mcp-master
           cp -R SKILL.md README.md LICENSE CHANGELOG.md CONTRIBUTING.md references scripts integrations assets docs dist/blender-mcp-master/
-          (cd dist && zip -q -r "blender-mcp-master-${VERSION}.zip" blender-mcp-master)
+          (cd dist && zip -q -r -FS "blender-mcp-master-${VERSION}.zip" blender-mcp-master -x '*/__pycache__/*' '*.py[co]')
           npm pack --ignore-scripts --pack-destination dist
           (cd dist && sha256sum "blender-mcp-master-${VERSION}.zip" "blender-mcp-master-${VERSION}.tgz" > SHA256SUMS.txt)
           python scripts/clean_install_smoke.py "dist/blender-mcp-master-${VERSION}.zip" dist/SHA256SUMS.txt --report dist/clean-install-report.json

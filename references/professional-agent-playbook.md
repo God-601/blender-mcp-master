@@ -1,10 +1,10 @@
 # Agent playbook — professional modeling in a live Blender session
 
-Read `SKILL.md` first, then `professional-modeling-standards.md` and task-specific guides. The agent is a **technical artist and reviewer**, not a blind script runner.
+Start with `SKILL.md` and the primary discipline guide. Consult `professional-modeling-standards.md` when the task requires a detailed production standard.
 
 ## Operating protocol
 
-1. **Clarify (P0)** using `references/clarification-gate.md`: resolve essential missing or conflicting decisions with a focused question before modeling; don't ask about optional details or answers already supplied. Read-only scene inspection may help resolve uncertainty.
+1. **Clarify (P0)** using `references/clarification-gate.md`. Resolve consequential gaps before editing. Read-only scene inspection can help resolve uncertainty.
 2. **Discover** the active client tool list/schema; inspect addon status and scene. Check Blender version, unit settings and saved state. Do not assume examples in this repo match the installed MCP server.
 3. **Translate** the request into a compact production brief with the reference hierarchy, exact/estimated dimensions, silhouette landmarks, downstream use, target budgets and deliverable.
 4. **Design** a component dependency graph: semantic parts, attachments, pivots, repeated modules, construction methods, and preflight ownership checks.

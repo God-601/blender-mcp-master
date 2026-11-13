@@ -1,8 +1,9 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, readdirSync } from "node:fs";
+import { mkdirSync, mkdtempSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
-import { resolve, dirname } from "node:path";
+import { tmpdir } from "node:os";
+import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
@@ -185,17 +186,22 @@ test("file tools reject unknown names, path traversal and files from the other d
   });
 });
 
-test("npm pack contains the skill content and excludes tests and dependencies", () => {
+function npmPackFiles(cwd) {
   const npmCli = process.env.npm_execpath ?? (process.platform === "win32"
     ? resolve(dirname(process.execPath), "node_modules/npm/bin/npm-cli.js") : null);
   const result = spawnSync(npmCli ? process.execPath : "npm", [...(npmCli ? [npmCli] : []), "pack", "--dry-run", "--json", "--ignore-scripts"], {
-    cwd: root,
+    cwd,
     encoding: "utf8",
     timeout: 60000
   });
   assert.equal(result.status, 0, result.stderr);
-  const files = JSON.parse(result.stdout)[0].files.map((file) => file.path);
+  return JSON.parse(result.stdout)[0].files.map((file) => file.path);
+}
+
+test("npm pack contains the skill content and excludes tests and dependencies", () => {
+  const files = npmPackFiles(root);
   assert.ok(files.includes('integrations/agents/blender_native_host.py'));
+  assert.ok(files.includes("integrations/agents/checkpoint_pack.py"));
   for (const required of ["SKILL.md", "README.md", "LICENSE", "package.json", "bin/blender-mcp-master.js", "src/server.js", "scripts/validate_asset.py", "scripts/specialist_plan.py", "scripts/specialist_orchestrator.py", "references/specialist-modules.json", "references/modeling-quality-loop.md", "assets/banner.svg", "assets/workflow.svg", "assets/architecture.svg", "integrations/agents/codex_reviewer.py", "integrations/agents/run_specialists.py", "integrations/godot/gltf_import_probe.gd", "integrations/godot/project.godot", "docs/QUICKSTART.md", "docs/ROADMAP-V2.md", "docs/V1.5-V2.0-MILESTONES.md", "CHANGELOG.md", "CONTRIBUTING.md"]) {
     assert.ok(files.includes(required), `missing from package: ${required}`);
   }
@@ -209,6 +215,26 @@ test("npm pack contains the skill content and excludes tests and dependencies", 
     assert.ok(packed.has(link), `README local link missing from npm package: ${link}`);
   }
   assert.ok(!files.some((path) => path.startsWith("tests/") || path.startsWith("node_modules/") || path.startsWith(".github/")), "package must not ship tests, deps or CI files");
+});
+
+test("npm pack excludes Python cache files from a dirty checkout", () => {
+  const fixture = mkdtempSync(join(tmpdir(), "blender-mcp-pack-"));
+  try {
+    const sources = ["scripts/model.py", "integrations/agents/agent.py"];
+    const caches = ["scripts/model.pyc", "scripts/optimized.pyo",
+                    "integrations/agents/__pycache__/metadata.txt"];
+    writeFileSync(join(fixture, "package.json"), JSON.stringify(pkg));
+    for (const name of [...sources, ...caches]) {
+      const path = join(fixture, name);
+      mkdirSync(dirname(path), { recursive: true });
+      writeFileSync(path, "fixture");
+    }
+    const files = npmPackFiles(fixture);
+    for (const source of sources) assert.ok(files.includes(source), source);
+    assert.deepEqual(files.filter((name) => caches.includes(name)), []);
+  } finally {
+    rmSync(fixture, { recursive: true, force: true });
+  }
 });
 
 

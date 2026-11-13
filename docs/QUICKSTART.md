@@ -1,9 +1,9 @@
 # Getting started — Blender MCP Master
 
-**What is installed?** An agent skill (`SKILL.md`, `references/`,
-`scripts/`, `assets/`) and, optionally, a read-only npm MCP resource server.
-**Not** a Blender-control MCP server or Blender addon. Live modeling requires
-a separately connected Blender-control MCP provider.
+The skill ZIP includes `SKILL.md`, `references/`, `scripts/`, `assets/`,
+`docs/` and `integrations/`. You can also run the optional read-only MCP
+resource server from GitHub. Live modeling requires a separately connected
+Blender-control MCP and Blender addon.
 
 ## Windows: install the Agent Skill from ZIP
 
@@ -46,22 +46,25 @@ a separately connected Blender-control MCP provider.
    replacing the folder. The ZIP contains source scripts, not an executable
    Blender addon.
 
-## Install from GitHub using Skills CLI
+## Install stable v1.4.0 using Skills CLI
 
 ```powershell
-npx skills add God-601/blender-mcp-master -g
+npx skills add God-601/blender-mcp-master@v1.4.0 --skill blender-mcp-master -g
 ```
 
-This uses the Skills CLI's GitHub source and does **not** need this project's
-npm package. Current Skills CLI versions may require Node.js 22.20 or newer;
-the ZIP method works without Node.js.
+The [current Skills CLI](https://github.com/vercel-labs/skills/blob/main/docs/commands.md)
+supports GitHub tag pins and requires Node.js 22.20 or newer. The ZIP method
+works without Node.js. An unpinned GitHub source uses the default branch,
+which contains the 2.0 engineering preview. See the
+[preflight instructions](release-notes-2.0.md#review-a-preflight-archive)
+to try that preview in a separate installation.
 
-## Optional: start the npm resource server
+## Optional read-only MCP resource server
 
-If `blender-mcp-master@1.4.0` is published on npm by the maintainer:
+Start the server from the stable GitHub tag:
 
 ```powershell
-npx -y blender-mcp-master@1.4.0
+npx -y "github:God-601/blender-mcp-master#v1.4.0"
 ```
 
 Configure that command in the agent's **MCP server config** as a stdio server
@@ -69,9 +72,6 @@ if the agent supports external MCP servers. It exposes reference documents and
 scripts, and it does **not** offer any write/control tool for a live Blender scene.
 The Node server supports Node >=20. Its `skill`, `list`, and `--help`
 subcommands work without MCP interaction when installed.
-
-**A first npm publish requires a package owner's authorized npm login/token.**
-The Release ZIP and GitHub skill installs are usable independently of npm.
 
 ## Set up separate Blender control
 
@@ -94,8 +94,11 @@ The Release ZIP and GitHub skill installs are usable independently of npm.
 - "Make a voxel tree with my project grid unit of 0.25 m and an 8-color
   palette. Check exposed faces, UV island layout and export warnings."
 
-For a NEW modeling project, the agent asks **several useful, specific design questions** (usually 2–6 depending on complexity) about any missing style, reference, silhouette, materials, details, or end use before changing the scene. It must not just ask permission to proceed, repeat requirements already given, or restart the interview on refinements. If every meaningful choice was delegated, it may pick and disclose editable defaults.
-Read-only discovery is allowed before the kickoff answer.
+For a new modeling project, the agent uses the
+[clarification gate](../references/clarification-gate.md) to resolve consequential
+gaps before editing. A complete brief or delegated design decisions call for
+zero design questions. The agent reuses answers on refinements and can discover
+the scene read-only while design choices are open.
 
 ## What counts as success?
 

@@ -5,6 +5,7 @@ These tests cover the Blender version bpy provides; they do not replace checking
 """
 import contextlib
 import io
+import json
 import os
 import re
 import tempfile
@@ -118,9 +119,60 @@ class BlenderRuntimeTests(unittest.TestCase):
         add_mesh("UnselectedBox", cube)
         out, err = run_script("validate_asset.py", TARGETS=[])
         self.assertIsNone(err, out)
-        self.assertIn("scene-wide fallback", out)
+        self.assertIn("scene-wide fallback", out.lower())
         self.assertIn("INCOMPLETE - CHECK TARGETS", out)
         self.assertNotIn("[UnselectedBox]", out)
+
+    def test_inspection_defaults_ignore_a_selected_example_namesake(self):
+        add_mesh("MCP_HS_Panel", cube).select_set(True)
+        for script, marker, status_key in (
+            ("inspect_geometry.py", "MCP_PROFESSIONAL_INSPECTION", "overall_technical"),
+            ("inspection_report.py", "MCP_INSPECTION_REPORT", "overall"),
+        ):
+            with self.subTest(script=script):
+                out, err = run_script(script)
+                self.assertIsNone(err, out)
+                report = json.loads(out.split(f"{marker}_BEGIN\n")[1].split(f"\n{marker}_END")[0])
+                self.assertEqual(report["targets"], [])
+                self.assertEqual(report[status_key], "NOT VERIFIED")
+                self.assertIn("TARGET_NAMES", " ".join(report["errors"]))
+
+    def test_validator_defaults_ignore_existing_selection(self):
+        selected = add_mesh("SelectedBox", cube)
+        selected.select_set(True)
+        selected.data.uv_layers.new(name="UVMap")
+        for script in ("validate_asset.py", "validate_uvs.py"):
+            with self.subTest(script=script):
+                out, err = run_script(script)
+                self.assertIsNone(err, out)
+                self.assertIn("RESULT: INCOMPLETE - CHECK TARGETS", out)
+                self.assertNotIn("[SelectedBox]", out)
+
+    def test_validator_opt_in_selection_only_audits_selected_meshes(self):
+        selected = add_mesh("SelectedBox", cube)
+        selected.select_set(True)
+        selected.data.uv_layers.new(name="UVMap")
+        add_mesh("UnselectedBox", cube).data.uv_layers.new(name="UVMap")
+        for script in ("validate_asset.py", "validate_uvs.py"):
+            with self.subTest(script=script):
+                out, err = run_script(script, USE_SELECTION=True)
+                self.assertIsNone(err, out)
+                self.assertIn("[SelectedBox]", out)
+                self.assertNotIn("[UnselectedBox]", out)
+                self.assertNotIn("RESULT: INCOMPLETE", out)
+
+    def test_validator_explicit_names_take_precedence_over_selection(self):
+        selected = add_mesh("SelectedBox", cube)
+        selected.select_set(True)
+        selected.data.uv_layers.new(name="UVMap")
+        add_mesh("NamedBox", cube).data.uv_layers.new(name="UVMap")
+        for script in ("validate_asset.py", "validate_uvs.py"):
+            with self.subTest(script=script):
+                out, err = run_script(script, TARGETS=["NamedBox"], USE_SELECTION=True)
+                self.assertIsNone(err, out)
+                self.assertIn("[NamedBox]", out)
+                self.assertNotIn("[SelectedBox]", out)
+                self.assertNotIn("RESULT: INCOMPLETE", out)
 
     def test_optimizer_backup_works_with_excluded_collection(self):
         obj = add_mesh("Box", cube)

@@ -46,6 +46,21 @@ class CleanInstallSmokeTests(unittest.TestCase):
                 with self.assertRaisesRegex(ValueError, "Duplicate ZIP"):
                     mod.validate_members(zf)
 
+    def test_rejects_python_caches_before_extraction(self):
+        mod = load()
+        with tempfile.TemporaryDirectory() as directory:
+            archive = Path(directory) / "cached.zip"
+            for name in ("scripts/__pycache__/", "scripts/__pycache__/metadata.txt",
+                         "integrations/agents/legacy.pyc", "scripts/optimized.pyo"):
+                with self.subTest(name=name):
+                    with zipfile.ZipFile(archive, "w") as zf:
+                        for required in mod.REQUIRED:
+                            zf.writestr("blender-mcp-master/" + required, "")
+                        zf.writestr("blender-mcp-master/" + name, "")
+                    with zipfile.ZipFile(archive) as zf:
+                        with self.assertRaisesRegex(ValueError, "Python cache ZIP member"):
+                            mod.validate_members(zf)
+
     def test_clean_home_install_from_newly_built_zip(self):
         mod = load()
         with tempfile.TemporaryDirectory() as directory:
@@ -58,7 +73,8 @@ class CleanInstallSmokeTests(unittest.TestCase):
                     zf.write(ROOT / name, "blender-mcp-master/" + name)
                 for dirname in ("docs", "references", "scripts", "integrations", "assets"):
                     for source in sorted((ROOT / dirname).rglob("*")):
-                        if source.is_file() and "__pycache__" not in source.parts:
+                        if (source.is_file() and "__pycache__" not in source.parts
+                                and source.suffix not in (".pyc", ".pyo")):
                             zf.write(source, "blender-mcp-master/" +
                                      source.relative_to(ROOT).as_posix())
             checksum = hashlib.sha256(archive.read_bytes()).hexdigest()

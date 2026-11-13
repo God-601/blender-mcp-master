@@ -4,7 +4,7 @@ import bmesh
 import json
 
 # ---- CONFIG ----------------------------------------------------------------
-TARGET_NAMES = ["MCP_HS_Panel"]
+TARGET_NAMES = []  # Explicit mesh object names.
 # ----------------------------------------------------------------------------
 
 
@@ -54,7 +54,7 @@ def inspect_object(obj, depsgraph):
 missing = [name for name in TARGET_NAMES if bpy.data.objects.get(name) is None]
 non_mesh = [name for name in TARGET_NAMES
             if bpy.data.objects.get(name) is not None and bpy.data.objects[name].type != "MESH"]
-depsgraph = bpy.context.evaluated_depsgraph_get()
+depsgraph = bpy.context.evaluated_depsgraph_get() if TARGET_NAMES else None
 reports = [inspect_object(bpy.data.objects[name], depsgraph)
            for name in TARGET_NAMES
            if bpy.data.objects.get(name) is not None and bpy.data.objects[name].type == "MESH"]
@@ -63,6 +63,7 @@ payload = {
     "targets": reports,
     "missing_targets": missing,
     "non_mesh_targets": non_mesh,
+    "errors": [] if TARGET_NAMES else ["Set TARGET_NAMES to explicit mesh object names."],
     "overall": "NOT VERIFIED" if missing or non_mesh or not reports
                or any(item["status"] == "NOT VERIFIED" for item in reports) else (
         "ISSUE" if any(item["status"] == "ISSUE" for item in reports) else

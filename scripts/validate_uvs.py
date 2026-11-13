@@ -1,11 +1,12 @@
-"""Read-only UV diagnostics for explicitly named or selected mesh objects.
+"""Read-only UV diagnostics for named meshes or explicitly opted-in selection.
 
 Paste into Blender MCP execute_blender_code. No mesh or UV data is modified.
 """
 import bpy
 
 # ---- CONFIG ----------------------------------------------------------------
-TARGETS = []          # Explicit object names; empty = selected mesh objects ONLY.
+TARGETS = []          # Explicit mesh object names.
+USE_SELECTION = False  # With empty TARGETS, explicitly validate only selected meshes.
 UV_LAYER_NAME = ""    # Empty = active UV layer; otherwise inspect this named layer.
 ZERO_AREA_EPSILON = 1e-12
 OUT_OF_TILE_TOLERANCE = 1e-4
@@ -29,10 +30,9 @@ def resolve_targets():
             else:
                 result.append(obj)
         return result
-    selected = [obj for obj in bpy.context.selected_objects if obj.type == "MESH"]
-    if not selected:
-        print("INFO: TARGETS empty and no mesh selected; scene-wide fallback is disabled.")
-    return selected
+    if USE_SELECTION is not True:
+        return []
+    return [obj for obj in bpy.context.selected_objects if obj.type == "MESH"]
 
 
 objects = resolve_targets()
@@ -42,10 +42,11 @@ for name in missing:
 for name, kind in invalid:
     print(f"WARN: target {name!r} is {kind}, not MESH")
 if not objects:
+    print("WARN: no mesh targets (scene-wide fallback is disabled). Set TARGETS to explicit mesh names.")
     incomplete.append("no mesh targets")
 if missing or invalid:
     incomplete.append("invalid or missing targets")
-    
+
 for obj in objects:
     mesh = obj.data
     layer = mesh.uv_layers.get(UV_LAYER_NAME) if UV_LAYER_NAME else mesh.uv_layers.active

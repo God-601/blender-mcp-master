@@ -3,9 +3,10 @@
 The router suggests what to read, never silently loads guides. Agent remains
 responsible for design interviews and actual tool capability discovery.
 """
+import argparse
 import json
+from pathlib import Path
 
-TASK = {"category": "hard_surface", "destination": "render", "needs": []}
 PRIMARY = {
     "hard_surface": "references/hard-surface.md",
     "organic": "references/organic.md",
@@ -34,10 +35,10 @@ def route(task):
     if not isinstance(task, dict):
         raise ValueError("task must be an object")
     category = task.get("category")
-    if category not in PRIMARY:
+    if not isinstance(category, str) or category not in PRIMARY:
         raise ValueError("category must be one of: " + ", ".join(PRIMARY))
     destination = task.get("destination", "other")
-    if destination not in ALLOWED_DESTINATIONS:
+    if not isinstance(destination, str) or destination not in ALLOWED_DESTINATIONS:
         raise ValueError("unsupported destination")
     needs = task.get("needs", [])
     if not isinstance(needs, list) or any(not isinstance(n, str) or n not in EXTRAS for n in needs):
@@ -49,9 +50,10 @@ def route(task):
     for field, value in (("known", known), ("delegated", delegated)):
         if not isinstance(value, list) or any(n not in QUESTION_TOPICS for n in value):
             raise ValueError(field + " contains invalid design topics")
-    if task.get("continuation", False) not in (True, False):
+    continuation = task.get("continuation", False)
+    if not isinstance(continuation, bool):
         raise ValueError("continuation must be bool")
-    if task.get("continuation", False):
+    if continuation:
         questions = []
     else:
         questions = [topic for topic in QUESTION_TOPICS if topic not in known and topic not in delegated]
@@ -61,10 +63,6 @@ def route(task):
         guide = EXTRAS[need]
         if guide != primary and guide not in secondary:
             secondary.append(guide)
-    if destination in ("roblox", "unity", "godot", "unreal") and primary != EXTRAS["export"] and "export" in needs:
-        # Already included above. Never infer export simply from the engine label:
-        # a user may just be editing a Blender asset for a future game.
-        pass
     return {
         "category": category, "destination": destination,
         "primary": primary, "optional": secondary,
@@ -75,5 +73,16 @@ def route(task):
     }
 
 
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("task", type=Path, help="Path to a UTF-8 JSON task brief")
+    args = parser.parse_args()
+    try:
+        routed = route(json.loads(args.task.read_text(encoding="utf-8")))
+    except (OSError, ValueError) as exc:
+        parser.error(str(exc))
+    print(json.dumps(routed, ensure_ascii=False, indent=2, sort_keys=True))
+
+
 if __name__ == "__main__":
-    print(json.dumps(route(TASK), ensure_ascii=False, indent=2, sort_keys=True))
+    main()

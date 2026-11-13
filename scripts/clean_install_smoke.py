@@ -38,6 +38,7 @@ REQUIRED = (
     "integrations/agents/codex_reviewer.py",
     "integrations/agents/run_specialists.py",
     "integrations/agents/blender_native_host.py",
+    "integrations/agents/checkpoint_pack.py",
     "integrations/agents/freeform_acceptance.py",
     "integrations/agents/production_benchmark.py",
     "integrations/godot/animation_probe.gd",
@@ -81,6 +82,8 @@ def validate_members(zf):
         if (not name.startswith(PREFIX) or name.startswith("/") or
                 "\\" in name or any(x in ("", ".", "..") for x in parts)):
             raise ValueError("Unsafe ZIP member: " + name)
+        if "__pycache__" in parts or name.endswith((".pyc", ".pyo")):
+            raise ValueError("Python cache ZIP member rejected: " + name)
         if stat.S_IFMT(info.external_attr >> 16) == stat.S_IFLNK:
             raise ValueError("Symlink ZIP member rejected: " + name)
     for required in REQUIRED:
