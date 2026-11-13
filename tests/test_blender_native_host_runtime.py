@@ -110,6 +110,41 @@ class NativeHostTests(unittest.TestCase):
         self.assertIsNone(host.lease)
         self.assertFalse((host.root / host.context['checkpoint_ref']).exists())
 
+    def test_unsaved_texture_pixels_block_checkpoint_without_losing_edits(self):
+        for packed in (False, True):
+            with self.subTest(packed=packed):
+                image, texture = self.add_external_texture()
+                if packed:
+                    image.pack()
+                original = texture.read_bytes()
+                pixels = (0, 1, 0, 1)
+                image.pixels[:] = pixels
+                self.assertTrue(image.is_dirty)
+                host = self.host()
+                with self.assertRaisesRegex(ValueError, 'unsaved image pixels.*' + image.name):
+                    with host:
+                        self.fail('writer started with unsaved texture pixels')
+                self.assertEqual(tuple(image.pixels), pixels)
+                self.assertEqual(texture.read_bytes(), original)
+                self.assertIsNone(host.lease)
+                self.assertFalse((host.root / host.context['checkpoint_ref']).exists())
+                bpy.data.images.remove(image)
+
+    def test_unsaved_generated_pixels_block_checkpoint(self):
+        image = bpy.data.images.new('GeneratedTexture', width=1, height=1, alpha=True)
+        image.pixels[:] = (0, 1, 0, 1)
+        self.assertTrue(image.is_dirty)
+        with self.assertRaisesRegex(ValueError, 'unsaved image pixels.*GeneratedTexture'):
+            with self.host():
+                self.fail('writer started with unsaved generated pixels')
+
+    def test_factory_startup_checkpoint_allows_installed_essentials_brush(self):
+        bpy.ops.wm.read_factory_settings(use_empty=False)
+        checkpoint = self.root / 'factory.blend'
+        status = self.mod.save_recovery_checkpoint(checkpoint)
+        self.assertIn(status, {'NO_EXTERNAL_PATHS_REPORTED', 'BLENDER_RUNTIME_ASSETS_ONLY'})
+        self.assertTrue(checkpoint.is_file())
+
     def test_second_writer_lease_is_rejected(self):
         with self.host():
             with self.assertRaises(FileExistsError):

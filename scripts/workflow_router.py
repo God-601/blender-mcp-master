@@ -13,7 +13,7 @@ PRIMARY = {
     "stylized": "references/stylized-lowpoly.md",
     "architecture": "references/modular-modeling.md",
     "character": "references/character-rig.md",
-    "materials": "references/uv-baking.md",
+    "materials": "references/materials.md",
     "game_asset": "references/game-ready-export.md",
     "retopology": "references/advanced-retopology.md",
 }

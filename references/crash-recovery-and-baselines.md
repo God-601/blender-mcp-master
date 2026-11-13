@@ -108,6 +108,8 @@ and labels its scope separately. Compare snapshots from the same Blender
 version and schema.
 
 The native host packs supported external dependencies in a disposable
-checkpoint, then reopens it before enabling writes. A missing or unportable
-dependency blocks that host run. The original scene retains its file paths
-and packing state.
+checkpoint, then reopens it before enabling writes. Missing or unportable
+dependencies and unsaved image pixels block that host run. The original
+scene retains its file paths and packing state.
+The factory Grease Pencil Essentials brush can remain a runtime dependency
+from the installed Blender distribution.

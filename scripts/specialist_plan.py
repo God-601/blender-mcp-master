@@ -44,6 +44,8 @@ def build_plan(task):
     for guide in [routed["primary"], *routed["optional"]]:
         step = steps_by_module.get(MODULE_BY_GUIDE.get(guide), steps_by_module[primary])
         step["guides"].append(guide)
+    if not steps_by_module[primary]["guides"]:
+        steps_by_module[primary]["guides"].append(modules[primary]["guides"][0])
     return {"schema_version": 1, "mode": "delegated" if len(selected) > 3 else "single",
             "destination": routed["destination"], "route": routed, "steps": steps}
 

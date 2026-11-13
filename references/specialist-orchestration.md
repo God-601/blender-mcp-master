@@ -124,7 +124,7 @@ fingerprint. The host checks selected scene globals separately.
 
 When Blender reports external dependencies, the host creates a disposable
 copy, packs supported assets in a separate Blender process and reopens the
-result. A missing file or a dependency Blender cannot pack stops startup. The
+result. A missing file, unsaved image pixels or a dependency Blender cannot pack stops startup. The
 live scene keeps its original paths and packing state. The probe exposes the
 checkpoint dependency status. After an interruption, inspect the retained
 checkpoint before resuming. Callbacks must bound synchronous work and terminate

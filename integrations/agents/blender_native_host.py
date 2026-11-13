@@ -17,7 +17,8 @@ import uuid
 
 import bpy
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / 'scripts'))
+sys.path[:0] = [str(Path(__file__).resolve().parents[2] / 'scripts'), str(Path(__file__).resolve().parent)]
+from checkpoint_pack import checkpoint_paths
 from scene_baseline_snapshot import PROTECTION_LIMITS, capture_object, node_tree_signature
 from specialist_orchestrator import artifact, validate_context, write_receipt
 
@@ -58,14 +59,19 @@ def material_dependencies(material):
 
 
 def save_recovery_checkpoint(path):
-    dependencies = sorted(set(bpy.utils.blend_paths(absolute=True, packed=False)))
+    dirty_images = sorted(image.name for image in bpy.data.images if image.is_dirty)
+    if dirty_images:
+        raise ValueError('Checkpoint cannot preserve unsaved image pixels. Save or pack these images first: '
+                         + ', '.join(dirty_images))
+    dependencies = checkpoint_paths()
     missing = [name for name in dependencies if not Path(name).is_file()]
     if missing:
         raise ValueError('Checkpoint has missing or unsupported external dependencies: ' + ', '.join(missing))
     if not dependencies:
         if bpy.ops.wm.save_as_mainfile(filepath=str(path), copy=True) != {'FINISHED'}:
             raise ValueError('Could not save recovery checkpoint')
-        return 'NO_EXTERNAL_PATHS_REPORTED'
+        return ('BLENDER_RUNTIME_ASSETS_ONLY' if bpy.utils.blend_paths(absolute=True, packed=False)
+                else 'NO_EXTERNAL_PATHS_REPORTED')
 
     # Work in a child process so packing cannot change live images, preferences or paths.
     worker = Path(__file__).with_name('checkpoint_pack.py').resolve()
