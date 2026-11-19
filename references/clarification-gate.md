@@ -10,6 +10,7 @@ user's brief or prior discussion.
 
 ## GENERAL KICKOFF — resolve gaps in a new brief
 
+Ask in the user's language. Adapt the examples below to the brief.
 Ask zero questions when the brief resolves every consequential choice or the
 user delegates the remaining design decisions. Record any editable defaults
 and proceed through scene protection and planning.
@@ -40,7 +41,7 @@ dimensions and triangle budget may be settled while color, material or
 silhouette preferences still need input. Ask only about the remaining gaps
 that would materially change the asset.
 
-**Never ask "posso seguir?", "pode prosseguir?", "is that OK?" or equivalent
+**Never ask "may I proceed?", "is that OK?" or equivalent
 as a design question.** If the user says "you choose", make a coherent choice
 and record it in the brief. Ask for approval only when an action separately
 requires authorization.
@@ -61,12 +62,12 @@ new high-impact questions.
 
 | Missing requirement | Ask | Why |
 | --- | --- | --- |
-| Concept/subject unclear | "Que tipo de árvore é — pinheiro, carvalho ou algo fantástico? Qual referência visual devo seguir?" | Species changes silhouette and branching |
-| Low-poly game prop, style missing | "Qual visual você prefere: blocado, facetas suaves ou pintado à mão? Tem uma referência?" | Topology and materials change |
-| Realtime target, purpose unclear | "Vai aparecer de perto ou como cenário? Precisa de colisão ou animação?" | Determines scale/detail/pivots |
-| Mechanical prop without dimensions | "Quais medidas e folgas precisam ser exatas?" | Prevents fictional fits |
-| Character | "Qual anatomia/silhueta, roupa, expressão e pose? Vai animar?" | Shape + topology + rig |
-| Finish unspecified | "O metal deve parecer novo, pintado ou envelhecido?" | Affects surface appearance |
+| Concept/subject unclear | "Which species or canopy shape should guide the silhouette?" | Species changes silhouette and branching |
+| Low-poly game prop, style missing | "Do you prefer blocky forms, soft facets or a hand-painted finish?" | Topology and materials change |
+| Realtime target, purpose unclear | "Will it appear in close-up? Does it need collision or animation?" | Determines scale/detail/pivots |
+| Mechanical prop without dimensions | "Which dimensions and clearances must be exact?" | Prevents fictional fits |
+| Character | "Which build, clothing and pose do you want? Will the character animate?" | Shape + topology + rig |
+| Finish unspecified | "Should the metal look new, painted or weathered?" | Affects surface appearance |
 | Delegation | No new question if meaningful choices explicitly delegated | Respect user autonomy |
 
 ### Example — low-poly Roblox tree
@@ -74,22 +75,15 @@ new high-impact questions.
 Already known: 2,000 evaluated triangles max, light PBR texture, Roblox.
 A useful kickoff is:
 
-> Para a árvore, me diga só algumas coisas sobre o visual:
-> 1. Qual espécie ou formato de copa você imagina?
-> 2. O tronco deve ser mais reto ou retorcido? Copa densa ou com espaços?
-> 3. Prefere tons mais realistas ou um visual levemente estilizado?
-> 4. Tem alguma imagem ou jogo de referência para eu seguir?
+> Which species or canopy shape do you have in mind? Should the trunk be straight or twisted?
+> Do you have a reference for the density and color of the foliage?
 
-Notice that none of these repeats the triangle budget, engine or texture style.
-Do not finish with "posso começar?" — take the answers into the plan.
+Use the answers in the plan. The triangle budget, engine and texture style are already known.
 
 ### Example — high-detail sword
 
-> 1. A espada deve parecer histórica, fantasia ou sci-fi?
-> 2. Como você imagina a lâmina (reta, curva, larga, fina) e o comprimento?
-> 3. Quais materiais/cores e nível de desgaste?
-> 4. O detalhe mais importante é lâmina, guarda, cabo ou ornamentos?
-> 5. Ela será vista de perto em jogo ou usada em render?
+> Should it look historical, fantasy or sci-fi? What blade shape and length do you want?
+> Which material, finish and features matter most in close-up?
 
 ## Severity and permissions
 

@@ -87,6 +87,11 @@ Roblox Studio acceptance:** Sofa V3 LOD meshes and PBR maps were inspected
 and the user approved the visible result. This does *not* certify universal
 Roblox/Unity compatibility or artistic quality.
 
+Codex completed a live modeling task. Claude Code discovered the skill but its
+model run needs authentication. Cursor, OpenCode and Kilo Code lack a recorded
+end-to-end run. The controlled benchmark used 6.236% more tokens with the skill
+across 15 trials per arm. [Benchmark results](docs/V2-CAMPAIGN-2026-11-08.md).
+
 See the [v2.0.0 release notes](docs/release-notes-2.0.md),
 [game export guidance](references/game-ready-export.md), and the
 [v1.5–1.9 milestone status](docs/V1.5-V2.0-MILESTONES.md).
@@ -165,6 +170,8 @@ Some tests require a compatible `bpy` runtime. Passing tests is not proof of art
 - **Aprofundar:** [documentação oficial](references/official-blender-documentation.md) · [verificação e recuperação](references/evidence-first-workflow.md) · [padrões profissionais](references/professional-modeling-standards.md).
 
 Inclui verificações técnicas e exemplos reais de baking e importação no Godot. Um sofá com três LODs e mapas PBR foi aprovado pelo usuário em uma campanha anterior no Roblox Studio.
+
+O Codex concluiu uma tarefa no Blender. O Claude Code encontrou a skill, mas a execução depende de autenticação. Cursor, OpenCode e Kilo Code seguem sem teste completo registrado. No A/B controlado, a skill consumiu 6,236% mais tokens em 15 tentativas por grupo.
 
 A 2.0 reúne módulos especializados, executor por adaptador
 do cliente, um escritor por vez, QA independente e recibos com SHA256.

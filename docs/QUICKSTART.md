@@ -7,7 +7,7 @@ Blender-control MCP and Blender addon.
 
 ## Windows: install the Agent Skill from ZIP
 
-1. Open [GitHub Releases](https://github.com/God-601/blender-mcp-master/releases)
+1. Open [the v2.0.0 release](https://github.com/God-601/blender-mcp-master/releases/tag/v2.0.0)
    and download `blender-mcp-master-2.0.0.zip` and `SHA256SUMS.txt`
    from the same tagged release.
 2. Verify the SHA256 against the checksum file (PowerShell):

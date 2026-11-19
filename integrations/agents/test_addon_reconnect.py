@@ -19,6 +19,10 @@ from test_native_recovery import digest, read, write
 
 
 def child(args):
+    def mark(stage):
+        write(args.output / 'startup.json', {'stage': stage, 'pid': os.getpid()})
+
+    mark('child_python_entered')
     import bpy
     from blender_native_host import BlenderNativeHost
     from scene_baseline_snapshot import capture_object
@@ -30,6 +34,7 @@ def child(args):
     spec.loader.exec_module(addon)
     os.environ[addon.ADDON_UPDATE_CHECK_ENV] = '1'
     addon.register()
+    mark('addon_registered')
     bpy.context.scene.blendermcp_auto_start_server = False
     bpy.context.scene.blendermcp_port = args.port
     bpy.ops.object.select_all(action='SELECT')
@@ -42,6 +47,7 @@ def child(args):
         owned_objects=['FutureOwnedAsset'], protected_objects=[sentinel.name],
         commit_sha=args.commit, actor_id='isolated-addon-reconnect-test', callbacks={})
     host.__enter__()
+    mark('native_host_ready')
     servers = []
 
     def start():
@@ -225,6 +231,8 @@ def campaign(args):
         report['status'] = 'PASS_WITH_PROCESS_SCOPED_IDENTITY_LIMIT'
     except Exception:
         report['error'] = traceback.format_exc()
+        marker = root / 'startup.json'
+        report['last_startup_stage'] = read(marker)['stage'] if marker.exists() else 'no_child_python_marker'
         raise
     finally:
         for connection in connections:

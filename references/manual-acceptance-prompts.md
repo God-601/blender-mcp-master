@@ -1,81 +1,73 @@
-# Blender MCP Master — Testes manuais da versão integrada
+# Manual acceptance prompts
 
-Esta é uma **prévia de teste**, não a release 1.0. Faça backup dos projetos; a skill exige um Blender-control MCP separado para editar o Blender. Não teste em projetos valiosos sem salvar uma cópia.
+Use a disposable scene or a saved copy. Connect a separate Blender-control MCP and record the revision under test. Run prompts in the user's language. [Português](manual-acceptance-prompts.pt-BR.md).
 
-## Inicialização obrigatória
+## Session preflight
 
-**Preflight (sempre em sessão nova)**
+> Activate Blender MCP Master. Inspect the current Blender version, available control tools and existing objects read-only. Resolve consequential design gaps before editing.
 
-> Ative a Blender MCP Master. Informe sua versão real do Blender, as ferramentas do Blender-control MCP disponíveis e os objetos existentes. Inspecione somente por leitura. Se o briefing deixar decisões importantes em aberto, esclareça essas decisões antes de alterar a cena.
+Record the observed session and tools. If a required connection or object is missing, mark the affected case NOT VERIFIED.
 
-**Aprovação:** a IA não inventa uma conexão MCP e não muda nada antes de receber as respostas às perguntas relevantes.
+## T01 — Low-poly chair
 
-## T01 — Cadeira low-poly e briefing com decisões em aberto
+> Make a medieval wooden game chair with four legs, a backrest, seat height 0.45 m, width 0.5 m and a 1,500-triangle budget. Deliver a .blend and preserve existing objects.
 
-> Crie uma cadeira medieval low-poly para jogos, com quatro pernas, assento a 0,45 m, largura 0,5 m, encosto, material de madeira e limite de 1.500 triângulos. Entrega em .blend. Preserve os objetos existentes.
+Check that the agent resolves open design decisions such as backrest shape and uses the answers. Repeat with those choices specified or delegated. Expect zero design questions on that variant.
 
-Aprovado se esclarecer as decisões em aberto que mudam o resultado, como a forma do encosto ou o acabamento da madeira, e usar as respostas. Repita o teste com um briefing completo ou com essas decisões delegadas. A segunda variante deve avançar com zero perguntas de design.
+## T02 — Castle and visual review
 
-## T02 — Castelo e inspeção artística
+> Make a low-poly medieval castle with a gate, two towers and walls. Check blockout proportions and alignment before detailing. Inspect actual front, side and three-quarter views.
 
-> Modele um castelo medieval low-poly com portão, duas torres e muralhas. Primeiro conclua o blockout, valide proporções e alinhamentos e só então adicione detalhes. Inspecione frente, lado e três-quartos com ferramentas reais e informe o que não pôde verificar.
+Check hierarchy, contact and visual evidence. Record unavailable views.
 
-Aprovado se existir hierarquia, contatos corretos e revisão visual autêntica, sem alegações inventadas.
+## T03 — Scene integrity
 
-## T03 — Integridade da cena
+> Add a sci-fi panel in a new collection. Preserve USER_Keep_Mesh and USER_Keep_Light. On failure remove only your temporary copies and compare the scene before and after.
 
-> Existem objetos de usuário chamados USER_Keep_Mesh e USER_Keep_Light. Adicione um painel sci-fi a uma coleção nova, sem alterar os objetos originais. Se um comando falhar, remova apenas cópias temporárias criadas por você. Compare o estado da cena antes e depois.
+Confirm both sentinels exist in the same session before any mutation. Otherwise stop and mark NOT VERIFIED. Inspect named panel fasteners, plates and brackets using the component-fit guide and close-up views. Verify names and data after success and failure.
 
-Aprovado se os dados e nomes originais continuarem intactos, inclusive quando houver erro.
+## T04 — Guided retopology
 
-**Pré-condição do T03:** confirme por leitura que USER_Keep_Mesh e USER_Keep_Light existem na mesma instância/sessão do Blender-control MCP. Se não existirem, o teste fica NOT VERIFIED: abra o arquivo correto ou crie e salve os dois objetos antes de pedir a modelagem; o agente deve parar antes de qualquer mutação.
+> Build a disposable mesh with two quad boundary loops. Inspect actual indices and bridge on a copy using scripts/retopology_advanced.py. Check quads, normals and the source. Repeat with invalid indices.
 
-**Encaixe do painel:** solicite que parafusos, placas e suportes encontrem a superfície pretendida em vez de atravessar material sem um recorte intencional. Para pares nomeados, use `references/component-fit-and-joints.md` e análise read-only; faça revisão visual das juntas antes da conclusão.
+Expect the invalid operation to leave no failed output and the original to remain intact.
 
-## T04 — Retopologia guiada
+## T05 — UVs
 
-> Construa uma malha descartável com dois loops quadrangulares de borda. Inspecione índices reais e execute a união usando scripts/retopology_advanced.py em uma cópia. Verifique quads, normais e preservação da fonte. Em seguida, experimente índices inválidos: o script deve recusar a operação sem deixar um objeto de saída falhado.
+> Compare separate UV islands with an overlapping variant using scripts/uv_diagnostics.py on explicit TARGETS. Inspect overlap and texel density read-only.
 
-Aprovado se a fonte permanecer intacta e não houver falsas alegações de retopologia automática para personagens.
+Distinguish edge contact from positive-area overlap. Report only measured properties.
 
-## T05 — UV
+## T06 — Optimization
 
-> Compare uma malha com duas ilhas UV separadas a uma variante com as ilhas sobrepostas. Use scripts/uv_diagnostics.py com TARGETS explícitos para checar overlap e texel density. Informe PASS, REVIEW, ISSUE e NOT VERIFIED conforme as evidências. Não modifique UVs durante a auditoria.
+> Compare a cube with a subdivision variant using scripts/asset_performance_audit.py on named objects. Record base and evaluated triangles, materials and textures. Optimize only on a copy.
 
-Aprovado se separar contato de borda de sobreposição verdadeira e não inventar padding, baking ou exportação.
+Verify modifier effects and source preservation. FPS, draw calls and VRAM require separate measurements.
 
-## T06 — Otimização de assets
+## T07 — Export
 
-> Crie um cubo e uma variante com Subdivision ativo. Use scripts/asset_performance_audit.py em objetos explicitamente nomeados; compare triângulos base/avaliados, materiais e texturas. Se sugerir otimização, faça em uma cópia. Não alegue medição de FPS, draw calls ou VRAM real.
+> Make a stylized sword with materials and UVs. Export GLB or FBX, reimport in a test scene and inspect scale, pivot, topology and materials.
 
-Aprovado se os dados reais incluírem modificadores e a cena original ficar intacta.
+Check the actual file and imported object. Mark target-engine compatibility NOT VERIFIED if the engine was unavailable.
 
-## T07 — Exportação
+## T08 — Token comparison
 
-> Modele uma espada estilizada com materiais e UVs; exporte GLB ou FBX e reimporte em cena de teste. Verifique escala, pivô, topologia e materiais. Se não houver acesso à engine de destino, registre compatibilidade com a engine como NOT VERIFIED.
+> Run T01 with and without the skill from identical scenes using the same client, model and MCP. Capture Bash/MCP calls and provider token counts when available. Use scripts/agent_efficiency_compare.py and the efficiency benchmark protocol.
 
-Aprovado se o arquivo existir e houver uma reimportação real.
+Retain reproducible inputs, failures and quality measurements alongside costs.
 
-## T08 — Comparação de tokens
+## T09 — Structural joints
 
-> Execute o mesmo cenário T01 duas vezes, uma sem a skill e outra com ela, em cenas idênticas com mesmo agente/modelo/MCP. Registre chamadas Bash/MCP e contagem de tokens APENAS quando disponível. Compare com scripts/agent_efficiency_compare.py e docs/EFFICIENCY-BENCHMARK.md, sem inventar redução.
+> Build a chair with a seat, four legs and two stretchers. Plan the leg-to-seat and stretcher-to-post contact planes. Document any intentional recess and depth. Inspect front, side, underside and three-quarter views before and after beveling. Use scripts/inspect_component_fit.py on separate named pairs. Inspect internal islands visually if parts were joined. Make corrections on owned copies.
 
-Aprovado com entradas reproduzíveis e análise de qualidade junto de custo.
+Record close-ups, transforms and before/after evidence. A sacrificial beam passing through a wall should trigger REVIEW or ISSUE. AABB/BVH alone cannot approve a joint.
 
-## T09 — Encaixes estruturais, sem atravessamento arbitrário
+## T10 — Flat-panel triangulation
 
-> Use a skill Blender MCP Master para construir uma cadeira low-poly de teste com assento, quatro pernas e duas travessas. Projete explicitamente o plano de contato entre topo das pernas e parte inferior do assento e entre ponta das travessas e faces dos postes. Não deixe peças atravessarem outras somente para esconder a junção. Se usar encaixe embutido, desenhe/documente a cavidade e a profundidade. Inspecione cada junta em vista frontal, lateral, inferior e três-quartos, antes e depois do chanfro. Use scripts/inspect_component_fit.py somente em pares de objetos separados para encontrar candidatos, e indique seus limites; se você consolidar tudo em um mesh, avalie visualmente as ilhas internas. Corrija encaixes ruins em cópias próprias, sem alterar objetos preexistentes.
+> Create three named planar fixtures covering the same quad-shaped patch. A uses one quad, B two triangles sharing a diagonal, and C four triangles meeting at a center vertex. Run scripts/topology_face_diagnostics.py with explicit TARGETS. Report editable faces and render triangles separately.
 
-**Esperado:** o agente descreve as superfícies de apoio e distingue contato intencional de interseção problemática. Exibir imagens reais de juntas em close-up, geometria/transformações nomeadas e sem declarar PASS só por AABB/BVH. Registrar se houve correção e evidência antes/depois. Para comparação, produza um exemplo descartável de uma viga atravessando uma parede para demonstrar que o agente **sinaliza REVIEW/ISSUE**, em vez de aprovar automaticamente. A auditoria deve ser não destrutiva.
+Expect 1/2, 2/2 and 4/4 faces/triangles respectively. Only C is an X-fan candidate. Inspect it in Edit Mode and remove the redundant center only on an owned copy if shape, normals and UVs are preserved. Verify shading and UVs before/after or record NOT VERIFIED.
 
-## T10 — Excessive editable face triangulation / X across flat panels
+## Evidence per run
 
-> Use Blender MCP Master. Create three separate named editable mesh tests: A one completely planar quad face; B two planar triangles sharing one diagonal that make the same quad; C one planar quad-shaped patch split by a center vertex into four triangles making an X. Run `scripts/topology_face_diagnostics.py` with explicit `TARGETS` for all three. Report native Blender face count and render triangle count separately. Demonstrate that A and B have two render triangles, C has four; C should yield a REVIEW candidate while B is not an X fan. Inspect the C patch in Edit Mode, and on an owned COPY only, remove the redundant center vertex/edges if UVs, normals and shape remain safe. Validate before/after UV and shading. Do not edit the original or treat every triangulation/glTF vertex split as a defect.
-
-**Esperado:** A one quad/two render tris, B two triangular faces/two render tris, C four triangular faces/four render tris. Analyzer marks C REVIEW but never auto-modifies. Correction on a copy is visually and technically verified, or stays NOT VERIFIED with a reason. Check Blender version before executing the new script.
-
-## Registro de evidências
-
-Para cada teste, salve: cenário, cliente/modelo, Blender e MCP versões exatas, prompt, cena inicial, resultado .blend, capturas frontal/lateral/três-quartos, logs de erro, alterações em objetos próprios, medições técnicas, status visual e status de exportação. Não compartilhe tokens de autenticação ou dados privados.
-
-Não chame algo de PASS sem evidência. Use PASS / ISSUE / N/A / NOT VERIFIED e anote problemas concretos para corrigir.
+Record scenario, client/model, Blender and MCP versions, prompt, initial scene, resulting .blend, front/side/three-quarter captures, error logs, owned changes, technical measurements, visual result and export status. Use PASS, ISSUE, N/A or NOT VERIFIED with evidence. Keep authentication tokens and private data out of reports.

@@ -55,26 +55,25 @@ planner and verifies the new module/adapter files.
   bypassing safety controls. This demonstrates launch/receipt handling only.
 - Local full Node suite after the Windows npm fix: 17 tests passed.
 
-## Remaining acceptance gates
+## Published release and remaining validation
 
-| Claim | Current scope | Required before 2.0 acceptance |
+GitHub published [v2.0.0](https://github.com/God-601/blender-mcp-master/releases/tag/v2.0.0)
+on 2026-11-13 at commit `478a6920666cb131a6e870b604b64e83b236f7a2`.
+The release includes the ZIP, SHA256SUMS.txt and clean-install-report.json.
+The publisher is [.github/workflows/release-stable-2.0.yml](https://github.com/God-601/blender-mcp-master/blob/v2.0.0/.github/workflows/release-stable-2.0.yml).
+It checks the authorized merge subject and the CI results for that commit.
+
+| Area | Recorded result | Remaining evidence |
 | --- | --- | --- |
-| Agent collaboration | Executable host bridge, deterministic transport tests, real CLI launch | Configured native host with actual specialists completing assets through Blender MCP |
-| Scene safety/recovery | Scoped probes, checkpoint hashes, drift/failure fixtures | Real save/reopen, crash/reconnect, shared datablock and writer-lease trials |
-| Topology/UV/PBR/retopo | Existing Blender runtime fixtures | Varied production assets, actual saved bakes, pose tests and reviewed renders |
-| Proportions/fit/collision | Existing measurements and conservative probes | Reference views, exact intended contact checks; BVH candidates are not collision certification |
-| Engines | Existing Godot fixture imports | Real assets with inspected materials/pivots/LODs in each claimed target; Roblox/Unity/Unreal not certified here |
-| Cost/efficiency | Bounded planning and concise handoffs | A/B provider-usage receipts, all failed trials retained, comparable quality |
-| Release | Exact-source evidence gates, no publisher added | All mandatory gates, independent evidence review and explicit publication authorization |
+| Clients | Codex completed a scoped Blender modeling task. Claude Code discovered the skill. | Authenticated Claude execution and end-to-end runs for Cursor, OpenCode and Kilo Code. |
+| Recovery | A real background Blender recovered its checkpoint. One GUI addon reconnect passed. | Two GUI repeats timed out before readiness. Reproduce startup and reconnect on the affected host. |
+| Geometry and materials | Blender fixtures cover selected topology, UV, bakes and preservation checks. | More production meshes, reviewed renders and deforming poses. |
+| Destination | Godot imported tested GLBs. Earlier Roblox assets have scoped Studio evidence. | Bind Studio appearance, PBR and playtest collision to the specific release-test GLB. Unity and Unreal need separate trials. |
+| Efficiency | 15 trials per arm used 525,606 tokens without the skill and 558,384 with it. | Repeat with a recorded model, comparable cache use and independent quality scoring. |
 
-For 2.0, `release_gate_report.evaluate(record, evidence_root=...)` now requires
-every core gate including `specialist_orchestration`, exact per-check source
-SHA and matching local artifact SHA256s. N/A cannot waive core gates. A
-complete, hash-valid packet returns REVIEW, **never publication authorization**.
-File integrity and identity checks cannot authenticate whether an external
-host actually ran Blender or whether an artistic assessment is correct.
-Legacy release workflows already restrict their own historical versions;
-there is deliberately no 2.0 publishing workflow to bypass this hold.
+The [campaign report](V2-CAMPAIGN-2026-11-08.md) records the fixtures and failed attempts.
+The optional release evidence evaluator requires per-check source SHAs and matching
+artifact hashes. A complete packet returns REVIEW for a human decision.
 
 ## Review follow-up: actual native production
 
@@ -115,4 +114,4 @@ responses and provider usage. The successful reviewer reported 33,281 input
 and 438 output tokens. These are actual single-run usage values, **not** an
 A/B savings claim. The subsequent [five-fixture campaign](V2-CAMPAIGN-2026-11-08.md)
 supplies bounded generation, recovery and engine evidence, including retained
-failures. Full freeform-agent and release acceptance gates remain open.
+failures. Broader freeform-agent and production acceptance work remains open.
