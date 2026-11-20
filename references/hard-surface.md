@@ -48,6 +48,12 @@ A common editable stack is Mirror/Array → Boolean → Solidify where needed �
 - Use linked duplicates or instances for bolts and repeated components.
 - For assemblies, verify clearances and intersections at all expected positions, not just the default pose.
 
+### Test the intended action
+
+Use the actual hinge, rig or constraint on an owned test copy. Define the expected travel, intended contacts and clearance from the brief. Inspect rest, intermediate, closest-approach and end poses. Record the angle or frame, named parts and observation for each. Sample more densely near contact. Discrete poses establish only the states inspected.
+
+For a hinged door, inspect the latch edge against the frame through the swing. A door can clear both ends and strike an obstruction halfway through. Use `scripts/solid_overlap_probe.py` for named mesh pairs and inspect reported candidates. Restore the original pose. For gameplay collision, repeat in the target engine with its actual collider and controls. Report the Blender and engine results separately.
+
 ## 6. Game and CAD differences
 
 For game assets, prioritize silhouette, target triangle/material budgets, UVs, texture baking, LODs, and export safety. Read references/game-ready-export.md and references/uv-baking.md when relevant.

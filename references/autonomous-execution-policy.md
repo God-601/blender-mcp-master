@@ -26,6 +26,14 @@ Maintain the following facts internally or in an owned, non-destructive project 
 
 Do not assume this ledger persists across agents or restarts. Re-read the minimum necessary evidence when identity is uncertain; never treat the agent's memory as proof of scene preservation.
 
+## Targeted revisions
+
+Before an edit, identify the requested change, approved traits to preserve and checks that depended on the old state. Use the existing brief and checkpoint. Keep this to one line for a simple revision. Trace shared meshes, materials, parent transforms and exported copies where relevant.
+
+For example, widening an owned motorcycle tank affects its silhouette and clearance from the handlebars across the steering range. Record the seat height and mount position before editing. Change the tank, compare the approved dimensions afterward, and inspect the bars at straight ahead, both limits and the closest approach. If a requested width conflicts with the required clearance, report the measured conflict and ask which constraint can change before editing another part.
+
+Carry earlier evidence forward only where its inputs still match. A rebuilt GLB needs a fresh destination check for claims about that file. Report what changed, what was preserved, and which affected checks still lack evidence.
+
 ## Execution loop
 
 1. **Resolve consequential gaps in the brief.** Use `references/clarification-gate.md` to decide whether questions are needed. Reuse answered requirements and delegated defaults.
