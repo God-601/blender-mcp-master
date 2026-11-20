@@ -33,7 +33,7 @@ Apply only after inspecting the target and creating a recoverable backup.
 Recommended order for static props:
 1. Remove truly loose/degenerate geometry.
 2. Weld only verified duplicate vertices with a small, scale-aware threshold.
-3. Dissolve redundant coplanar edges only where the result remains visually and UV-correct.
+3. Dissolve redundant coplanar edges only where the result remains visually and UV-correct. The balanced optimizer delimits material, seam, sharp, UV and normal boundaries. Review the result after any merge-by-distance operation, which runs separately.
 4. Consider Decimate only on a duplicate or with a recoverable backup; inspect multiple views.
 5. Recalculate/inspect normals and validate the final mesh.
 

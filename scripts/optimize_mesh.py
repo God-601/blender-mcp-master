@@ -100,7 +100,7 @@ def optimize_mesh(obj):
         if MODE == "balanced" and USE_LIMITED_DISSOLVE:
             bmesh.ops.dissolve_limit(
                 bm, angle_limit=0.01, use_dissolve_boundaries=False,
-                verts=list(bm.verts), edges=list(bm.edges), delimit={"MATERIAL"}
+                verts=list(bm.verts), edges=list(bm.edges), delimit={"MATERIAL", "SEAM", "SHARP", "UV", "NORMAL"}
             )
         bmesh.ops.recalc_face_normals(bm, faces=list(bm.faces))
         after = (len(bm.verts), len(bm.edges), len(bm.faces))
