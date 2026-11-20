@@ -101,13 +101,19 @@ try:
         if ob.type != 'MESH':
             print("skip non-mesh:", name)
             continue
+        source = ob.evaluated_get(depsgraph) if APPLY_MODIFIERS else ob
         if APPLY_MODIFIERS:
             me = bpy.data.meshes.new_from_object(
-                ob.evaluated_get(depsgraph), preserve_all_data_layers=True, depsgraph=depsgraph
+                source, preserve_all_data_layers=True, depsgraph=depsgraph
             )
         else:
             me = ob.data.copy()
         temp_meshes.append(me)
+        # new_from_object copies mesh materials. Bake object-linked overrides
+        # onto the private mesh before creating the export object.
+        for index, slot in enumerate(source.material_slots):
+            if slot.link == 'OBJECT':
+                me.materials[index] = slot.material
         if TRIANGULATE:
             bm = bmesh.new()
             try:

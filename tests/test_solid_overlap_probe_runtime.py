@@ -58,6 +58,33 @@ class RuntimeProbeTests(unittest.TestCase):
         self.assertEqual(item["contact_case"], "disjoint_aabb")
         self.assertEqual(item["status"], "MEASURED")
 
+    def test_wider_door_hits_obstruction_only_during_swing(self):
+        from math import radians
+        door = self.cube("Door")
+        for vertex in door.data.vertices:
+            vertex.co.x += 0.5  # hinge at x=0
+        door.scale = (1, 0.08, 2)
+        obstacle = self.cube("FrameStop", size=0.12, center=(1, 1, 0))
+        fixed_transform = obstacle.matrix_world.copy()
+
+        def swing():
+            results = []
+            for angle in (0, 45, 90):
+                door.rotation_euler.z = radians(angle)
+                bpy.context.view_layer.update()
+                results.append(run([{"a": "Door", "b": "FrameStop"}])["results"][0])
+            door.rotation_euler.z = 0
+            bpy.context.view_layer.update()
+            return results
+
+        self.assertTrue(all(r["contact_case"] == "disjoint_aabb" for r in swing()))
+        door.scale.x = 2
+        closed, midway, opened = swing()
+        self.assertEqual(closed["contact_case"], "disjoint_aabb")
+        self.assertGreater(midway["triangle_candidates"], 0)
+        self.assertEqual(opened["contact_case"], "disjoint_aabb")
+        self.assertEqual(obstacle.matrix_world, fixed_transform)
+
     def test_surface_intersection_remains_review(self):
         self.cube("A")
         self.cube("B", center=(0.5, 0, 0))

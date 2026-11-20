@@ -13,8 +13,8 @@ class GeneralKickoffContractTests(unittest.TestCase):
         self.assertIn("multiple consequential choices", skill)
         self.assertIn("Ask zero questions", skill)
         self.assertIn("Do not repeat answered requirements", skill)
-        self.assertIn("posso seguir?", skill)
-        self.assertIn("Do not repeat answered requirements", skill)
+        self.assertIn("Ask in the user's language", skill)
+        self.assertIn("Skip generic permission questions", skill)
 
     def test_clarification_gate_has_real_questions_not_permission_prompt(self):
         gate = (ROOT / "references" / "clarification-gate.md").read_text(encoding="utf-8")

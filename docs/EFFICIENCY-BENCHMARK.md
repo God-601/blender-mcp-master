@@ -18,6 +18,8 @@ Create `baseline.json` and `with-skill.json` with fields like the following. The
 ~~~json
 {
   "case_id": "E01",
+  "run_status": "completed",
+  "incidents": [],
   "prompt_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "scene_fixture_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
   "agent": "Codex",
@@ -50,3 +52,15 @@ Interpretation:
 - Negative `delta` means fewer counted tokens in the candidate **for that matched case only**. Always compare scene safety and model outputs separately.
 
 Run at least the cases in `references/skill-evaluation-protocol.md` and repeat runs before generalizing. Avoid reporting exact economic or quality improvements without matching provider usage data, real Blender captures, or independent review.
+
+## Blind visual review
+
+Choose the paired trial and observable criteria from the shared brief before opening either render. Use matching camera, framing, lighting and render settings. Inspect source images for overlays that could reveal the arm. The packet tool checks completed receipts for opposite arms, the same case and trial, the shared task, initial scene bytes and image dimensions. Each source PNG must match the SHA-256 in its trial receipt. Camera parity and absence of visible labels need separate verification.
+
+From the repository root, run the following on a matched pair of production benchmark trial directories. The packet helper uses Pillow and requires a new output directory.
+
+~~~sh
+python integrations/agents/blind_visual_pair.py chair-baseline-1 chair-with_skill-1 pair-01 --criterion "Broad backrest on two visible posts" --criterion "Readable leg and support silhouette at gameplay distance"
+~~~
+
+Give the reviewer only the `review/` directory and any common reference supplied with the brief. It contains anonymous front, side and three-quarter PNGs, plus the criteria. Keep the sibling `private-key.json`, usage and original trial folders with the coordinator. For each criterion, record the view, visible evidence and verdict (A, B, tie or NOT VERIFIED). Use NOT VERIFIED if the available views cannot answer the question. Record and freeze the review before revealing the key. Then join the verdicts to the original trial IDs and measured usage, retaining ties, missing renders and failed trials in the campaign totals. Exact dimensions, topology and engine behavior keep their own measurements.

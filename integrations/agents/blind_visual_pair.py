@@ -1,0 +1,81 @@
+"""Prepare a reviewer-only image packet from corresponding production benchmark trials."""
+import argparse
+import hashlib
+import io
+import json
+from pathlib import Path
+import secrets
+import shutil
+
+VIEWS = ("front", "side", "three_quarter")
+
+
+def prepare(baseline, candidate, output, criteria):
+    arms = {"baseline": baseline, "with_skill": candidate}
+    if baseline.samefile(candidate):
+        raise ValueError("A pair requires distinct trials")
+    identities = []
+    recorded_hashes = {}
+    for arm, root in arms.items():
+        receipt = json.loads((root / "receipt.json").read_text(encoding="utf-8"))
+        if not isinstance(receipt, dict) or receipt.get("arm") != arm or receipt.get("status") != "completed":
+            raise ValueError(f"Expected a completed {arm} receipt in {root}")
+        case, trial = receipt.get("case_id"), receipt.get("trial")
+        if not isinstance(case, str) or not case.strip() or type(trial) is not int or trial < 1:
+            raise ValueError(f"Invalid case or trial in {root}")
+        identities.append((case, trial))
+        recorded_hashes[arm] = receipt.get("artifact_hashes")
+    if identities[0] != identities[1]:
+        raise ValueError("Mismatched receipt case or trial")
+    for name in ("common_task.txt", "scene_fixture.blend"):
+        hashes = set()
+        for root in arms.values():
+            with (root / name).open("rb") as stream:
+                digest = hashlib.sha256()
+                for chunk in iter(lambda: stream.read(1024 * 1024), b""):
+                    digest.update(chunk)
+                hashes.add(digest.hexdigest())
+        if len(hashes) != 1:
+            raise ValueError("Mismatched " + name)
+    criteria = [item.strip() for item in criteria]
+    if not all(criteria) or not criteria:
+        raise ValueError("Supply observable criteria from the shared brief")
+    from PIL import Image
+
+    labels = list(arms)
+    secrets.SystemRandom().shuffle(labels)
+    output.mkdir()
+    try:
+        public = output / "review"
+        public.mkdir()
+        (public / "criteria.json").write_text(json.dumps(criteria, indent=2), encoding="utf-8")
+        dimensions = {}
+        key = {}
+        for label, arm in zip(("A", "B"), labels):
+            root = arms[arm]
+            key[label] = {"arm": arm, "trial": root.name}
+            for view in VIEWS:
+                name = view + ".png"
+                hashes = recorded_hashes[arm]
+                data = (root / name).read_bytes()
+                if not isinstance(hashes, dict) or hashes.get(name) != hashlib.sha256(data).hexdigest():
+                    raise ValueError(f"Missing or mismatched SHA-256 for {arm}/{name}")
+                with Image.open(io.BytesIO(data)) as source:
+                    if dimensions.setdefault(view, source.size) != source.size:
+                        raise ValueError("Image dimensions differ for " + view)
+                    clean = source.convert("RGBA")
+                    clean.info.clear()
+                    clean.save(public / f"{label}-{view}.png")
+        (output / "private-key.json").write_text(json.dumps(key, indent=2), encoding="utf-8")
+    except BaseException:
+        shutil.rmtree(output)
+        raise
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    for name in ("baseline", "candidate", "output"):
+        parser.add_argument(name, type=Path)
+    parser.add_argument("--criterion", action="append", required=True)
+    args = parser.parse_args()
+    prepare(args.baseline, args.candidate, args.output, args.criterion)

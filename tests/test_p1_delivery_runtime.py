@@ -33,6 +33,56 @@ class P1DeliveryRuntimeTests(unittest.TestCase):
         obj.name = name
         return obj
 
+    def test_object_material_overrides_survive_glb_reimport(self):
+        for apply in (True, False):
+            with self.subTest(apply=apply), tempfile.TemporaryDirectory() as folder:
+                bpy.ops.wm.read_factory_settings(use_empty=True)
+                white = self.cube("WhitePart")
+                white.data.materials.append(bpy.data.materials.new("White"))
+                red = white.copy()
+                red.name = "RedPart"
+                bpy.context.collection.objects.link(red)
+                red.material_slots[0].link = "OBJECT"
+                paint = bpy.data.materials.new("Red")
+                paint.diffuse_color = (1, 0, 0, 1)
+                red.material_slots[0].material = paint
+                path = str(Path(folder) / "parts.glb")
+                out, err = run_script("export_asset.py", OBJECTS=[white.name, red.name],
+                                      PATH=path, FORMAT="GLB", APPLY_MODIFIERS=apply)
+                self.assertIsNone(err, (out, err))
+                self.assertEqual(red.data, white.data)
+                self.assertEqual(red.data.materials[0].name, "White")
+                self.assertEqual(red.material_slots[0].material.name, "Red")
+                bpy.ops.wm.read_factory_settings(use_empty=True)
+                bpy.ops.import_scene.gltf(filepath=path)
+                for name, material in (("WhitePart", "White"), ("RedPart", "Red")):
+                    self.assertEqual(bpy.data.objects[name].material_slots[0].material.name, material)
+
+    def test_duplicate_audit_targets_are_refused(self):
+        self.cube("Part")
+        out, err = run_script("validate_asset.py", TARGETS=["Part", "Part"])
+        self.assertIsInstance(err, ValueError)
+        self.assertNotIn("TOTAL:", out)
+
+    def test_nonfinite_uv_cannot_pass_validation(self):
+        part = self.cube("Part")
+        layer = part.data.uv_layers.active
+        for value in (float("nan"), float("inf"), -float("inf")):
+            # Bulk mesh import can carry non-finite floats that the ordinary
+            # RNA property setter clamps. Exercise the actual stored data.
+            coords = [0.0] * (2 * len(layer.data))
+            layer.data.foreach_get("uv", coords)
+            coords[5] = value
+            layer.data.foreach_set("uv", coords)
+            out, err = run_script("validate_uvs.py", TARGETS=["Part"])
+            self.assertIsNone(err)
+            self.assertIn(f"'Part' layer {layer.name!r} loop 2: non-finite UV", out)
+            self.assertIn("RESULT: INCOMPLETE", out)
+            out, err = run_script("validate_asset.py", TARGETS=["Part"])
+            self.assertIsNone(err)
+            self.assertIn("non-finite UV", out)
+            self.assertIn("RESULT: REVIEW WARNINGS", out)
+
     def test_benchmark_counts_evaluated_subdivision_mesh_not_base(self):
         cube = self.cube("BenchmarkCube")
         mod = cube.modifiers.new("Subdivision", "SUBSURF")

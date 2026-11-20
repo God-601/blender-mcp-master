@@ -64,9 +64,11 @@ objects, and validating the result. A practical GLB also imported into Godot
 Claude Code discovered the skill, with model execution pending authentication.
 The latest Roblox GLB was checked in Blender. A physical collision, PBR and
 appearance check in Studio remains open for that asset. The previous Studio
-campaign provides separate evidence for earlier assets. The controlled A/B
-campaign established comparable technical results and did not demonstrate
-token savings. The [engineering evidence](V2-EVIDENCE.md) describes the
+campaign provides separate evidence for earlier assets. Cursor, OpenCode and Kilo Code have no recorded end-to-end run.
+The [controlled A/B campaign](V2-CAMPAIGN-2026-11-08.md) recorded
+558,384 tokens with the skill and 525,606 without it (+6.236%). Cache use
+differed and the provider omitted the model identifier. One GUI addon reconnect
+run succeeded. Two repeats timed out before any transport request. The [engineering evidence](V2-EVIDENCE.md) describes the
 remaining production and client acceptance work.
 
 ## Review a preflight archive

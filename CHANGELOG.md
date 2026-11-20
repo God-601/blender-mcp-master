@@ -1,6 +1,6 @@
 # Changelog
 
-## 2.0.0 — specialist workflows, recoverable edits and scoped validation
+## 2.0.0 (2026-11-13) — specialist workflows, recoverable edits and scoped validation
 
 - Consolidates modeling, retopology, optimization, UV, materials, export and
   validation specialists with scoped handoffs, stage checkpoints and a native

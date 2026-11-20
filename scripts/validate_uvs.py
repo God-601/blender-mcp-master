@@ -2,6 +2,8 @@
 
 Paste into Blender MCP execute_blender_code. No mesh or UV data is modified.
 """
+import math
+
 import bpy
 
 # ---- CONFIG ----------------------------------------------------------------
@@ -65,6 +67,12 @@ for obj in objects:
     if not coords:
         print("WARN: UV layer is empty")
         incomplete.append(obj.name + ": empty UV layer")
+        continue
+    invalid_loop = next((i for i, uv in enumerate(coords)
+                         if not all(math.isfinite(value) for value in uv)), None)
+    if invalid_loop is not None:
+        print(f"WARN: {obj.name!r} layer {layer.name!r} loop {invalid_loop}: non-finite UV {tuple(coords[invalid_loop])}")
+        incomplete.append(obj.name + ": non-finite UV")
         continue
     min_u, max_u = min(v.x for v in coords), max(v.x for v in coords)
     min_v, max_v = min(v.y for v in coords), max(v.y for v in coords)

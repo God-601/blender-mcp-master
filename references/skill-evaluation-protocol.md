@@ -45,6 +45,9 @@ Record `NOT VERIFIED` instead of inventing data. Report rejected runs as well
 as successes. Two reviewers should review visually where feasible, blind to
 variant, resolving discrepancies from the evidence.
 
+For an executable blind image comparison and the unblinding procedure, see
+[the paired benchmark](../docs/EFFICIENCY-BENCHMARK.md#blind-visual-review).
+
 ## Acceptance to advance beyond beta
 
 At least one real multi-step live Blender modeling session on supported client
