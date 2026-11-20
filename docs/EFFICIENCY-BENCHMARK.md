@@ -18,6 +18,8 @@ Create `baseline.json` and `with-skill.json` with fields like the following. The
 ~~~json
 {
   "case_id": "E01",
+  "run_status": "completed",
+  "incidents": [],
   "prompt_sha256": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "scene_fixture_sha256": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
   "agent": "Codex",
@@ -53,7 +55,7 @@ Run at least the cases in `references/skill-evaluation-protocol.md` and repeat r
 
 ## Blind visual review
 
-Choose the paired trial and observable criteria from the shared brief before opening either render. Use matching camera, framing, lighting and render settings. Inspect source images for overlays that could reveal the arm. The packet tool checks the shared task, initial scene bytes and image dimensions. Camera parity and absence of visible labels need separate verification.
+Choose the paired trial and observable criteria from the shared brief before opening either render. Use matching camera, framing, lighting and render settings. Inspect source images for overlays that could reveal the arm. The packet tool checks completed receipts for opposite arms, the same case and trial, the shared task, initial scene bytes and image dimensions. Camera parity and absence of visible labels need separate verification.
 
 From the repository root, run the following on a matched pair of production benchmark trial directories. The packet helper uses Pillow and requires a new output directory.
 

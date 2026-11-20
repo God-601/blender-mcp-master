@@ -37,12 +37,12 @@ def _unreliable_run(record):
     checks = record.get("checks")
     if not isinstance(checks, dict) or checks.get("scene_preserved") != "PASS":
         reasons.append("scene_preservation_not_proven")
-    incidents = record.get("incidents", [])
+    incidents = record.get("incidents")
     if not isinstance(incidents, list):
         reasons.append("invalid_incident_record")
     elif incidents:
         reasons.append("run_incident")
-    if record.get("run_status", "completed") != "completed":
+    if record.get("run_status") != "completed":
         reasons.append("run_not_completed_cleanly")
     return reasons
 

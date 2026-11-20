@@ -15,6 +15,8 @@ def load_module():
 
 def record(tokens=100, shell=8):
     return {
+        "run_status": "completed",
+        "incidents": [],
         "case_id": "E01",
         "prompt_sha256": "a" * 64,
         "scene_fixture_sha256": "b" * 64,
@@ -91,6 +93,16 @@ class PairedEfficiencyTests(unittest.TestCase):
         self.assertFalse(m.compare(before, after)["comparable"])
         after["run_status"] = "recovered_after_crash"
         self.assertFalse(m.compare(record(), after)["comparable"])
+
+    def test_missing_completion_evidence_blocks_both_reports(self):
+        from test_benchmark_suite_summary import load
+        for field in ("run_status", "incidents"):
+            before, after = record(), record()
+            del after[field]
+            self.assertFalse(load_module().compare(before, after)["comparable"])
+            result = load().summarize({"trials": [
+                {"case_id": "E01", "baseline": before, "with_skill": after}]})
+            self.assertEqual(result["comparable_trials"], 0)
 
     def test_report_does_not_modify_inputs(self):
         m = load_module()

@@ -10,11 +10,20 @@ VIEWS = ("front", "side", "three_quarter")
 
 
 def prepare(baseline, candidate, output, criteria):
-    from PIL import Image
-
     arms = {"baseline": baseline, "with_skill": candidate}
     if baseline.samefile(candidate):
         raise ValueError("A pair requires distinct trials")
+    identities = []
+    for arm, root in arms.items():
+        receipt = json.loads((root / "receipt.json").read_text(encoding="utf-8"))
+        if not isinstance(receipt, dict) or receipt.get("arm") != arm or receipt.get("status") != "completed":
+            raise ValueError(f"Expected a completed {arm} receipt in {root}")
+        case, trial = receipt.get("case_id"), receipt.get("trial")
+        if not isinstance(case, str) or not case.strip() or type(trial) is not int or trial < 1:
+            raise ValueError(f"Invalid case or trial in {root}")
+        identities.append((case, trial))
+    if identities[0] != identities[1]:
+        raise ValueError("Mismatched receipt case or trial")
     for name in ("common_task.txt", "scene_fixture.blend"):
         hashes = set()
         for root in arms.values():
@@ -28,6 +37,8 @@ def prepare(baseline, candidate, output, criteria):
     criteria = [item.strip() for item in criteria]
     if not all(criteria) or not criteria:
         raise ValueError("Supply observable criteria from the shared brief")
+    from PIL import Image
+
     labels = list(arms)
     secrets.SystemRandom().shuffle(labels)
     output.mkdir()

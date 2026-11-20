@@ -23,6 +23,8 @@ def pick_objects():
     MISSING_TARGETS.clear()
     INVALID_TARGETS.clear()
     if TARGETS:
+        if len(set(TARGETS)) != len(TARGETS):
+            raise ValueError("TARGETS must contain unique object names")
         result = []
         for name in TARGETS:
             obj = bpy.data.objects.get(name)
@@ -109,8 +111,11 @@ def check_object(obj):
         if layers.active and len(layers.active.data):
             uv = layers.active.data
             xs, ys = [loop.uv.x for loop in uv], [loop.uv.y for loop in uv]
-            inside = min(xs) >= -0.001 and max(xs) <= 1.001 and min(ys) >= -0.001 and max(ys) <= 1.001
-            results.append(("INFO", f"active UVs inside 0-1: {inside} (tiling/UDIM may exceed this)"))
+            if not all(map(math.isfinite, xs)) or not all(map(math.isfinite, ys)):
+                results.append(("WARN", f"non-finite UV coordinates in {layers.active.name!r}"))
+            else:
+                inside = min(xs) >= -0.001 and max(xs) <= 1.001 and min(ys) >= -0.001 and max(ys) <= 1.001
+                results.append(("INFO", f"active UVs inside 0-1: {inside} (tiling/UDIM may exceed this)"))
 
     slots = [slot.material for slot in obj.material_slots]
     empty = sum(1 for mat in slots if mat is None)
