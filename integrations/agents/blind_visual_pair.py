@@ -1,6 +1,7 @@
 """Prepare a reviewer-only image packet from corresponding production benchmark trials."""
 import argparse
 import hashlib
+import io
 import json
 from pathlib import Path
 import secrets
@@ -14,6 +15,7 @@ def prepare(baseline, candidate, output, criteria):
     if baseline.samefile(candidate):
         raise ValueError("A pair requires distinct trials")
     identities = []
+    recorded_hashes = {}
     for arm, root in arms.items():
         receipt = json.loads((root / "receipt.json").read_text(encoding="utf-8"))
         if not isinstance(receipt, dict) or receipt.get("arm") != arm or receipt.get("status") != "completed":
@@ -22,6 +24,7 @@ def prepare(baseline, candidate, output, criteria):
         if not isinstance(case, str) or not case.strip() or type(trial) is not int or trial < 1:
             raise ValueError(f"Invalid case or trial in {root}")
         identities.append((case, trial))
+        recorded_hashes[arm] = receipt.get("artifact_hashes")
     if identities[0] != identities[1]:
         raise ValueError("Mismatched receipt case or trial")
     for name in ("common_task.txt", "scene_fixture.blend"):
@@ -52,7 +55,12 @@ def prepare(baseline, candidate, output, criteria):
             root = arms[arm]
             key[label] = {"arm": arm, "trial": root.name}
             for view in VIEWS:
-                with Image.open(root / (view + ".png")) as source:
+                name = view + ".png"
+                hashes = recorded_hashes[arm]
+                data = (root / name).read_bytes()
+                if not isinstance(hashes, dict) or hashes.get(name) != hashlib.sha256(data).hexdigest():
+                    raise ValueError(f"Missing or mismatched SHA-256 for {arm}/{name}")
+                with Image.open(io.BytesIO(data)) as source:
                     if dimensions.setdefault(view, source.size) != source.size:
                         raise ValueError("Image dimensions differ for " + view)
                     clean = source.convert("RGBA")
